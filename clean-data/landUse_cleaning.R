@@ -362,4 +362,3 @@ landUse_clean = landUse_clean |>
          land_use = ifelse(land_use %in% c("RIPARIAN/WETLAND", "RIP"), "RIPARIAN/WETLAND", land_use))
 
 save(landUse_clean, file = "landUse_clean.rds")
-load("landUse_clean.rds")
