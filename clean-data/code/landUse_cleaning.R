@@ -4,6 +4,8 @@ library(skimr)
 library(scales)
 library(summarytools)
 
+load("~/560-Project/raw-data/data/rawData.rda")
+
 # rename and select relevant variables from 1986-1992 dataset
 landUse1986_1992_clean = landUse1986_1992 |> 
   rename(id = ï..FID,

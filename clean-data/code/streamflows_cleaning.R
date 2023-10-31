@@ -2,6 +2,8 @@ library(dplyr)
 library(tidyverse)
 library(skimr)
 
+load("~/560-Project/raw-data/data/rawData.rda")
+
 # streamflow gauge at start of Bear River, USGS site number = 10011500
 # select and rename relevant variables, separate dateTime column
 bearRiver_start_clean = bearRiver_start |> 
