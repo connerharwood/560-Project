@@ -1,0 +1,2 @@
+*.rda filter=lfs diff=lfs merge=lfs -text
+Untitled/rawData.rda filter=lfs diff=lfs merge=lfs -text
