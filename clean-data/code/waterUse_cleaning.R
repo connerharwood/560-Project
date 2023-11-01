@@ -324,7 +324,9 @@ waterUse_clean = left_join(waterUse_clean, countyPopulations,
 
 # reorder population variable, convert from population in thousands to actual population, rename
 waterUse_clean = waterUse_clean |> 
-  relocate(population_thousands, .after = county)
+  relocate(population_thousands, .after = county) |> 
+  mutate(population_thousands = population_thousands*1000) |> 
+  rename(population = population_thousands)
 
 # save as .rds file
 save(waterUse_clean, file = "waterUse_clean.rds")
