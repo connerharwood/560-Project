@@ -315,5 +315,16 @@ waterUse_clean = waterUse_merged |>
 
 skim(waterUse_clean)
 
+# load county population data for merge
+load("~/560-Project/clean-data/data/countyPopulations_clean.rds")
+
+# merge waterUse and countyPopulations
+waterUse_clean = left_join(waterUse_clean, countyPopulations,
+                            by = c("year", "county"), relationship = "many-to-one")
+
+# reorder population variable
+waterUse_clean = waterUse_clean |> 
+  relocate(population_thousands, .after = county)
+
 # save as .rds file
 save(waterUse_clean, file = "waterUse_clean.rds")
