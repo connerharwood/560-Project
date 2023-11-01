@@ -1,0 +1,10 @@
+---
+title: 'Stage 2: Draft Exploratory Analysis'
+author: "Ellie Hall and Conner Harwood"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
