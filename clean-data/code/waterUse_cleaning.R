@@ -302,7 +302,7 @@ waterUse_merged = left_join(waterUse_merge, waterUse_info_merge,
                              by = "system_id", relationship = "many-to-many")
 
 # drop duplicates, reorder columns, drop source_name
-waterUse_cleaned = waterUse_merged |> 
+waterUse_clean = waterUse_merged |> 
   distinct() |>
   select(-source_name) |> 
   relocate(source_id, .after = system_id) |> 
@@ -313,4 +313,7 @@ waterUse_cleaned = waterUse_merged |>
   relocate(system_type, .after = source_type) |> 
   rename(total_gallons = total_use)
 
-skim(waterUse_cleaned)
+skim(waterUse_clean)
+
+# save as .rds file
+save(waterUse_clean, file = "waterUse_clean.rds")
