@@ -23,5 +23,43 @@ waterUse3 = waterUse_raw |>
     "System Type",
     "History Year",
     "County",
-    
+    "Population",
+    "Domestic Use",  
+    "Commercial Use",
+    "Industrial Use",
+    "Institutional Use",
+    "Total Use",
+    "Method of Measurement",
+    "Secondary Metered Domestic Use",
+    "Secondary Metered Commercial Use",
+    "Secondary Metered Industrial Use",
+    "Secondary Metered Institutional Use",
+    "Secondary Metered Agriculture Use"
+    )
+
+# select relevant variables from waterUse_info
+waterUse_info3 = waterUse_info |> 
+  select(
+    "System Name",
+    "System ID",
+    "Lat NAD83",
+    "Lon NAD83",
+    "Source Type",
+    "Diversion Type",
+    "Use Type",
+    "Year",
+    "Units",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+    "Total"
   )
