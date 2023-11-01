@@ -322,7 +322,7 @@ load("~/560-Project/clean-data/data/countyPopulations_clean.rds")
 waterUse_clean = left_join(waterUse_clean, countyPopulations,
                             by = c("year", "county"), relationship = "many-to-one")
 
-# reorder population variable
+# reorder population variable, convert from population in thousands to actual population, rename
 waterUse_clean = waterUse_clean |> 
   relocate(population_thousands, .after = county)
 
