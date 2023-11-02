@@ -6,12 +6,6 @@ load("~/560-Project/raw-data/data/waterUse_raw.rda")
 
 #------------------------------------------------------------------------------#
 
-# I learned later in the cleaning process that waterUse_info is the main water use dataset we're interested in,
-# and waterUse_raw has some info we'll want to merge into waterUse_info
-# To be more clear with names, I'll be using the format waterUse for the original waterUse_info dataset, 
-# and waterUse_info for the original waterUse_raw dataset
-# The numbers in dataframe names indicate the data cleaning step that dataset was created in
-
 ## Data cleaning checklist ##
 
 # 1: Convert file formats
@@ -23,7 +17,7 @@ load("~/560-Project/raw-data/data/waterUse_raw.rda")
 # 3: Remove irrelevant, garbage, or empty rows and columns
 
 # select relevant variables from waterUse_raw
-waterUse_info3 = waterUse_raw |> 
+waterUse_info3 = waterUse_info |> 
   select(
     "System Name",
     "System ID",
@@ -44,7 +38,7 @@ waterUse_info3 = waterUse_raw |>
     )
 
 # select relevant variables from waterUse_info
-waterUse3 = waterUse_info |> 
+waterUse3 = waterUse_raw |> 
   select(
     "System Name",
     "System ID",
@@ -183,10 +177,6 @@ waterUse_info_missingPopulation = waterUse_info8 |>
 # look at entries with missing total_use
 waterUse__info_missingTotalUse = waterUse_info8 |> 
   filter(is.na(total_use))
-
-# After looking at missing total_use values for waterUse_info8, I've realized the waterUse dataset has
-# the most complete info, so this will be what we'll primarily use moving forward
-# We'll use the waterUse_info dataset to merge counties and system type
 
 # select variables we want to merge from waterUse_info
 waterUse_info8_merge = waterUse_info8 |> 
