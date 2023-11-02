@@ -16,7 +16,7 @@ load("~/560-Project/raw-data/data/waterUse_raw.rda")
 
 # 3: Remove irrelevant, garbage, or empty rows and columns
 
-# select relevant variables from waterUse_raw
+# select relevant variables from waterUse_info
 waterUse_info3 = waterUse_info |> 
   select(
     "System Name",
@@ -37,7 +37,7 @@ waterUse_info3 = waterUse_info |>
     "Secondary Metered Agriculture Use"
     )
 
-# select relevant variables from waterUse_info
+# select relevant variables from waterUse_raw
 waterUse3 = waterUse_raw |> 
   select(
     "System Name",
@@ -85,7 +85,7 @@ waterUse_info3 |>
   count(`System ID`, `History Year`, `Total Use`) |> 
   filter(n > 1)
 
-# unique combination of certain variables to identify duplicates in waterUse_info3
+# unique combination of certain variables to identify duplicates in waterUse3
 waterUse3 |> 
   count(`System Name`, `System ID`, `Lat NAD83`, `Lon NAD83`, `Source Type`, 
         `Diversion Type`, `Use Type`, `Year`, `Total`) |> 
