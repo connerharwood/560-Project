@@ -16,7 +16,8 @@ Utah has been the [fastest growing state since 2010](https://worldpopulationrevi
 
 Furthermore, agriculture is the largest water user in the state of Utah, using 68% of the state's water supply, yet only generates 0.2% of Utah's GDP [source](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwjU4_Tf8aOCAxU9MjQIHS19CYEQFnoECA4QAw&url=https%3A%2F%2Fcontent.csbs.utah.edu%2F~lozada%2FResearch%2FUtahAgWaterUseHay.docx%23%3A~%3Atext%3DUsing%252068%2525%2520of%2520Utah%27s%2520water%2Cto%2520which%2520we%2520will%2520return.&usg=AOvVaw0IdpqkRNtyRjWG_ycnpIPq&opi=89978449). Thus, it’s important to understand the economic consequences of water use in this sector in order to better manage its use.
 
-# Data
+
+# Data Descriptions
 
 **Utah Water Use Data**
 Obtained through the Utah Division of Water Rights [here](https://waterrights.utah.gov/asp_apps/generalWaterUse/WaterUseList.asp), this data includes all water rights holders in Utah dating back to 1959. It has records on total monthly water usage in gallons for each water user, and breaks down this usage by type of use (e.g. agricultural, commercial, water supplier), as well as several other variables of interest. It also has latitude and longitude information for most water users, which we may use at some point in the project for spatial analysis. We're looking at data on water usage in the 9 GSL Basin counties.
@@ -26,3 +27,8 @@ Obtained through the USGS using the `dataRetrieval` package in R, we've gathered
 
 **County Resident Population Data**
 Obtained through Federal Reserve Economic Data (FRED) [here](https://fred.stlouisfed.org/categories/30154), it has yearly resident population numbers for each Utah county dating back to 1970.
+
+
+# Data Processing
+
+**Utah Water Use Data**
