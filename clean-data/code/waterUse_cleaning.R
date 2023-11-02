@@ -16,27 +16,6 @@ load("~/560-Project/raw-data/data/waterUse_raw.rda")
 
 # 3: Remove irrelevant, garbage, or empty rows and columns
 
-# select relevant variables from waterUse_info
-waterUse_info3 = waterUse_info |> 
-  select(
-    "System Name",
-    "System ID",
-    "System Type",
-    "History Year",
-    "County",
-    "Population",
-    "Domestic Use",  
-    "Commercial Use",
-    "Industrial Use",
-    "Institutional Use",
-    "Total Use",
-    "Secondary Metered Domestic Use",
-    "Secondary Metered Commercial Use",
-    "Secondary Metered Industrial Use",
-    "Secondary Metered Institutional Use",
-    "Secondary Metered Agriculture Use"
-    )
-
 # select relevant variables from waterUse_raw
 waterUse3 = waterUse_raw |> 
   select(
@@ -66,13 +45,34 @@ waterUse3 = waterUse_raw |>
     "Total"
   )
 
-# check for empty rows or columns in waterUse_info3 (there are none)
-which(nrow(is.na(waterUse_info3) | waterUse_info3 == "") == ncol(waterUse_info3))
-which(ncol(is.na(waterUse_info3) | waterUse_info3 == "") == nrow(waterUse_info3))
+# select relevant variables from waterUse_info
+waterUse_info3 = waterUse_info |> 
+  select(
+    "System Name",
+    "System ID",
+    "System Type",
+    "History Year",
+    "County",
+    "Population",
+    "Domestic Use",  
+    "Commercial Use",
+    "Industrial Use",
+    "Institutional Use",
+    "Total Use",
+    "Secondary Metered Domestic Use",
+    "Secondary Metered Commercial Use",
+    "Secondary Metered Industrial Use",
+    "Secondary Metered Institutional Use",
+    "Secondary Metered Agriculture Use"
+  )
 
 # check for empty rows or columns in waterUse3 (there are none)
 which(nrow(is.na(waterUse3) | waterUse3 == "") == ncol(waterUse3))
 which(ncol(is.na(waterUse3) | waterUse3 == "") == nrow(waterUse3))
+
+# check for empty rows or columns in waterUse_info3 (there are none)
+which(nrow(is.na(waterUse_info3) | waterUse_info3 == "") == ncol(waterUse_info3))
+which(ncol(is.na(waterUse_info3) | waterUse_info3 == "") == nrow(waterUse_info3))
 
 # 4: Identify the primary key, or define a surrogate key
 
@@ -80,15 +80,15 @@ which(ncol(is.na(waterUse3) | waterUse3 == "") == nrow(waterUse3))
 
 # 5: Resolve duplicates
 
-# unique combination of certain variables to identify duplicates in waterUse_info3
-waterUse_info3 |> 
-  count(`System ID`, `History Year`, `Total Use`) |> 
-  filter(n > 1)
-
 # unique combination of certain variables to identify duplicates in waterUse3
 waterUse3 |> 
   count(`System Name`, `System ID`, `Lat NAD83`, `Lon NAD83`, `Source Type`, 
         `Diversion Type`, `Use Type`, `Year`, `Total`) |> 
+  filter(n > 1)
+
+# unique combination of certain variables to identify duplicates in waterUse_info3
+waterUse_info3 |> 
+  count(`System ID`, `History Year`, `Total Use`) |> 
   filter(n > 1)
 
 # Looks like any duplicates are due to NA values, which will be resolved in a later cleaning step
@@ -100,27 +100,6 @@ waterUse3 |>
 # Will understand secondary usage variables in later stage
 
 # 7: Rename variables as necessary
-
-# rename variables in waterUse_info
-waterUse_info7 = waterUse_info3 |> 
-  rename(
-    system_name = "System Name",
-    system_id = "System ID",
-    system_type = "System Type",
-    year = "History Year",
-    county = "County",
-    population = "Population",
-    domestic_use = "Domestic Use",
-    commercial_use = "Commercial Use",
-    industrial_use = "Industrial Use",
-    institutional_use = "Institutional Use",
-    total_use = "Total Use",
-    secondary_domestic_use = "Secondary Metered Domestic Use",
-    secondary_commercial_use = "Secondary Metered Commercial Use",
-    secondary_industrial_use = "Secondary Metered Industrial Use",
-    secondary_institutional_use = "Secondary Metered Institutional Use",
-    secondary_agriculture_use = "Secondary Metered Agriculture Use"
-  )
 
 # rename variables in waterUse
 waterUse7 = waterUse3 |> 
@@ -149,6 +128,27 @@ waterUse7 = waterUse3 |>
     nov = "Nov",
     dec = "Dec",
     total_use = "Total"
+  )
+
+# rename variables in waterUse_info
+waterUse_info7 = waterUse_info3 |> 
+  rename(
+    system_name = "System Name",
+    system_id = "System ID",
+    system_type = "System Type",
+    year = "History Year",
+    county = "County",
+    population = "Population",
+    domestic_use = "Domestic Use",
+    commercial_use = "Commercial Use",
+    industrial_use = "Industrial Use",
+    institutional_use = "Institutional Use",
+    total_use = "Total Use",
+    secondary_domestic_use = "Secondary Metered Domestic Use",
+    secondary_commercial_use = "Secondary Metered Commercial Use",
+    secondary_industrial_use = "Secondary Metered Industrial Use",
+    secondary_institutional_use = "Secondary Metered Institutional Use",
+    secondary_agriculture_use = "Secondary Metered Agriculture Use"
   )
 
 # 8: Understand patterns of missing values
@@ -181,12 +181,6 @@ waterUse__info_missingTotalUse = waterUse_info8 |>
 # select variables we want to merge from waterUse_info
 waterUse_info8_merge = waterUse_info8 |> 
   select(system_id, system_type, county)
-
-#------------------------------------------------------------------------------#
-
-# Clean waterUse_info to get ready for merge with waterUse
-
-# 8: Understand patterns of missing values
 
 # explore waterUse data
 skim(waterUse7)
