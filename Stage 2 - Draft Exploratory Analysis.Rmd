@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Topic and Motivation
 
-We are looking at how water usage and water-related land use changes in Utah counties lying within the Great Salt Lake Basin have contributed to variations in Great Salt Lake (GSL) water levels. We'll also be using predictive analysis to look at potential future changes to GSL levels using water use, changes in water-related land use, and population trends. The specific counties we're focusing on, which lie fully or mostly within the GSL Basin, are Box Elder, Cache, Davis, Morgan, Rich, Salt Lake, Tooele, Utah, and Weber.
+We are looking at how water usage and water-related land use changes in Utah counties lying within the Great Salt Lake Basin have contributed to variations in Great Salt Lake (GSL) water levels. We'll also be using predictive analysis to look at potential future changes to GSL levels using water use trends, changes in water-related land use, and population trends. The specific counties we're focusing on, which lie fully or mostly within the GSL Basin, are Box Elder, Cache, Davis, Morgan, Rich, Salt Lake, Tooele, Utah, and Weber.
 
 Utah has been the [fastest growing state since 2010](https://worldpopulationreview.com/state-rankings/fastest-growing-states), and much of this growth comes in counties closely connected to the Great Salt Lake. The GSL has also been facing dangerously low and decreasing water levels over the past several decades. If this trend continues, the economic, environmental, and ecological consequences to the region would be drastic. Thus, it's important to understand how water use in the Great Salt Lake Basin faced with population pressures will impact the health and future of the Great Salt Lake and its surrounding communities. 
 
