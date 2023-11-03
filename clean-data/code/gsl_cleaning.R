@@ -14,6 +14,10 @@ GSL_southLevels_clean = GSL_southLevels |>
   select(date = Date, south_levels = X_62614_00003) |> 
   separate(date, into = c("year", "month", "day"))
 
+# look at data structure
+str(GSL_northLevels_clean)
+str(GSL_southLevels_clean)
+
 # check duplicates
 GSL_northLevels_clean |> 
   n_distinct()
@@ -47,17 +51,24 @@ print(missing_GSL_southLevels_year)
 
 ## No missing years in either ##
 
+# calculate average monthly levels for each year in North Arm
+GSL_northLevels_monthly = GSL_northLevels_clean |> 
+  group_by(year, month) |> 
+  summarize(north_levels = mean(north_levels))
 
-gsl_levels = merge(GSL_northLevels, GSL_southLevels, by = "Date")
+# calculate average monthly levels for each year in South Arm
+GSL_southLevels_monthly = GSL_southLevels_clean |> 
+  group_by(year, month) |> 
+  summarize(south_levels = mean(south_levels))
 
-gsl_levels$north_levels = as.numeric(gsl_levels$north_levels)
-gsl_levels$south_levels = as.numeric(gsl_levels$south_levels)
+# merge North and South levels
+gsl_levels = merge(GSL_northLevels_monthly, GSL_southLevels_monthly, by = c("year", "month"))
 
+## February 1967 not an observation in merged dataset ##
+
+# calculate average between North and South levels for each month, drop North and South levels
 gsl_levels = gsl_levels |> 
-  mutate(level = (north_levels + south_levels) / 2)
+  mutate(level = (north_levels + south_levels) / 2) |> 
+  select(-north_levels, -south_levels)
 
-gsl_levels$year = format(gsl_levels$Date, "%Y")
-
-gsl_levels <- aggregate(level ~ year, gsl_levels, FUN = mean)
-
-
+save(gsl_levels, file = "gsl_levels_clean.rds")
