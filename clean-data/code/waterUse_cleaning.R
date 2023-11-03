@@ -258,7 +258,6 @@ save(waterUse_clean, file = "waterUse_clean.rds")
 #------------------------------------------------------------------------------#
 
 ## CLEANING STILL NEEDED ##
-# Latitude and longitude: checks values, convert incorrect ones / zeros to NA
 # Graph water usage, look for extreme/incorrect values
 # Look at observations with 0 total use and see if there are monthly usage records
 # Maybe sum up the total column across all 12 months to make sure it's accurate

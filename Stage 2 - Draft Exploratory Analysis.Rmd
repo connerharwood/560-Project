@@ -35,7 +35,7 @@ Obtained through Federal Reserve Economic Data (FRED) [here](https://fred.stloui
 # Data Processing
 
 **Water Use**
-The water use .csv files for each of the 9 counties included two data tables containing different variables and information on entities with water user rights. One of the tables contained the monthly water usage data we're interested, and the other table had county information which we merged with the first table after cleaning them both. The main cleaning needed with this data was selecting and renaming the relevant variables, addressing NA values, and merging into one dataset with the population data. Observations missing year, as well as those containing no water usage values, were removed. Some of the latitude/longitude entries were 0, which converted to NA.
+The water use .csv files for each of the 9 counties included two data tables containing different variables and information on entities with water user rights. One of the tables contained the monthly water usage data we're interested, and the other table had county information which we merged with the first table after cleaning them both. The main cleaning needed with this data was selecting and renaming the relevant variables, addressing NA values, and merging into one dataset with the population data. Observations missing year, as well as those containing no water usage values, were removed. Some of the latitude/longitude entries were 0, which we converted to NA.
 
 **Great Salt Lake Elevation Levels**
 
