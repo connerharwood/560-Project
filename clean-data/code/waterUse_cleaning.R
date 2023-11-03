@@ -230,6 +230,8 @@ waterUse_clean = waterUse_merged |>
   relocate(system_type, .after = source_type) |> 
   rename(total_gallons = total)
 
+#------------------------------------------------------------------------------#
+
 # load county population data for merge
 load("~/560-Project/clean-data/data/countyPopulations_clean.rds")
 
@@ -243,5 +245,13 @@ waterUse_clean = waterUse_clean |>
   mutate(population_thousands = population_thousands*1000) |> 
   rename(population = population_thousands)
 
+#------------------------------------------------------------------------------#
+
 # save as .rds file
 save(waterUse_clean, file = "waterUse_clean.rds")
+
+#------------------------------------------------------------------------------#
+
+## CLEANING STILL NEEDED ##
+# Latitude and longitude: checks values, convert incorrect ones to NA
+# Graph water usage, look for extreme/incorrect values
