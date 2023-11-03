@@ -133,6 +133,11 @@ skim(waterUse8)
 waterUse8 = waterUse8 |> 
   mutate(across(jan:dec, ~ifelse(is.na(.), 0, .)))
 
+# convert invalid latitude and longitude to NA
+waterUse8 = waterUse8 |> 
+  mutate(latitude = ifelse(latitude < 37 | longitude == 0, NA, latitude),
+         longitude = ifelse(latitude < 37 | longitude == 0, NA, longitude))
+
 # explore data again
 skim(waterUse8)
 
@@ -253,5 +258,8 @@ save(waterUse_clean, file = "waterUse_clean.rds")
 #------------------------------------------------------------------------------#
 
 ## CLEANING STILL NEEDED ##
-# Latitude and longitude: checks values, convert incorrect ones to NA
+# Latitude and longitude: checks values, convert incorrect ones / zeros to NA
 # Graph water usage, look for extreme/incorrect values
+# Look at observations with 0 total use and see if there are monthly usage records
+# Maybe sum up the total column across all 12 months to make sure it's accurate
+# Some observations have a nonzero number for total, but zeros for individual months - is this a problem?

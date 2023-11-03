@@ -35,10 +35,12 @@ Obtained through Federal Reserve Economic Data (FRED) [here](https://fred.stloui
 # Data Processing
 
 **Water Use**
+The water use .csv files for each of the 9 counties included two data tables containing different variables and information on entities with water user rights. One of the tables contained the monthly water usage data we're interested, and the other table had county information which we merged with the first table after cleaning them both. The main cleaning needed with this data was selecting and renaming the relevant variables, addressing NA values, and merging into one dataset with the population data. Observations missing year, as well as those containing no water usage values, were removed. Some of the latitude/longitude entries were 0, which converted to NA.
 
 **Great Salt Lake Elevation Levels**
 
 **Water-Related Land Use**
 
+
 **County Resident Populations**
-We downloaded this data from FRED for our specific counties of interest, and it came in an already mostly clean .xls file. All that was needed for further cleaning was reading the file into RStudio, converting to long format, extracting year from the date column, and changing some variables names. This data was then merged with the water use data by county and year.
+We downloaded this data from FRED for our specific counties of interest, and it came in an already mostly clean .xls file. All that was needed for further cleaning was reading the file into RStudio, converting to long format, extracting year from the date column, and changing some variables names. This data was then merged with the water use data by county and year. Populations were expressed in thousands of people, which we converted by multiplying by 1000 to express it as its actual number.
