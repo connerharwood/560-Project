@@ -299,7 +299,7 @@ landUse_clean1 = landUse_combined |>
 
 # keep roles with distinct combinations of all variables (except surrogate key variable)
 landUse_clean2 = landUse_clean1 |> 
-  distinct(county, basin, year, land_use, acres, .keep_all = TRUE)
+  distinct(county, basin, year, description, land_use, acres, .keep_all = TRUE)
 
 # 6: Understand the definition, origin, and units of each variable
 
@@ -315,6 +315,11 @@ skim(landUse_clean2)
 landUse_clean3 = landUse_clean2 |> 
   mutate(land_use = ifelse(land_use == " ", NA, land_use))
 
+# check land_use = X description 
+landUse_clean3 |>
+  filter(land_use == "X")
+# we remove these observations in a later step 
+
 # 14: Perform logical checks on quantitative variables
 
 # 15: Clean string variables
@@ -326,7 +331,6 @@ landUse_clean4 = landUse_clean3 |>
          basin = str_to_title(basin),
          description = str_to_title(description),
          land_use = toupper(land_use))
-
 
 ## Various additonal cleaning steps as needed
 
@@ -344,11 +348,6 @@ landUse_clean5 = landUse_clean4 |>
 landUse_clean6 = landUse_clean5 |> 
   distinct(county, basin, year, land_use, acres, .keep_all = TRUE)
 
-# look at NA values for land_use (they all indicate no land use)
-landUse_clean6 |> 
-  select(description, land_use) |> 
-  filter(is.na(land_use))
-
 # drop NA values since land with no use not relevant to us
 landUse_clean = landUse_clean6 |> 
   na.omit()
@@ -357,10 +356,14 @@ landUse_clean = landUse_clean6 |>
 landUse_clean = landUse_clean |> 
   mutate(key = 1:nrow(landUse_clean))
 
+# check land_use categories 
+landUse_clean |> 
+  select(land_use) |>
+  distinct()
+
 # combine same land_use categories with different labels into one label
 landUse_clean = landUse_clean |> 
   mutate(land_use = ifelse(land_use %in% c("URBAN", "URB"), "URBAN", land_use),
          land_use = ifelse(land_use %in% c("RIPARIAN/WETLAND", "RIP"), "RIPARIAN/WETLAND", land_use))
 
 save(landUse_clean, file = "landUse_clean.rds")
-load("landUse_clean.rds")
