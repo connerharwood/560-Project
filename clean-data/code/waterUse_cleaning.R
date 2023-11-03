@@ -1,6 +1,7 @@
 library(dplyr)
 library(tidyverse)
 library(skimr)
+library(ggplot2)
 
 load("~/560-Project/raw-data/data/waterUse_raw.rda")
 
@@ -130,8 +131,8 @@ waterUse8 = waterUse8 |>
 skim(waterUse8)
 
 # NA values for monthly water usage can be assumed to be 0, so change these values to 0
-waterUse8 = waterUse8 |> 
-  mutate(across(jan:dec, ~ifelse(is.na(.), 0, .)))
+# waterUse8 = waterUse8 |> 
+ # mutate(across(jan:dec, ~ifelse(is.na(.), 0, .)))
 
 # convert invalid latitude and longitude to NA
 waterUse8 = waterUse8 |> 
