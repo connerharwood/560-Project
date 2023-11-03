@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Topic and Motivation
 
-We are looking at how water usage in Utah counties lying within the Great Salt Lake Basin has contributed to variations in Great Salt Lake (GSL) water levels, as well as stream flows entering the GSL. We'll also be using predictive analysis to look at potential future changes to GSL levels using water use and population trends. The specific counties we're focusing on, which lie fully or mostly within the GSL Basin, are Box Elder, Cache, Davis, Morgan, Rich, Salt Lake, Tooele, Utah, and Weber.
+We are looking at how water usage and water-related land use changes in Utah counties lying within the Great Salt Lake Basin have contributed to variations in Great Salt Lake (GSL) water levels. We'll also be using predictive analysis to look at potential future changes to GSL levels using water use, changes in water-related land use, and population trends. The specific counties we're focusing on, which lie fully or mostly within the GSL Basin, are Box Elder, Cache, Davis, Morgan, Rich, Salt Lake, Tooele, Utah, and Weber.
 
 Utah has been the [fastest growing state since 2010](https://worldpopulationreview.com/state-rankings/fastest-growing-states), and much of this growth comes in counties closely connected to the Great Salt Lake. The GSL has also been facing dangerously low and decreasing water levels over the past several decades. If this trend continues, the economic, environmental, and ecological consequences to the region would be drastic. Thus, it's important to understand how water use in the Great Salt Lake Basin faced with population pressures will impact the health and future of the Great Salt Lake and its surrounding communities. 
 
@@ -19,16 +19,26 @@ Furthermore, agriculture is the largest water user in the state of Utah, using 6
 
 # Data Descriptions
 
-**Utah Water Use Data**
+**Water Use**
 Obtained through the Utah Division of Water Rights [here](https://waterrights.utah.gov/asp_apps/generalWaterUse/WaterUseList.asp), this data includes all water rights holders in Utah dating back to 1959. It has records on total monthly water usage in gallons for each water user, and breaks down this usage by type of use (e.g. agricultural, commercial, water supplier), as well as several other variables of interest. It also has latitude and longitude information for most water users, which we may use at some point in the project for spatial analysis. We're looking at data on water usage in the 9 GSL Basin counties.
 
 **Great Salt Lake Elevation Levels**
 Obtained through the USGS using the `dataRetrieval` package in R, we've gathered daily water level observations dating back to 1966. The two relevant gauges are the Saltair Boat Harbor gauge in the South arm of the lake, and the gauge near Saline, UT in the North arm (the lake was essentially split into two by a railroad in the 1950s). Since the water levels of the two arms are typically very similar, we've simply used the average of the two gauge values for our observations. The gauges measure surface level elevation above sea level in feet.
 
-**County Resident Population Data**
+**Water-Related Land Use**
+Obtained through the Utah Division of Water Resources [here](https://dwre-utahdnr.opendata.arcgis.com/pages/wrlu-data), this data includes yearly composition of water-related land use by county and by basin. Each observation in a given year contains the acreage of a specific plot of land area as well as a description of the type of water use on that land (e.g. crop type, urban use, pasture).
+
+**County Resident Populations**
 Obtained through Federal Reserve Economic Data (FRED) [here](https://fred.stlouisfed.org/categories/30154), it has yearly resident population numbers for each Utah county dating back to 1970.
 
 
 # Data Processing
 
-**Utah Water Use Data**
+**Water Use**
+
+**Great Salt Lake Elevation Levels**
+
+**Water-Related Land Use**
+
+**County Resident Populations**
+We downloaded this data from FRED for our specific counties of interest, and it was already in a mostly cleaned .xls file. All that was needed for further cleaning was reading the file into RStudio, converting to long format, extracting year from the date column, and changing some variables names. This data was then merged with the water use data by county and year.
