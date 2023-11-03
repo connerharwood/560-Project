@@ -1,6 +1,11 @@
 load("~/560-Project/clean-data/data/landUse_clean.rds")
 
-save(landUse_clean, file = "test.rds")
+test = landUse_clean
+save(test, file = "test.rds")
 
 load("~/560-Project/clean-data/data/test.rds")
 
+test = test |> 
+  select(-county)
+
+save(test, file = "test.rds")
