@@ -280,9 +280,8 @@ landUse_combined = rbind(landUse1986_1992_clean,
                          landUse2021_clean,
                          landUse2022_clean)
 
+# save combined land use dataframe as file
 save(landUse_combined, file = "landUse_combined.rds")
-load("landUse_combined.rds")
-
 
 ## Cleaning Checklist
 
