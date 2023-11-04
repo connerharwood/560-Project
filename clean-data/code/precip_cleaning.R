@@ -104,3 +104,7 @@ print(missing_years)
 
 ## No missing years ## 
 
+# save precip data 
+precip_clean = precip 
+save(precip_clean, file = "precip_clean.rds")
+
