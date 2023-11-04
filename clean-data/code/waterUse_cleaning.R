@@ -32,18 +32,7 @@ waterUse3 = waterUse_raw |>
     diversion_type = "Diversion Type",
     use_type = "Use Type",
     year = "Year",
-    jan = "Jan",
-    feb = "Feb",
-    mar = "Mar",
-    apr = "Apr",
-    may = "May",
-    jun = "Jun",
-    jul = "Jul",
-    aug = "Aug",
-    sep = "Sep",
-    oct = "Oct",
-    nov = "Nov",
-    dec = "Dec",
+    Jan:Dec,
     total = "Total"
   )
 
@@ -238,7 +227,7 @@ waterUse_almostClean = waterUse_merged |>
 
 # convert to long format
 waterUse_tidy = waterUse_almostClean |> 
-  pivot_longer(cols = jan:dec,
+  pivot_longer(cols = Jan:Dec,
                names_to = "month",
                values_to = "gallons")
 
@@ -251,11 +240,26 @@ load("~/560-Project/clean-data/data/countyPopulations_clean.rds")
 waterUse_clean = left_join(waterUse_tidy, countyPopulations,
                             by = c("year", "county"), relationship = "many-to-one")
 
-# reorder population variable, convert from population in thousands to actual population, rename
+# convert from population in thousands to actual population, rename, reorder variables, drop source_id (not relevant)
 waterUse_clean = waterUse_clean |> 
-  relocate(population_thousands, .after = county) |> 
   mutate(population_thousands = population_thousands*1000) |> 
-  rename(population = population_thousands)
+  rename(population = population_thousands) |> 
+  select(
+    system_id,
+    system_name,
+    year,
+    county,
+    population,
+    latitude,
+    longitude,
+    source_type,
+    system_type,
+    diversion_type,
+    use_type,
+    month,
+    month_gallons = gallons,
+    year_gallons = total_gallons
+  )
 
 #------------------------------------------------------------------------------#
 
