@@ -1,7 +1,6 @@
 library(dplyr)
 library(tidyverse)
 library(skimr)
-library(ggplot2)
 
 load("~/560-Project/raw-data/data/waterUse_raw.rda")
 
@@ -13,7 +12,8 @@ load("~/560-Project/raw-data/data/waterUse_raw.rda")
 # Already done
 
 # 2: Import data and wrangle into a tidy layout
-# Already done
+# Completely did not realize it needed to be converted to long format til after going through the cleaning steps,
+# so did this at a later step
 
 #------------------------------------------------------------------------------#
 
@@ -225,7 +225,7 @@ waterUse_merged = left_join(waterUse_merge, waterUse_info_merge,
                              by = "system_id", relationship = "many-to-many")
 
 # drop duplicates, reorder columns, drop source_name
-waterUse_clean = waterUse_merged |> 
+waterUse_almostClean = waterUse_merged |> 
   distinct() |>
   select(-source_name) |> 
   relocate(source_id, .after = system_id) |> 
@@ -236,13 +236,19 @@ waterUse_clean = waterUse_merged |>
   relocate(system_type, .after = source_type) |> 
   rename(total_gallons = total)
 
+# convert to long format
+waterUse_tidy = waterUse_almostClean |> 
+  pivot_longer(cols = jan:dec,
+               names_to = "month",
+               values_to = "gallons")
+
 #------------------------------------------------------------------------------#
 
 # load county population data for merge
 load("~/560-Project/clean-data/data/countyPopulations_clean.rds")
 
 # merge waterUse and countyPopulations
-waterUse_clean = left_join(waterUse_clean, countyPopulations,
+waterUse_clean = left_join(waterUse_tidy, countyPopulations,
                             by = c("year", "county"), relationship = "many-to-one")
 
 # reorder population variable, convert from population in thousands to actual population, rename
