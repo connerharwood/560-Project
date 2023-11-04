@@ -1,60 +1,106 @@
 library(dplyr)
 library(tidyverse)
+library(skimr)
 
-# remove irrelevant columns and rename 
-precip_clean1 = precip_raw |> 
-  select(-...1, -meanprecip, -diff, -percent, -sd) |> 
-  rename(total = tot, average = ave)
+# rename and add columns in Box Elder precip data 
+boxElder = precip_boxElder |>
+  mutate(year = substr(Date, 1, 4),
+         month = substr(Date, 5, 6),
+         county = "Box Elder") |>
+  select(-Date) |> 
+  rename(precipitation = Value)
 
-# convert data to long format 
-precip_clean2 = precip_clean1 |>
-  pivot_longer(cols = "jan":"dec",
-               names_to = "month",
-               values_to = "precip")
+# rename and add columns in Cache precip data 
+cache = precip_cache |>
+  mutate(year = substr(Date, 1, 4),
+         month = substr(Date, 5, 6),
+         county = "Cache") |>
+  select(-Date) |> 
+  rename(precipitation = Value)
 
-# rearrange and rename columns 
-precip_clean2 = precip_clean2 |> 
-  select(fips, 
-         year, 
-         month, 
-         precip_in = precip, 
-         year_total = total, 
-         year_avg = average, 
-         year_drought = drought)
+# rename and add columns in Davis precip data 
+davis = precip_davis |>
+  mutate(year = substr(Date, 1, 4),
+         month = substr(Date, 5, 6),
+         county = "Davis") |>
+  select(-Date) |> 
+  rename(precipitation = Value)
 
-# keep fip codes of interest
-precip_clean3 = precip_clean2 |> 
-  mutate(county = ifelse(fips == "49003", "Box Elder",
-         ifelse(fips == "49005", "Cache",
-         ifelse(fips == "49011", "David",
-         ifelse(fips == "49029", "Morgan",
-         ifelse(fips == "49033", "Rich",
-         ifelse(fips == "49035", "Salt Lake",
-         ifelse(fips == "49045", "Tooele",
-         ifelse(fips == "49049", "Utah",
-         ifelse(fips == "49057", "Weber", NA)))))))))) 
+# rename and add columns in Morgan precip data 
+morgan = precip_morgan |>
+  mutate(year = substr(Date, 1, 4),
+         month = substr(Date, 5, 6),
+         county = "Morgan") |>
+  select(-Date) |> 
+  rename(precipitation = Value)
 
-is_present = any(grepl("^25", precip_raw$fips))
+# rename and add columns in Rich precip data 
+rich = precip_rich |>
+  mutate(year = substr(Date, 1, 4),
+         month = substr(Date, 5, 6),
+         county = "Rich") |>
+  select(-Date) |> 
+  rename(precipitation = Value)
 
-fips_county = data.frame(
-  county = c("Box Elder", "Cache", "David", "Morgan", "Rich", "Salt Lake", "Tooele", "Utah", "Weber"), 
-  fips = c("49003", "49005", "49011", "49029", "49033", "49035", "49045", "49049", "49057")
-)
+# rename and add columns in Salt Lake precip data 
+saltLake = precip_saltLake |>
+  mutate(year = substr(Date, 1, 4),
+         month = substr(Date, 5, 6),
+         county = "Salt Lake") |>
+  select(-Date) |> 
+  rename(precipitation = Value)
 
-library(scales)
+# rename and add columns in Tooele precip data 
+tooele = precip_tooele |>
+  mutate(year = substr(Date, 1, 4),
+         month = substr(Date, 5, 6),
+         county = "Tooele") |>
+  select(-Date) |> 
+  rename(precipitation = Value)
 
-precip_squish = precip_clean2 |>
-  squish(fips)
+# rename and add columns in Utah precip data 
+utah = precip_utah |>
+  mutate(year = substr(Date, 1, 4),
+         month = substr(Date, 5, 6),
+         county = "Utah") |>
+  select(-Date) |> 
+  rename(precipitation = Value)
 
-precip_fips = left_join(precip_clean2, fips_county, relationship = "many-to-one")
+# rename and add columns in Weber precip data 
+weber = precip_weber |>
+  mutate(year = substr(Date, 1, 4),
+         month = substr(Date, 5, 6),
+         county = "Weber") |>
+  select(-Date) |> 
+  rename(precipitation = Value)
 
-precip_fips = precip_fips |>
-  filter(!is.na(county))
+# append data sets  
+precip = rbind(boxElder, cache, davis, morgan, rich, saltLake, tooele, utah, weber)
 
-str(precip_raw$fips)
-  
+# check structure of precip and missing values
+skim(precip)
 
-precip_clean3 |>
-  filter(!is.numeric(fips))
+## No missing values found ## 
 
+# rearrange columns and rename precipitation
+precip = precip |> 
+  select(year, county, month, precip_in = precipitation) |> 
+  mutate(year = as.numeric(year))
+
+# convert month numbers into names 
+precip$month = month.abb[as.integer(precip$month)]
+
+# check for duplicates
+precip |> 
+  n_distinct()
+
+## No duplicates found ## 
+
+# check that all years are present 
+all_years = 1959:2023
+precip_years = unique(precip$year)
+missing_years = setdiff(all_years, precip_years)
+print(missing_years)
+
+## No missing years ## 
 
