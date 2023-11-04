@@ -142,6 +142,25 @@ waterUse_info3 |>
 waterUse_info8 = waterUse_info3 |> 
   filter(!is.na(county))
 
+# look at observations with no monthly data to understand those that still have total use values
+monthly_zeros = waterUse8 |>
+  filter(Jan == 0 &
+           Feb == 0 &
+           Mar == 0 &
+           Apr == 0 &
+           May == 0 &
+           Jun == 0 &
+           Jul == 0 &
+           Aug == 0 &
+           Sep == 0 &
+           Oct == 0 &
+           Nov == 0 &
+           Dec == 0)
+# Going into the Utah water use database to look at some specific water rights users appear in monthly_zeros,
+# it looks like there simply wasn't monthly data recorded, but for some there is a total recorded
+# This is mostly with older years and is most likely just a lack of data recorded, so we'll assume the
+# yearly usage values are correct and either keep the monthly usage equal to zero, or perhaps take the yearly
+# usage number for that observation and assign to each month the monthly average (total use / 12)
 #------------------------------------------------------------------------------#
 
 # 9: Convert to numeric
@@ -224,6 +243,21 @@ waterUse_almostClean = waterUse_merged |>
   relocate(longitude, .after = latitude) |> 
   relocate(system_type, .after = source_type) |> 
   rename(total_gallons = total)
+
+
+monthly_zeros = waterUse_almostClean |>
+  filter(Jan == 0 &
+           Feb == 0 &
+           Mar == 0 &
+           Apr == 0 &
+           May == 0 &
+           Jun == 0 &
+           Jul == 0 &
+           Aug == 0 &
+           Sep == 0 &
+           Oct == 0 &
+           Nov == 0 &
+           Dec == 0)
 
 # convert to long format
 waterUse_tidy = waterUse_almostClean |> 

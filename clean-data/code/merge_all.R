@@ -4,6 +4,7 @@ library(tidyverse)
 load("~/560-Project/clean-data/data/waterUse_clean.rds")
 load("~/560-Project/clean-data/data/landUse_clean.rds")
 load("~/560-Project/clean-data/data/gsl_levels_clean.rds")
+load("~/560-Project/clean-data/data/precip_clean.rds")
 
 # forgot to convert year in gsl_levels to numeric, so doing that here
 gsl_levels = gsl_levels |> 
@@ -12,8 +13,8 @@ gsl_levels = gsl_levels |>
 # merge water use data with GSL levels data by year and month
 waterUse_gslLevels = left_join(waterUse_clean, gsl_levels, by = c("year", "month"), relationship = "many-to-one")
 
-# merge water use and GSL levels data with land use data
-waterUse_gslLevels_landUse = left_join(waterUse_gslLevels, landUse_clean, by = c("year", "county"), relationship = "many-to-many")
+# merge water use and GSL levels data with precipitation data by year, county, and month
+masterData = left_join(waterUse_gslLevels, precip_clean, by = c("year", "county", "month"), relationship = "many-to-one")
 
 #------------------------------------------------------------------------------#
 ## further processing of land use data needed before merging ##
