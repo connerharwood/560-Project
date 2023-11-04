@@ -297,6 +297,15 @@ waterUse_clean = waterUse_clean |>
 
 #------------------------------------------------------------------------------#
 
+# drop observations that have no monthly or yearly water use data
+waterUse_clean2 = waterUse_clean |> 
+  filter(year_gallons != 0)
+
+jan_total = waterUse_clean2 |> 
+  filter(month == "Jan") |> 
+  sum(month_gallons)
+
+
 # save as .rds file
 save(waterUse_clean, file = "waterUse_clean.rds")
 
