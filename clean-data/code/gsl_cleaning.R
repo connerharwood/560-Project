@@ -71,4 +71,7 @@ gsl_levels = gsl_levels |>
   mutate(level = (north_levels + south_levels) / 2) |> 
   select(-north_levels, -south_levels)
 
+# convert month numbers to character month names
+gsl_levels$month = month.abb[as.integer(gsl_levels$month)]
+
 save(gsl_levels, file = "gsl_levels_clean.rds")
