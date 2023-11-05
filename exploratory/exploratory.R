@@ -40,8 +40,14 @@ unique_use_type2
 
 #------------------------------------------------------------------------------#
 
+# create a new dataset for the first graph 
+graph1 = masterData |> 
+  select(year, water_use, total_gallons) |> 
+  distinct() |>
+  mutate(log_gallons = log(total_gallons))
+
 # create a graph showing water usage by type over time 
-ggplot(masterData, aes(x = year, y = log(total_gallons), color = reorder(water_use, -total_gallons))) +
+ggplot(graph1, aes(x = year, y = log_gallons, color = reorder(water_use, -log_gallons))) +
   geom_line() + 
   labs(
     title = "Log Yearly Water Usage by Use Type",

@@ -41,12 +41,12 @@ precipitation = precipitation |>
 
 # aggregate water use data to yearly total per water use type
 waterUse_yearly = waterUse_clean |> 
-  group_by(use_type, year) |> 
+  group_by(year, use_type) |> 
   summarize(total_use = sum(year_gallons))
 
 # aggregate land use data to yearly total across counties
 landUse_yearly = landUse_clean |> 
-  group_by(land_use, year) |> 
+  group_by(year, land_use) |> 
   summarize(total_acres = sum(acres))
 
 #------------------------------------------------------------------------------#
