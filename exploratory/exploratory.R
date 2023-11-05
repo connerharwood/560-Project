@@ -62,8 +62,9 @@ ggplot(masterData, aes(x = year, y = log(total_use), color = reorder(use_type, -
 # create a graph showing GSL levels over time 
 ggplot(masterData, aes(x = year, y = gsl_level)) + 
   geom_line(color = "blue") + 
+  geom_hline(yintercept = 4198, linetype = "dashed", color = "red") +
   labs( 
-    title = "Great Salt Lake Levels Over Time",
+    title = "Great Salt Lake Levels",
     x = "Year", 
     y = "Level in Feet") + 
   theme_minimal()
