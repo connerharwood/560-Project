@@ -76,3 +76,10 @@ abc = waterUse_clean |>
   group_by(year, county) |> 
   summarize(population = sum(population)) |> 
   ungroup()
+
+pop = countyPopulations |> 
+  mutate(population = population_thousands*1000)
+
+pop_sum = pop |> 
+  group_by(year) |> 
+  summarize(population = sum(population))
