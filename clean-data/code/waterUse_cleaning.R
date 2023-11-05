@@ -268,23 +268,13 @@ waterUse_tidy = waterUse_almostClean |>
 
 #------------------------------------------------------------------------------#
 
-# load county population data for merge
-load("~/560-Project/clean-data/data/countyPopulations_clean.rds")
-
-# merge waterUse and countyPopulations
-waterUse_clean1 = left_join(waterUse_tidy, countyPopulations,
-                            by = c("year", "county"), relationship = "many-to-one")
-
 # convert from population in thousands to actual population, rename, reorder variables, drop source_id (not relevant)
-waterUse_clean1 = waterUse_clean1 |> 
-  mutate(population_thousands = population_thousands*1000) |> 
-  rename(population = population_thousands) |> 
+waterUse_clean1 = waterUse_tidy |> 
   select(
     system_id,
     system_name,
     year,
     county,
-    population,
     latitude,
     longitude,
     source_type,
