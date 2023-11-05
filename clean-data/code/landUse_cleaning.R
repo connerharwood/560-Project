@@ -364,3 +364,11 @@ landUse_clean = landUse_clean |>
          land_use = ifelse(land_use %in% c("RIPARIAN/WETLAND", "RIP"), "RIPARIAN/WETLAND", land_use))
 
 save(landUse_clean, file = "landUse_clean.rds")
+
+# possible future cleaning / changes:
+
+# aggregate land use data for each land use category by year and county
+landUse_aggregate = landUse_clean |> 
+  select(-description) |> 
+  group_by(year, county, land_use) |> 
+  summarize(acres = sum(acres))
