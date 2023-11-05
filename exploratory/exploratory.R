@@ -4,54 +4,44 @@ library(ggplot2)
 library(data.table)
 library(binsreg)
 
-# idea for GSL levels graph: plot line at 4198 feet, showing minimum level needed for a healthy lake
-
 load("~/560-Project/clean-data/data/masterData.rds")
-load("~/560-Project/clean-data/data/landUse_clean.rds")
 
 #------------------------------------------------------------------------------#
 
 ## preparation and some additional cleaning to the master data ##
 
-# remove duplicates in the masterData
+masterData = as.data.table(masterData)
+
+# remove duplicates in the master dataset
 masterData = masterData |> 
   distinct()
 
+# check structure of master dataset
+str(masterData)
+
 # look at use type categories
-unique_use_type = unique(masterData$use_type)
+unique_use_type = unique(masterData$water_use)
 unique_use_type
 
 # group similar use type categories
 masterData = masterData |> 
-  mutate(use_type = ifelse(use_type == "Irrigation", "Agricultural",
-                    ifelse(use_type %in% c("Power (Hydro-Elec)", 
+  mutate(water_use = ifelse(water_use == "Irrigation", "Agricultural",
+                    ifelse(water_use %in% c("Power (Hydro-Elec)", 
                                            "Power (Fossil-Fuel)", 
                                            "Power (Geothermal)",
                                            "Geothermal"),
-                           "Power", use_type)))
+                           "Power", water_use))) |> 
+  # remove sewage since only has a few years of observation and small water user
+  filter(water_use != "Sewage Treatment" & year >= 1970) 
 
 # check to see if regrouping categories worked
-unique_use_type2 = unique(masterData$use_type)
+unique_use_type2 = unique(masterData$water_use)
 unique_use_type2
-
-# look at Cargill Salt Inc.'s 2015 water use 
-cargill = masterData |> 
-  filter(system_id == 2168 & year == 2015 & source_type == "Lake") 
-
-# remove Cargill Salt Inc. invalid observation for 2015 
-masterData = as.data.table(masterData)
-masterData = masterData |> 
-  mutate(key = 1:nrow(masterData))
-
-# remove invalid Cargill observations from master dataset
-masterData = masterData |>
-  filter(!(key %in% 331530:331539)) |> 
-  select(-key)
 
 #------------------------------------------------------------------------------#
 
 # create a graph showing water usage by type over time 
-ggplot(yearly_data, aes(x = year, y = ln_total_per_use, color = reorder(use_type, -ln_total_per_use))) +
+ggplot(masterData, aes(x = year, y = log(total_gallons), color = reorder(water_use, -total_gallons))) +
   geom_line() + 
   labs(
     title = "Log Yearly Water Usage by Use Type",
@@ -77,6 +67,7 @@ ggplot(yearly_data, aes(x = year, y = gsl_level)) +
     x = "Year", 
     y = "Level in Feet") + 
   theme_minimal()
+# idea for GSL levels graph: plot line at 4198 feet, showing minimum level needed for a healthy lake !!!!!!!
 
 # create a graph showing water usage per capita 
 ggplot(yearly_data, aes(x = year, y = ln_usage_per_capita)) +
