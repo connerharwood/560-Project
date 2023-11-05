@@ -161,6 +161,7 @@ monthly_zeros = waterUse8 |>
 # This is mostly with older years and is most likely just a lack of data recorded, so we'll assume the
 # yearly usage values are correct and either keep the monthly usage equal to zero, or perhaps take the yearly
 # usage number for that observation and assign to each month the monthly average (total use / 12)
+
 #------------------------------------------------------------------------------#
 
 # 9: Convert to numeric
@@ -271,11 +272,11 @@ waterUse_tidy = waterUse_almostClean |>
 load("~/560-Project/clean-data/data/countyPopulations_clean.rds")
 
 # merge waterUse and countyPopulations
-waterUse_clean = left_join(waterUse_tidy, countyPopulations,
+waterUse_clean1 = left_join(waterUse_tidy, countyPopulations,
                             by = c("year", "county"), relationship = "many-to-one")
 
 # convert from population in thousands to actual population, rename, reorder variables, drop source_id (not relevant)
-waterUse_clean = waterUse_clean |> 
+waterUse_clean1 = waterUse_clean1 |> 
   mutate(population_thousands = population_thousands*1000) |> 
   rename(population = population_thousands) |> 
   select(
@@ -298,21 +299,103 @@ waterUse_clean = waterUse_clean |>
 #------------------------------------------------------------------------------#
 
 # drop observations that have no monthly or yearly water use data
-waterUse_clean2 = waterUse_clean |> 
+waterUse_clean2 = waterUse_clean1 |> 
   filter(year_gallons != 0)
 
-jan_total = waterUse_clean2 |> 
-  filter(month == "Jan") |> 
-  sum(month_gallons)
+# looking at the data, there are two observations with much higher usage than the rest of the data,
+# and the water use data base is not showing these records, so these may have been an error caused during import
+# Thus, we'll be removing these two observations below
 
+# define surrogate key to remove the 2 observations
+waterUse_clean_rm = waterUse_clean2 |> 
+  mutate(key = 1:nrow(waterUse_clean2))
+
+# remove the two invalid observations
+waterUse_clean_rm = waterUse_clean_rm |> 
+  filter(key != 332034 & key != 332035)
+
+waterUse_clean3 = waterUse_clean_rm
+
+# calculate what months use the most water as a percentage of the total
+totals = waterUse_clean3 |>
+  group_by(month) |> 
+  summarize(monthly_total = sum(month_gallons, na.rm = TRUE)) |> 
+  mutate(total = sum(monthly_total),
+         month_percent = monthly_total / total)
+
+# extract monthly percentages from totals dataframe
+jan = totals[totals$month == "Jan", ]
+jan_percent = jan$month_percent
+
+feb = totals[totals$month == "Feb", ]
+feb_percent = feb$month_percent
+
+mar = totals[totals$month == "Mar", ]
+mar_percent = mar$month_percent
+
+apr = totals[totals$month == "Apr", ]
+apr_percent = apr$month_percent
+
+may = totals[totals$month == "May", ]
+may_percent = may$month_percent
+
+jun = totals[totals$month == "Jun", ]
+jun_percent = jun$month_percent
+
+jul = totals[totals$month == "Jul", ]
+jul_percent = jul$month_percent
+
+aug = totals[totals$month == "Aug", ]
+aug_percent = aug$month_percent
+
+sep = totals[totals$month == "Sep", ]
+sep_percent = sep$month_percent
+
+oct = totals[totals$month == "Oct", ]
+oct_percent = oct$month_percent
+
+nov = totals[totals$month == "Nov", ]
+nov_percent = nov$month_percent
+
+dec = totals[totals$month == "Dec", ]
+dec_percent = dec$month_percent
+
+total = totals$total
+total = total[1]
+
+# impute monthly averages for observations missing all months
+waterUse_impute = waterUse_clean3 |> 
+  group_by(year_gallons) |> 
+  mutate(month_gallons = ifelse(all(month_gallons == 0) & month == "Jan", jan_percent*year_gallons,
+         ifelse(all(month_gallons == 0) & month == "Feb", feb_percent*year_gallons,
+         ifelse(all(month_gallons == 0) & month == "Mar", mar_percent*year_gallons,
+         ifelse(all(month_gallons == 0) & month == "Apr", apr_percent*year_gallons,
+         ifelse(all(month_gallons == 0) & month == "May", may_percent*year_gallons,
+         ifelse(all(month_gallons == 0) & month == "Jun", jun_percent*year_gallons,
+         ifelse(all(month_gallons == 0) & month == "Jul", jul_percent*year_gallons,
+         ifelse(all(month_gallons == 0) & month == "Aug", aug_percent*year_gallons,
+         ifelse(all(month_gallons == 0) & month == "Sep", sep_percent*year_gallons,
+         ifelse(all(month_gallons == 0) & month == "Oct", oct_percent*year_gallons,
+         ifelse(all(month_gallons == 0) & month == "Nov", nov_percent*year_gallons,
+         ifelse(all(month_gallons == 0) & month == "Dec", dec_percent*year_gallons, month_gallons)))))))))))))
+
+# look at observations with no monthly data to check a random one (system_id == 1008 is what we chose)
+check = waterUse_clean3 |> 
+  group_by(year_gallons) |> 
+  filter(all(month_gallons == 0))
+
+# check system_id = 1008 before imputing
+sys1008 = waterUse_impute |> 
+  filter(system_id == 1008 & year == 1988)
+
+# check system_id = 1008 after imputing
+sys1008_2 = waterUse_clean3 |> 
+  filter(system_id == 1008 & year == 1988)
+
+## IT WORKED, WE ARE BETTER THAN EVERY DATA SCIENTIST EVER ##
+#------------------------------------------------------------------------------#
+
+waterUse_clean = waterUse_impute
 
 # save as .rds file
 save(waterUse_clean, file = "waterUse_clean.rds")
-
-#------------------------------------------------------------------------------#
-
-## CLEANING STILL NEEDED ##
-# Graph water usage, look for extreme/incorrect values
-# Look at observations with 0 total use and see if there are monthly usage records
-# Maybe sum up the total column across all 12 months to make sure it's accurate
-# Some observations have a nonzero number for total, but zeros for individual months - is this a problem?
