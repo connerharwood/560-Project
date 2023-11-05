@@ -39,15 +39,23 @@ precipitation = precipitation |>
   group_by(year) |> 
   summarize(precipitation = mean(year_total))
 
+waterUse_ag = waterUse_clean |> 
+  filter(use_type == "Agricultural") |> 
+  group_by(year) |> 
+  summarize(tot = sum(year_gallons)) |> 
+  mutate(log_tot = log(tot))
+
 # aggregate water use data to yearly total per water use type
 waterUse_yearly = waterUse_clean |> 
-  group_by(use_type, year) |> 
+  select(year, use_type, year_gallons)
+  group_by(year, use_type) |> 
   summarize(total_use = sum(year_gallons))
 
 # aggregate land use data to yearly total across counties
 landUse_yearly = landUse_clean |> 
   group_by(land_use, year) |> 
-  summarize(total_acres = sum(acres))
+  summarize(total_acres = sum(acres)) |> 
+  mutate(land_use = ifelse(land_use == "AGRICULTURAL", "AG", land_use))
 
 #------------------------------------------------------------------------------#
 ## Merge to Master Dataset ## 
