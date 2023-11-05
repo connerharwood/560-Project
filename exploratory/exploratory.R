@@ -40,14 +40,8 @@ unique_use_type2
 
 #------------------------------------------------------------------------------#
 
-# create a new dataset for the first graph 
-graph1 = masterData |> 
-  select(year, water_use, total_gallons) |> 
-  distinct() |>
-  mutate(log_gallons = log(total_gallons))
-
 # create a graph showing water usage by type over time 
-ggplot(graph1, aes(x = year, y = log_gallons, color = reorder(water_use, -log_gallons))) +
+ggplot(masterData, aes(x = year, y = log(total_use), color = reorder(use_type, -total_use))) +
   geom_line() + 
   labs(
     title = "Log Yearly Water Usage by Use Type",
@@ -66,7 +60,7 @@ ggplot(graph1, aes(x = year, y = log_gallons, color = reorder(water_use, -log_ga
   theme_minimal()
 
 # create a graph showing GSL levels over time 
-ggplot(yearly_data, aes(x = year, y = gsl_level)) + 
+ggplot(masterData, aes(x = year, y = gsl_level)) + 
   geom_line(color = "blue") + 
   labs( 
     title = "Great Salt Lake Levels Over Time",
@@ -76,7 +70,7 @@ ggplot(yearly_data, aes(x = year, y = gsl_level)) +
 # idea for GSL levels graph: plot line at 4198 feet, showing minimum level needed for a healthy lake !!!!!!!
 
 # create a graph showing water usage per capita 
-ggplot(yearly_data, aes(x = year, y = ln_usage_per_capita)) +
+ggplot(masterData, aes(x = year, y = ln_usage_per_capita)) +
   geom_smooth() + 
   labs( 
     title = "Water Usage Per Capita Over Time",
@@ -85,7 +79,7 @@ ggplot(yearly_data, aes(x = year, y = ln_usage_per_capita)) +
   theme_minimal()
 
 # create a scatterplot showing precipitation and water usage 
-ggplot(precipitation, aes(x = precip, y = log(total_usage))) + 
+ggplot(masterData, aes(x = precipitation, y = log(total_gallons))) + 
   geom_point() + 
   geom_smooth(method = "lm") + 
   labs( 
