@@ -7,6 +7,9 @@ load("~/560-Project/clean-data/data/precip_clean.rds")
 load("~/560-Project/clean-data/data/landUse_clean.rds")
 load("~/560-Project/clean-data/data/countyPopulations_clean.rds")
 
+#------------------------------------------------------------------------------#
+## Prepare data for merging by aggregating to yearly level ## 
+
 # forgot to convert year in gsl level dataset to numeric, so doing that here
 gsl_levels = gsl_levels |> 
   mutate(year = as.numeric(year))
@@ -20,50 +23,49 @@ gsl_levels = gsl_levels |>
   group_by(year) |> 
   summarize(gsl_level = mean(level))
 
-# 
+# create a new dataset with total population across counties 
 population = countyPopulations |> 
   mutate(population = population_thousands*1000) |> 
   group_by(year) |> 
   summarize(population = sum(population))
 
-# merge water use data with GSL levels data by year and month
-waterUse_gslLevels = left_join(waterUse_clean, gsl_levels, by = c("year", "month"), relationship = "many-to-one")
+# create a new data set with yearly precipitation data for each county
+precipitation = precip_clean |> 
+  group_by(year, county) |> 
+  mutate(year_total = sum(precip_in))
 
-# drop irrelevant key variable
-waterUse_gslLevels = waterUse_gslLevels |> 
-  select(-key)
-
-# calculate total usage per use type category
-use_type_total = masterData |> 
-  group_by(use_type) |> 
-  summarize(use_total = sum(year_gallons)) |> 
-  arrange(desc(use_total))
-
-# create a new data table with yearly aggregates 
-yearly_data = masterData |> 
-  group_by(year, use_type) |> 
-  summarize(total_per_use = sum(year_gallons),
-            gsl_level = mean(gsl_level, na.rm = TRUE),
-            population = mean(population, na.rm = TRUE)) |>
-  mutate(ln_total_per_use = log(total_per_use),
-         usage_per_capita = total_per_use/population,
-         ln_usage_per_capita = log(usage_per_capita)) |> 
-  # remove sewage treatment because only data available for a few years and small water user
-  filter(year >= 1970 & use_type != "Sewage Treatment") 
-
-# calculate the total water usage per year
-yearly_data = yearly_data |> 
+# calculate yearly precipitation data for all counties
+precipitation = precipitation |> 
   group_by(year) |> 
-  mutate(total = sum(total_per_use)) |> 
-  ungroup()
+  summarize(precipitation = mean(year_total))
 
-# merge water use and GSL levels data with precipitation data by year, county, and month
-masterData = left_join(waterUse_gslLevels, precip_clean, by = c("year", "county", "month"), relationship = "many-to-one")
+# aggregate water use data to yearly total per water use type
+waterUse_yearly = waterUse_clean |> 
+  group_by(use_type, year) |> 
+  summarize(total_use = sum(year_gallons))
+
+# aggregate land use data to yearly total across counties
+landUse_yearly = landUse_clean |> 
+  group_by(land_use, year) |> 
+  summarize(total_acres = sum(acres))
+
+#------------------------------------------------------------------------------#
+## Merge to Master Dataset ## 
+
+# merge water use data with GSL levels data by year
+water_gsl = left_join(waterUse_yearly, gsl_levels, by = "year", relationship = "many-to-one")
+
+# merge water use and GSL levels data with precipitation data by year
+precip_water_gsl = left_join(water_gsl, precipitation, by = "year", relationship = "many-to-one")
+
+# merge water use, GSL levels, precipitation, and population data by year 
+pop_precip_water_gsl = left_join(precip_water_gsl, population, by = "year", relationship = "many-to-one")
+
+# merge water use, GSL levels, precipitation, population, and land use data by year 
+masterData0 = left_join(pop_precip_water_gsl, landUse_yearly, by = "year", relationship = "many-to-many")
 
 # reorder and rename some variables
-masterData = masterData |> 
-  relocate(month, .after = year) |> 
-  rename(gsl_level = level,
-         county_precip = precip_in)
+masterData = masterData0 |> 
+  select(year, gsl_level, population, precipitation, water_use = use_type, total_gallons = total_use, land_use, total_acres)
 
 save(masterData, file = "masterData.rds")
