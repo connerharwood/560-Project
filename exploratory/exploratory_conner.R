@@ -4,6 +4,25 @@ library(data.table)
 
 load("~/560-Project/clean-data/data/masterData.rds")
 
+waterUse_graph = masterData |> 
+  select(year, water_use, total_gallons) |> 
+  distinct() |> 
+  mutate(log_gallons = log(total_gallons))
+  
+# Create a scatter plot with subplots based on 'group' variable
+ggplot(data = your_data, aes(x = x, y = y)) +
+  geom_point() +
+  facet_wrap(~ group)
+
+
+
+
+
+
+
+
+
+
 # group similar use type categories
 masterData = masterData |> 
   mutate(use_type = ifelse(use_type == "Irrigation", "Agricultural",
