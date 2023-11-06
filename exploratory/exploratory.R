@@ -5,6 +5,7 @@ library(data.table)
 library(binsreg)
 library(scales)
 library(lubridate)
+library(cowplot)
 
 load("~/560-Project/clean-data/data/masterData.rds")
 
@@ -28,14 +29,7 @@ plot1 = ggplot(masterData, aes(x = year, y = log(total_gallons), color = reorder
     y = "Log Yearly Water Usage", 
     color = "Use Type"
   ) +
-  scale_color_manual(values = c("Water Supplier" = "pink", 
-                                "Agricultural" = "orange", 
-                                "Industrial" = "cyan", 
-                                "Mining" = "purple",
-                                "Power" = "blue",
-                                "Domestic" = "green",
-                                "Commercial" = "red"
-  )) +
+  scale_color_brewer(palette = "Set2") +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
 
@@ -84,7 +78,7 @@ plot4 = ggplot(masterData, aes(x = precipitation, y = log(total_gallons), color 
 ggsave("precip_waterUsage.png", plot = plot4)
 
 #------------------------------------------------------------------------------#
-## Create separate dataset to focus on water-related land use data ##
+## Create separate dataset to focus on agricultural water-related land use and water use data ##
 
 # select only agricultural water use and water-related land use data
 agData1 = masterData |> 
@@ -118,3 +112,51 @@ plot5 = ggplot() +
 
 # save plot as .png file
 ggsave("agPlots.png", plot = plot5)
+
+#------------------------------------------------------------------------------#
+## Create separate dataset to focus on agricultural water use data and GSL levels ##
+
+# select only agricultural water use and water-related land use data
+agWater_GSL1 = masterData |> 
+  filter(water_use == "Agricultural")
+
+# aggregate total water usage per year across agricultural water uses
+agWater_GSL = agWater_GSL1 |> 
+  distinct(year, water_use, total_gallons, .keep_all = TRUE) |> 
+  group_by(year) |> 
+  mutate(yearly_usage = sum(total_gallons))
+
+# create a plot showing GSL levels in feet over time
+plot_gsl_levels = ggplot(agWater_GSL, aes(x = year, y = gsl_level)) +
+  geom_smooth(color = "lightblue", se = FALSE, span = 0.1) +
+  labs(y = "GSL Levels (Feet)",
+       title = "Agricultural Water Use and GSL Levels" 
+       ) +
+  theme_minimal() +
+  # remove x-axis since irrelevant 
+  theme(
+    axis.text.x = element_blank(),   # Hide x-axis text
+    axis.ticks.x = element_blank(),  # Hide x-axis ticks
+    axis.title.x = element_blank()   # Hide x-axis label
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# create a plot showing agricultural water usage 
+plot_ag_water_usage = ggplot(agWater_GSL, aes(x = year, y = yearly_usage / 1000000000)) +
+  geom_smooth(color = "pink", se = FALSE, span = 0.1) +
+  labs(y = "Ag Water Use (Billions of Gallons)", 
+       x = "Year") +
+  theme_minimal()
+
+# combine the two plots into one 
+plot6 = plot_grid(
+  plot_gsl_levels,
+  plot_ag_water_usage,
+  ncol = 1,
+  align = "v"
+)
+
+print(plot6)
+
+# save plot as .png file
+ggsave("agWater_GSL.png", plot = plot6)
