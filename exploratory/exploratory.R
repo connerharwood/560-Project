@@ -10,6 +10,15 @@ load("~/560-Project/clean-data/data/masterData.rds")
 
 #------------------------------------------------------------------------------#
 
+# create table showing total water use by use type
+useType_totals = masterData |> 
+  group_by(water_use) |> 
+  summarize("Total Gallons" = sum(total_gallons) / 100000000000) |> 
+  rename("Water Use Type" = water_use)
+
+# save data table as .rds file to put in R Markdown
+save(useType_totals, file = "useType_totals.rds")
+
 # create a graph showing water usage by type over time 
 plot1 = ggplot(masterData, aes(x = year, y = log(total_gallons), color = reorder(water_use, -total_gallons))) +
   geom_smooth(se = FALSE, span = 0.09, size = 0.5) +
