@@ -68,13 +68,13 @@ Despite a lengthy and exhaustive cleaning process, during our explanatory stage 
 
 # Exploratory Analysis
 
-**Great Salt Lake Levels**
+**Great Salt Lake Levels and Agricultural Water Use**
 
 ```{r echo=FALSE}
-include_graphics("~/560-Project/exploratory/output/gslLevels.png")
+include_graphics("~/560-Project/exploratory/output/agWater_GSL.png")
 ```
 
-We plotted yearly Great Salt Lake elevations measured as feet above sea level. We also added a line at 4198 feet - this number represents the minimum water level needed to support a healthy ecosystem. Clearly, the GSL has been trending down for years now and lies well below the healthy minimum needed.
+Here we plot yearly Great Salt Lake elevations measured as feet above sea level, with yearly agricultural water usage below. We also added a line at 4198 feet - this number represents the minimum water level needed to support a healthy ecosystem. Clearly, the GSL has been trending down for years now and lies well below the healthy minimum needed.
 
 **Water Use by Use Type**
 
@@ -83,17 +83,6 @@ include_graphics("~/560-Project/exploratory/output/waterUse_byType.png")
 ```
 
 We looked at water use trends broken down by the type of water use. Most uses show a steady but small increase over time, with agricultural uses increasing at a significantly faster rate than other uses.
-
-**Total Water Usage by Each Use Type**
-
-```{r echo=FALSE}
-library(pander)
-library(knitr)
-load("~/560-Project/exploratory/output/useType_totals.rds")
-pandoc.table(useType_totals, style = "rmarkdown")
-```
-
-Here we simply show the total water usage (displayed in hundreds of billions of gallons) per each water use type in the data.
 
 **Precipitation and Water Usage**
 
