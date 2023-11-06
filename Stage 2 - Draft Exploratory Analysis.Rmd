@@ -62,7 +62,7 @@ The precipitation data was downloaded separately for each county, from which we 
 **Master Dataset**
 To start merging the data into one master dataset, we started by merging the water use data with the GSL levels and precipitation data. We then merged this with the aggregated land use data. To get all the data on the same time scale, we filtered out all observations before 1992, since data on a couple of significant water use types constrains us to this.
 
-Despite a lengthy and exhaustive cleaning process, during our explanatory stage we frequently encountered issues with our data that needed attention and further cleaning. The data seem to have significant limitations that we hope to better address as we continue with our analyis.
+Despite a lengthy and exhaustive cleaning process, during our explanatory stage we frequently encountered issues with our data that needed attention and further cleaning. The data seem to have significant limitations that we hope to better address as we continue with our analysis
 
 
 # Exploratory Analysis
