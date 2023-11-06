@@ -8,40 +8,8 @@ load("~/560-Project/clean-data/data/masterData.rds")
 
 #------------------------------------------------------------------------------#
 
-## preparation and some additional cleaning to the master data ##
-
-masterData = as.data.table(masterData)
-
-# remove duplicates in the master dataset
-masterData = masterData |> 
-  distinct()
-
-# check structure of master dataset
-str(masterData)
-
-# look at use type categories
-unique_use_type = unique(masterData$water_use)
-unique_use_type
-
-# group similar use type categories
-masterData = masterData |> 
-  mutate(water_use = ifelse(water_use == "Irrigation", "Agricultural",
-                    ifelse(water_use %in% c("Power (Hydro-Elec)", 
-                                           "Power (Fossil-Fuel)", 
-                                           "Power (Geothermal)",
-                                           "Geothermal"),
-                           "Power", water_use))) |> 
-  # remove sewage since only has a few years of observation and small water user
-  filter(water_use != "Sewage Treatment" & year >= 1970) 
-
-# check to see if regrouping categories worked
-unique_use_type2 = unique(masterData$water_use)
-unique_use_type2
-
-#------------------------------------------------------------------------------#
-
 # create a graph showing water usage by type over time 
-ggplot(masterData, aes(x = year, y = log(total_use), color = reorder(use_type, -total_use))) +
+ggplot(masterData, aes(x = year, y = log(total_gallons), color = reorder(water_use, -total_gallons))) +
   geom_line() + 
   labs(
     title = "Log Yearly Water Usage by Use Type",
@@ -68,7 +36,6 @@ ggplot(masterData, aes(x = year, y = gsl_level)) +
     x = "Year", 
     y = "Level in Feet") + 
   theme_minimal()
-# idea for GSL levels graph: plot line at 4198 feet, showing minimum level needed for a healthy lake !!!!!!!
 
 # create a graph showing water usage per capita 
 ggplot(masterData, aes(x = year, y = ln_usage_per_capita)) +
@@ -115,35 +82,3 @@ ggplot() +
   theme_minimal() +
   theme(legend.position = "bottomright") +
   scale_color_manual(values = c("GSL Level" = "green", "Log Yearly Water Use Total" = "red"))
-
-
-# calculate total usage per use type category
-use_type_total = masterData |> 
-  group_by(use_type) |> 
-  summarize(use_total = sum(year_gallons)) |> 
-  arrange(desc(use_total))
-
-# create a new data table with yearly aggregates 
-yearly_data = masterData |> 
-  group_by(year, use_type) |> 
-  summarize(total_per_use = sum(year_gallons),
-            gsl_level = mean(gsl_level, na.rm = TRUE),
-            population = mean(population, na.rm = TRUE)) |>
-  mutate(ln_total_per_use = log(total_per_use),
-         usage_per_capita = total_per_use/population,
-         ln_usage_per_capita = log(usage_per_capita)) |> 
-  # remove sewage treatment because only data available for a few years and small water user
-  filter(year >= 1970 & use_type != "Sewage Treatment") 
-
-# calculate the total water usage per year
-yearly_data = yearly_data |> 
-  group_by(year) |> 
-  mutate(total = sum(total_per_use)) |> 
-  ungroup()
-
-
-
-
-
-
-

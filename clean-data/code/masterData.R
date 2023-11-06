@@ -47,23 +47,17 @@ waterUse_ag = waterUse_clean |>
 
 # aggregate water use data to yearly total per water use type
 waterUse_yearly = waterUse_clean |> 
-<<<<<<< HEAD
   select(year, use_type, year_gallons)
-=======
->>>>>>> e5ca1ff54092e5d4b16745ea5b50f88339dec009
   group_by(year, use_type) |> 
   summarize(total_use = sum(year_gallons))
 
 # aggregate land use data to yearly total across counties
 landUse_yearly = landUse_clean |> 
-<<<<<<< HEAD
   group_by(land_use, year) |> 
   summarize(total_acres = sum(acres)) |> 
-  mutate(land_use = ifelse(land_use == "AGRICULTURAL", "AG", land_use))
-=======
+  mutate(land_use = ifelse(land_use == "AGRICULTURAL", "AG", land_use)) |> 
   group_by(year, land_use) |> 
   summarize(total_acres = sum(acres))
->>>>>>> e5ca1ff54092e5d4b16745ea5b50f88339dec009
 
 #------------------------------------------------------------------------------#
 ## Merge to Master Dataset ## 
@@ -84,4 +78,44 @@ masterData0 = left_join(pop_precip_water_gsl, landUse_yearly, by = "year", relat
 masterData = masterData0 |> 
   select(year, gsl_level, population, precipitation, water_use = use_type, total_gallons = total_use, land_use, total_acres)
 
+#------------------------------------------------------------------------------#
+## Additional cleaning with fully merged data ##
+
+masterData = as.data.table(masterData)
+
+# remove duplicates in the master dataset
+masterData = masterData |> 
+  distinct()
+
+# check structure of master dataset
+str(masterData)
+
+# look at use type categories
+unique_use_type = unique(masterData$water_use)
+unique_use_type
+
+# group similar use type categories
+masterData = masterData |> 
+  mutate(water_use = ifelse(water_use == "Irrigation", "Agricultural",
+                            ifelse(water_use %in% c("Power (Hydro-Elec)", 
+                                                    "Power (Fossil-Fuel)", 
+                                                    "Power (Geothermal)",
+                                                    "Geothermal"),
+                                   "Power", water_use))) |> 
+  # remove sewage since only has a few years of observation and small water user
+  filter(water_use != "Sewage Treatment" & year >= 1970) 
+
+# check to see if regrouping categories worked
+unique_use_type2 = unique(masterData$water_use)
+unique_use_type2
+
+# add column that calculates total water usage across all use types per year, and per capita usage per year
+masterData2 = masterData |> 
+  group_by(year) |> 
+  mutate(allUses_total = sum(total_gallons),
+         perCapita_usage = allUses_total / population) |> 
+  ungroup()
+
+#------------------------------------------------------------------------------#
+# calculate water use per capita
 save(masterData, file = "masterData.rds")
