@@ -60,6 +60,8 @@ The precipitation data was downloaded separately for each county, from which we 
 **Master Dataset**
 Before merging into a master data set, we found it best fit to aggregate all data to yearly levels. This included either taking the sum of all months (precipitation, water use), or taking the mean of all months (population, land use acreage, and GSL lake levels). We decided that month-to-month fluctuations were not as important to observe as yearly time trends. To get the data in the same observation period, we filtered out all observations before 1992, since data on a couple of significant water use types constrains us to this time period. 
 
+We log transformed water usage variables in a few situations due to right-skewed data and very significant outliers.
+
 Despite a lengthy and exhaustive cleaning process, during our explanatory stage we frequently encountered issues with our data that needed attention and further cleaning. The data seem to have significant limitations that we hope to better address as we continue with our analysis.
 
 
@@ -99,4 +101,4 @@ Here we divided total yearly water usage in the GSL Basin by the total populatio
 
 ### Bigger Picture
 
-Overall, the data show that the Great Salt Lake is showing no signs of reversing its declining, and water users in the Great Salt Lake Basin 
+Overall, the data show that the Great Salt Lake is showing no signs of reversing its decline, and water users in the Great Salt Lake Basin don't seem to be curbing their usage. The health, economic, environmental, and ecological impacts of a shrinking Great Salt Lake have already been felt and seen. Without significant behavioral and policy changes in this region, the GSL could reach irreversibly low water levels in the not-so-distant future. Our next step will be predicting when lake levels will reach these lows using what we've observed with water usage in the Great Salt Lake Basin, along with precipitation and population trends for a more accurate measure.
