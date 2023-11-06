@@ -116,6 +116,7 @@ masterData2 = masterData |>
          perCapita_usage = allUses_total / population) |> 
   ungroup()
 
+masterData = masterData2
 #------------------------------------------------------------------------------#
 # calculate water use per capita
 save(masterData, file = "masterData.rds")
