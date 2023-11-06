@@ -6,6 +6,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(knitr())
 ```
 
 # Topic and Motivation
@@ -69,13 +70,17 @@ Despite a lengthy and exhaustive cleaning process, during our explanatory stage 
 
 **Great Salt Lake Levels**
 
-![]("~/560-Project/exploratory/output/gslLevels.png")
+```{r echo=FALSE}
+include_graphics("~/560-Project/exploratory/output/gslLevels.png")
+```
 
 We plotted yearly Great Salt Lake elevations measured as feet above sea level. We also added a line at 4198 feet - this number represents the minimum water level needed to support a healthy ecosystem. Clearly, the GSL has been trending down for years now and lies well below the healthy minimum needed.
 
 **Water Use by Use Type**
 
-![]("~/560-Project/exploratory/output/waterUse_byType.png")
+```{r echo=FALSE}
+include_graphics("~/560-Project/exploratory/output/waterUse_byType.png")
+```
 
 We looked at water use trends broken down by the type of water use. Most uses show a steady but small increase over time, with agricultural uses increasing at a significantly faster rate than other uses.
 
@@ -92,13 +97,17 @@ Here we simply show the total water usage (displayed in hundreds of billions of 
 
 **Precipitation and Water Usage**
 
-![]("~/560-Project/exploratory/output/precip_waterUsage.png")
+```{r echo=FALSE}
+include_graphics("~/560-Project/exploratory/output/precip_waterUsage.png")
+```
 
 This plot shows how water use within each use type changes as precipitation in the Great Salt Lake Basin counties increases. Most uses see either no change or a small decrease in use as precipitation increases, with agricultural uses declining more significantly. This aligns with what we would expect, as agricultural practices such as irrigation may not be as necessary with higher levels of rainfall. It also shows a problematic trend the other way; in drier years, the agricultural sector increases its water usage. This, in conjunction with the lack of precipitation, could exacerbate declining lake levels.
 
 **Per Capita Water Usage**
 
-![]("~/560-Project/exploratory/output/perCapita_usage.png")
+```{r echo=FALSE}
+include_graphics("~/560-Project/exploratory/output/perCapita_usage.png")
+```
 
 Here we divided total yearly water usage in the GSL Basin by the total population of all the Basin counties in that year to obtain a measure for per capita water usage. The data show a positive relationship here, meaning that with an already fastly increasing population, water usage is increasing at an even faster rate.
 
