@@ -116,7 +116,11 @@ masterData2 = masterData |>
          perCapita_usage = allUses_total / population) |> 
   ungroup()
 
-masterData = masterData2
+# remove extreme values that are likely invalid data
+masterData3 = masterData2 |> 
+  filter(perCapita_usage < 139479780)
+
+masterData = masterData3
 #------------------------------------------------------------------------------#
 # calculate water use per capita
 save(masterData, file = "masterData.rds")

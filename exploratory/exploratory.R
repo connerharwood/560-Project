@@ -10,7 +10,7 @@ load("~/560-Project/clean-data/data/masterData.rds")
 
 # create a graph showing water usage by type over time 
 ggplot(masterData, aes(x = year, y = log(total_gallons), color = reorder(water_use, -total_gallons))) +
-  geom_line() + 
+  geom_line() +
   labs(
     title = "Log Yearly Water Usage by Use Type",
     x = "Year",  
@@ -25,20 +25,24 @@ ggplot(masterData, aes(x = year, y = log(total_gallons), color = reorder(water_u
                                 "Domestic" = "green",
                                 "Commercial" = "red"
   )) +
-  theme_minimal()
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
 
 # create a graph showing GSL levels over time 
 ggplot(masterData, aes(x = year, y = gsl_level)) + 
-  geom_line(color = "blue") + 
+  geom_line(color = "blue") +
   geom_hline(yintercept = 4198, linetype = "dashed", color = "red") +
+  geom_text(aes(x = max(year), y = 4198.5, label = "Minimum Healthy Lake Level", color = "red"), hjust = 1) +
   labs( 
     title = "Great Salt Lake Levels",
     x = "Year", 
     y = "Level in Feet") + 
-  theme_minimal()
+  theme_minimal() +
+  guides(color = "none") +
+  theme(plot.title = element_text(hjust = 0.5))
 
 # create a graph showing water usage per capita 
-ggplot(masterData, aes(x = year, y = ln_usage_per_capita)) +
+ggplot(masterData, aes(x = year, y = perCapita_usage)) +
   geom_smooth() + 
   labs( 
     title = "Water Usage Per Capita Over Time",
