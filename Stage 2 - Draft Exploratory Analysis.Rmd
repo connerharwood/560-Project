@@ -74,7 +74,7 @@ Despite a lengthy and exhaustive cleaning process, during our explanatory stage 
 include_graphics("~/560-Project/exploratory/output/agWater_GSL.png")
 ```
 
-Here we plot yearly Great Salt Lake elevations measured as feet above sea level, with yearly agricultural water usage below. We also added a line at 4198 feet - this number represents the minimum water level needed to support a healthy ecosystem. Clearly, the GSL has been trending down for years now and lies well below the healthy minimum needed.
+Here we plot yearly Great Salt Lake elevations measured as feet above sea level, with log yearly agricultural water usage below. These trends show a clear rise in agricultural water use along with a consistently declining Great Salt Lake. We also added a line at 4198 feet - this number represents the minimum water level needed to support a healthy ecosystem. The GSL continues to fall well below this important threshold, with agricultural water usage showing no signs of slowing down.
 
 **Water Use by Use Type**
 
@@ -98,5 +98,8 @@ This plot shows how water use within each use type changes as precipitation in t
 include_graphics("~/560-Project/exploratory/output/perCapita_usage.png")
 ```
 
-Here we divided total yearly water usage in the GSL Basin by the total population of all the Basin counties in that year to obtain a measure for per capita water usage. The data show a positive relationship here, meaning that with an already fastly increasing population, water usage is increasing at an even faster rate.
+Here we divided total yearly water usage in the GSL Basin by the total population of all the Basin counties in that year to obtain a measure for per capita water usage. The data show a positive relationship here, meaning that with an already sharply increasing population, water usage is increasing at an even faster rate.
 
+### Bigger Picture
+
+Overall, the data show that the Great Salt Lake is showing no signs of reversing its declining, and water users in the Great Salt Lake Basin 
