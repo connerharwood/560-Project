@@ -60,9 +60,45 @@ We downloaded this data from FRED for our specific counties of interest, and it 
 The precipitation data was downloaded separately for each county, from which we then cleaned the date values and added a county variable for each county. That data was then appended into one dataset, and we did a few checks of the data before finalizing it. Overall not much cleaning was needed here.
 
 **Master Dataset**
-To start merging the data into one master dataset, we started with the water use and GSL levels data, and merged these by year and month, since we wanted the average GSL level value for a given year and month. This dataset was then merged with the precipitation data by year, month, and county. To get all the data on the same time scale, we filtered out all observations before 1966, since the Great Lake levels data constrains us to this.
+To start merging the data into one master dataset, we started by merging the water use data with the GSL levels and precipitation data. We then merged this with the aggregated land use data. To get all the data on the same time scale, we filtered out all observations before 1992, since data on a couple of significant water use types constrains us to this.
 
-We did not merge the land use data with the master dataset. This data is only at the yearly, not monthly, level, and since for much of our analysis we wanted to look at monthly changes, we kept it separate. We may still end up using this data for the econometric analysis (though we are still undecided exactly how we might use it), and did perform some exploratory analysis with it. If we decide to use the water-related land use data in our econometric analysis, we'll be constrained to 1986 and after since that is when this data begins.
+Despite a lengthy and exhaustive cleaning process, during our explanatory stage we frequently encountered issues with our data that needed attention and further cleaning. The data seem to have significant limitations that we hope to better address as we continue with our analyis.
 
 
 # Exploratory Analysis
+
+**Great Salt Lake Levels**
+
+![]("~/560-Project/exploratory/output/gslLevels.png")
+
+We plotted yearly Great Salt Lake elevations measured as feet above sea level. We also added a line at 4198 feet - this number represents the minimum water level needed to support a healthy ecosystem. Clearly, the GSL has been trending down for years now and lies well below the healthy minimum needed.
+
+**Water Use by Use Type**
+
+![]("~/560-Project/exploratory/output/waterUse_byType.png")
+
+We looked at water use trends broken down by the type of water use. Most uses show a steady but small increase over time, with agricultural uses increasing at a significantly faster rate than other uses.
+
+**Total Water Usage by Each Use Type**
+
+```{r echo=FALSE}
+library(pander)
+library(knitr)
+load("~/560-Project/exploratory/output/useType_totals.rds")
+pandoc.table(useType_totals, style = "rmarkdown")
+```
+
+Here we simply show the total water usage (displayed in hundreds of billions of gallons) per each water use type in the data.
+
+**Precipitation and Water Usage**
+
+![]("~/560-Project/exploratory/output/precip_waterUsage.png")
+
+This plot shows how water use within each use type changes as precipitation in the Great Salt Lake Basin counties increases. Most uses see either no change or a small decrease in use as precipitation increases, with agricultural uses declining more significantly. This aligns with what we would expect, as agricultural practices such as irrigation may not be as necessary with higher levels of rainfall. It also shows a problematic trend the other way; in drier years, the agricultural sector increases its water usage. This, in conjunction with the lack of precipitation, could exacerbate declining lake levels.
+
+**Per Capita Water Usage**
+
+![]("~/560-Project/exploratory/output/perCapita_usage.png")
+
+Here we divided total yearly water usage in the GSL Basin by the total population of all the Basin counties in that year to obtain a measure for per capita water usage. The data show a positive relationship here, meaning that with an already fastly increasing population, water usage is increasing at an even faster rate.
+

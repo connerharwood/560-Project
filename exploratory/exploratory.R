@@ -14,7 +14,8 @@ load("~/560-Project/clean-data/data/masterData.rds")
 useType_totals = masterData |> 
   group_by(water_use) |> 
   summarize("Total Gallons in Hundreds of Billions" = sum(total_gallons) / 100000000000) |> 
-  rename("Water Use Type" = water_use)
+  rename("Water Use Type" = water_use) |> 
+  arrange(desc(`Total Gallons in Hundreds of Billions`))
 
 # save data table as .rds file to put in R Markdown
 save(useType_totals, file = "useType_totals.rds")
