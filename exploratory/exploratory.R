@@ -147,9 +147,9 @@ plot_gsl_levels = ggplot(agWater_GSL, aes(x = year, y = gsl_level)) +
   scale_color_manual(values = c("blue" = "blue"))
 
 # create a plot showing agricultural water usage 
-plot_ag_water_usage = ggplot(agWater_GSL, aes(x = year, y = yearly_usage / 1000000000)) +
+plot_ag_water_usage = ggplot(agWater_GSL, aes(x = year, y = log(yearly_usage))) +
   geom_smooth(color = "pink", se = FALSE, span = 0.1) +
-  labs(y = "Ag Water Use (Billions of Gallons)", 
+  labs(y = "Log Ag Water Use", 
        x = "Year") +
   theme_minimal()
 
@@ -165,3 +165,4 @@ print(plot6)
 
 # save plot as .png file
 ggsave("agWater_GSL.png", plot = plot6)
+
