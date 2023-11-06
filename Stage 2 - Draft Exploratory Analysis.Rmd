@@ -79,7 +79,7 @@ Here we plot yearly Great Salt Lake elevations measured as feet above sea level,
 include_graphics("~/560-Project/exploratory/output/waterUse_byType.png")
 ```
 
-We looked at water use trends broken down by the type of water use. Most uses show a steady but small increase over time, with agricultural uses increasing at a significantly faster rate than other uses.
+We looked at water use trends broken down by the type of water use. Most uses show a steady but small increase over time, with agricultural uses increasing at a significantly faster rate than other uses. Water suppliers, industrial, and mining water uses have remained high with little fluctuations across years. However, we find that agricultural recently overtook mining in water usage. If the upward trend continues, agriculture will become an even more significant water user in the Great Salt Lake basin. 
 
 **Precipitation and Water Usage**
 
