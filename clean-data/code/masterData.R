@@ -47,23 +47,17 @@ waterUse_ag = waterUse_clean |>
 
 # aggregate water use data to yearly total per water use type
 waterUse_yearly = waterUse_clean |> 
-<<<<<<< HEAD
   select(year, use_type, year_gallons)
-=======
->>>>>>> e5ca1ff54092e5d4b16745ea5b50f88339dec009
   group_by(year, use_type) |> 
   summarize(total_use = sum(year_gallons))
 
 # aggregate land use data to yearly total across counties
 landUse_yearly = landUse_clean |> 
-<<<<<<< HEAD
   group_by(land_use, year) |> 
   summarize(total_acres = sum(acres)) |> 
   mutate(land_use = ifelse(land_use == "AGRICULTURAL", "AG", land_use))
-=======
   group_by(year, land_use) |> 
   summarize(total_acres = sum(acres))
->>>>>>> e5ca1ff54092e5d4b16745ea5b50f88339dec009
 
 #------------------------------------------------------------------------------#
 ## Merge to Master Dataset ## 
