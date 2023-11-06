@@ -10,7 +10,7 @@ load("~/560-Project/clean-data/data/masterData.rds")
 
 # create a graph showing water usage by type over time 
 ggplot(masterData, aes(x = year, y = log(total_gallons), color = reorder(water_use, -total_gallons))) +
-  geom_smooth(se = FALSE, span = 0.085, size = 0.5) +
+  geom_smooth(se = FALSE, span = 0.09, size = 0.5) +
   labs(
     title = "Log Yearly Water Usage by Use Type",
     x = "Year",  

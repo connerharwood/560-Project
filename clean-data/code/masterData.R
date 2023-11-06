@@ -120,16 +120,16 @@ min_mining
 
 # look at when power use type data starts
 powerYears = masterData3 |> 
-  filter(water_use == "Power")
-min_power = min(powerYears$year)
-min_power
+  filter(water_use == "Power") |> 
+  arrange(year)
 
 # After observing the data, we noticed that mining and power use types did not have data until later years,
-# so we checked which year this data started and filter out all years before that below
+# so we checked which year this data started to filter out all years before that
+# It turns out the power date starts in 1987, but is missing 1988-1991, so we filter out years before 1992 below
 
-# filter out years before 1988
+# filter out years before 1992
 masterData4 = masterData3 |> 
-  filter(year >= 1988)
+  filter(year >= 1992)
 
 masterData = masterData4
 #------------------------------------------------------------------------------#
