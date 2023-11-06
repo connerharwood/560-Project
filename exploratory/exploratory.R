@@ -134,7 +134,7 @@ plot_gsl_levels = ggplot(agWater_GSL, aes(x = year, y = gsl_level)) +
        title = "Agricultural Water Use and GSL Levels" 
        ) +
   geom_hline(yintercept = 4198, linetype = "dashed", color = "blue") +
-  geom_text(aes(x = max(year), y = 4198.5, label = "Minimum Healthy Lake Level", color = "blue"), hjust = 1, size = 3) +
+  geom_text(aes(x = max(year), y = 4198.5, label = "Minimum Healthy Level = 4198", color = "blue"), hjust = 1, size = 3) +
   guides(color = "none") +
   theme_minimal() +
   # remove x-axis since irrelevant 
