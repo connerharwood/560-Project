@@ -10,7 +10,7 @@ load("~/560-Project/clean-data/data/masterData.rds")
 
 # create a graph showing water usage by type over time 
 ggplot(masterData, aes(x = year, y = log(total_gallons), color = reorder(water_use, -total_gallons))) +
-  geom_line() +
+  geom_smooth(se = FALSE, span = 0.085, size = 0.5) +
   labs(
     title = "Log Yearly Water Usage by Use Type",
     x = "Year",  
@@ -42,8 +42,8 @@ ggplot(masterData, aes(x = year, y = gsl_level)) +
   theme(plot.title = element_text(hjust = 0.5))
 
 # create a graph showing water usage per capita 
-ggplot(masterData, aes(x = year, y = perCapita_usage)) +
-  geom_smooth() + 
+ggplot(masterData, aes(x = year, y = perCapita_usage / 1000)) +
+  geom_smooth() +
   labs( 
     title = "Water Usage Per Capita Over Time",
     x = "Year", 
@@ -51,9 +51,8 @@ ggplot(masterData, aes(x = year, y = perCapita_usage)) +
   theme_minimal()
 
 # create a scatterplot showing precipitation and water usage 
-ggplot(masterData, aes(x = precipitation, y = log(total_gallons))) + 
-  geom_point() + 
-  geom_smooth(method = "lm") + 
+ggplot(masterData, aes(x = precipitation, y = log(total_gallons), color = water_use)) + 
+  geom_smooth(se = FALSE) + 
   labs( 
     title = "Yearly Total Precipitation vs. Log Yearly Water Usage",
     x = "Total Precipitation in Inches", 

@@ -39,15 +39,9 @@ precipitation = precipitation |>
   group_by(year) |> 
   summarize(precipitation = mean(year_total))
 
-waterUse_ag = waterUse_clean |> 
-  filter(use_type == "Agricultural") |> 
-  group_by(year) |> 
-  summarize(tot = sum(year_gallons)) |> 
-  mutate(log_tot = log(tot))
-
 # aggregate water use data to yearly total per water use type
 waterUse_yearly = waterUse_clean |> 
-  select(year, use_type, year_gallons)
+  select(year, use_type, year_gallons) |> 
   group_by(year, use_type) |> 
   summarize(total_use = sum(year_gallons))
 
@@ -55,9 +49,7 @@ waterUse_yearly = waterUse_clean |>
 landUse_yearly = landUse_clean |> 
   group_by(land_use, year) |> 
   summarize(total_acres = sum(acres)) |> 
-  mutate(land_use = ifelse(land_use == "AGRICULTURAL", "AG", land_use)) |> 
-  group_by(year, land_use) |> 
-  summarize(total_acres = sum(acres))
+  mutate(land_use = ifelse(land_use == "AGRICULTURAL", "AG", land_use))
 
 #------------------------------------------------------------------------------#
 ## Merge to Master Dataset ## 
@@ -119,6 +111,25 @@ masterData2 = masterData |>
 # remove extreme values that are likely invalid data
 masterData3 = masterData2 |> 
   filter(perCapita_usage < 139479780)
+
+# look at when mining use type data starts
+miningYears = masterData3 |> 
+  filter(water_use == "Mining")
+min_mining = min(miningYears$year)
+min_mining
+
+# look at when power use type data starts
+powerYears = masterData3 |> 
+  filter(water_use == "Power")
+min_power = min(powerYears$year)
+min_power
+
+# After observing the data, we noticed that mining and power use types did not have data until later years,
+# so we checked which year this data started and filter out all years before that below
+
+# filter out years before 1988
+masterData4 = masterData3 |> 
+  filter(year >= 1988)
 
 masterData = masterData3
 #------------------------------------------------------------------------------#
