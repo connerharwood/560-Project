@@ -131,7 +131,7 @@ min_power
 masterData4 = masterData3 |> 
   filter(year >= 1988)
 
-masterData = masterData3
+masterData = masterData4
 #------------------------------------------------------------------------------#
 # calculate water use per capita
 save(masterData, file = "masterData.rds")
