@@ -335,3 +335,12 @@ industrial = waterUse_yearly |>
 
 water_supplier = waterUse_yearly |> 
   filter(use_type == "Water Supplier")
+
+water_supplier_outlier2006 = waterUse_ignore |> 
+  filter(year == 2006 & use_type == "Water Supplier")
+
+water_supplier_outlier2014 = waterUse_ignore |> 
+  filter(year == 2014 & use_type == "Water Supplier")
+
+industrial_outlier = waterUse_ignore |> 
+  filter(year == 2015 & use_type == "Industrial")
