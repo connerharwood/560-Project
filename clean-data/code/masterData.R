@@ -1,97 +1,64 @@
 library(dplyr)
 library(tidyverse)
+library(data.table)
 
 load("~/560-Project/clean-data/data/waterUse_clean.rds")
 load("~/560-Project/clean-data/data/gsl_clean.rds")
 load("~/560-Project/clean-data/data/precip_clean.rds")
-load("~/560-Project/clean-data/data/landUse_clean.rds")
 load("~/560-Project/clean-data/data/countyPopulations_clean.rds")
 
 #------------------------------------------------------------------------------#
-## Prepare data for merging by aggregating to yearly level ## 
+# merge ----
 
-# forgot to convert year in land use dataset to numeric, so doing that here
-landUse_clean = landUse_clean |> 
-  mutate(year = as.numeric(year))
+# merge water use and precipitation data
+merge1 = left_join(waterUse_clean, precip_clean, by = c("year", "month", "county"), relationship = "many-to-one")
 
-# aggregate great salt lake levels to yearly average 
-gsl = gsl |> 
-  group_by(year) |> 
-  summarize(gsl_level = mean(level),
-            gsl_volume = mean(volume_m3))
+# merge water use and precipitation data with GSL data
+merge2 = left_join(merge1, gsl, by = c("year", "month"), relationship = "many-to-one")
 
-# create a new dataset with total population across counties 
-population = countyPopulations |> 
-  mutate(population = population_thousands*1000) |> 
-  group_by(year) |> 
-  summarize(population = sum(population))
+# merge water use, precipitation, and GSL data with population data
+merge3 = left_join(merge2, countyPopulations, by = c("year", "county"), relationship = "many-to-one")
 
-# create a new data set with yearly precipitation data for each county
-precipitation = precip_clean |> 
-  group_by(year, county) |> 
-  mutate(year_total = sum(precip_in))
+# change merge3 to data table
+merge3 = as.data.table(merge3)
 
-# calculate yearly precipitation data for all counties
-precipitation = precipitation |> 
-  group_by(year) |> 
-  summarize(precipitation = mean(year_total))
-
-# aggregate water use data to yearly total per water use type
-waterUse_yearly = waterUse_clean |> 
-  select(year, use_type, year_gallons) |> 
-  group_by(year, use_type) |> 
-  summarize(total_use = sum(year_gallons))
-
-# aggregate land use data to yearly total across counties
-landUse_yearly = landUse_clean |> 
-  group_by(land_use, year) |> 
-  summarize(total_acres = sum(acres)) |> 
-  mutate(land_use = ifelse(land_use == "AGRICULTURAL", "AG", land_use))
-
-#------------------------------------------------------------------------------#
-## Merge to Master Dataset ## 
-
-# merge water use data with GSL data by year
-water_gsl = left_join(waterUse_yearly, gsl, by = "year", relationship = "many-to-one")
-
-# merge water use and GSL levels data with precipitation data by year
-precip_water_gsl = left_join(water_gsl, precipitation, by = "year", relationship = "many-to-one")
-
-# merge water use, GSL levels, precipitation, and population data by year 
-pop_precip_water_gsl = left_join(precip_water_gsl, population, by = "year", relationship = "many-to-one")
-
-# merge water use, GSL levels, precipitation, population, and land use data by year 
-masterData0 = left_join(pop_precip_water_gsl, landUse_yearly, by = "year", relationship = "many-to-many")
-
-# reorder and rename some variables
-masterData = masterData0 |> 
+# select, reorder, and rename relevant variables
+merged = merge3 |> 
   select(
-    year, 
-    gsl_level, 
-    gsl_volume, 
-    population, 
-    precipitation, 
-    water_use = use_type, 
-    total_gallons = total_use, 
-    land_use, 
-    total_acres
-    )
+    key,
+    system_id,
+    system_name,
+    system_type,
+    county,
+    latitude,
+    longitude,
+    year,
+    month,
+    use_type,
+    source_type,
+    diversion_type,
+    month_use = month_gallons,
+    year_use = year_gallons,
+    gsl_level_ft = level,
+    gsl_volume_m3 = volume_m3,
+    precip_in,
+    population_thousands
+  )
 
 #------------------------------------------------------------------------------#
-## Additional cleaning with fully merged data ##
+# additional cleaning ----
 
-masterData = as.data.table(masterData)
-
-# remove duplicates in the master dataset
-masterData = masterData |> 
+unique(merged$use_type)
+# remove duplicates
+merged2 = merged |> 
+  select(-key) |> 
   distinct()
 
-# check structure of master dataset
-str(masterData)
 
-# look at use type categories
-unique_use_type = unique(masterData$water_use)
-unique_use_type
+
+save(masterData, file = "masterData.rds")
+
+#------------------------------------------------------------------------------#
 
 # group similar use type categories
 masterData = masterData |> 
@@ -137,8 +104,3 @@ powerYears = masterData3 |>
 # filter out years before 1992
 masterData4 = masterData3 |> 
   filter(year >= 1992)
-
-masterData = masterData4
-#------------------------------------------------------------------------------#
-# calculate water use per capita
-save(masterData, file = "masterData.rds")

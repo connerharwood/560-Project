@@ -3,37 +3,37 @@ library(tidyverse)
 library(skimr)
 library(lubridate)
 
-load("~/560-Project/raw-data/data/rawData.rda")
+load("~/560-Project/raw-data/data/raw_data.rda")
 
 # select and rename variables of interest for North Arm of GSL
-GSL_northLevels_clean = GSL_northLevels |> 
+gsl_north_levels_clean = gsl_north_levels |> 
   select(date = Date, north_levels = X_62614_00003) |> 
   separate(date, into = c("year", "month", "day"))
 
 # select and rename variables of interest for South Arm of GSL
-GSL_southLevels_clean = GSL_southLevels |>
+gsl_south_levels_clean = gsl_south_levels |>
   select(date = Date, south_levels = X_62614_00003) |> 
   separate(date, into = c("year", "month", "day"))
 
 # look at data structure
-str(GSL_northLevels_clean)
-str(GSL_southLevels_clean)
+str(gsl_north_levels_clean)
+str(gsl_south_levels_clean)
 
 # check duplicates
-GSL_northLevels_clean |> 
+gsl_north_levels_clean |> 
   n_distinct()
 
 # check duplicates
-GSL_southLevels_clean |> 
+gsl_south_levels_clean |> 
   n_distinct()
 
 ## No duplicates in either ##
 
 # check missing values in North Arm
-skim(GSL_northLevels_clean)
+skim(gsl_north_levels_clean)
 
 # check missing values in South Arm
-skim(GSL_southLevels_clean)
+skim(gsl_south_levels_clean)
 
 ## No missing values in either ##
 
@@ -41,29 +41,29 @@ skim(GSL_southLevels_clean)
 all_years = 1966:2023
 
 # missing years in North Arm
-GSL_northLevels_years = unique(GSL_northLevels_clean$year)
-missing_GSL_northLevels_year = setdiff(all_years, GSL_northLevels_years)
-print(missing_GSL_northLevels_year)
+gsl_north_levels_years = unique(gsl_north_levels_clean$year)
+missing_gsl_north_levels_year = setdiff(all_years, gsl_north_levels_years)
+print(missing_gsl_north_levels_year)
 
 # missing years in South Arm
-GSL_southLevels_years = unique(GSL_southLevels_clean$year)
-missing_GSL_southLevels_year = setdiff(all_years, GSL_southLevels_years)
-print(missing_GSL_southLevels_year)
+gsl_south_levels_years = unique(gsl_south_levels_clean$year)
+missing_gsl_south_levels_year = setdiff(all_years, gsl_south_levels_years)
+print(missing_gsl_south_levels_year)
 
 ## No missing years in either ##
 
 # calculate average monthly levels for each year in North Arm
-GSL_northLevels_monthly = GSL_northLevels_clean |> 
+gsl_north_levels_monthly = gsl_north_levels_clean |> 
   group_by(year, month) |> 
   summarize(north_levels = mean(north_levels))
 
 # calculate average monthly levels for each year in South Arm
-GSL_southLevels_monthly = GSL_southLevels_clean |> 
+gsl_south_levels_monthly = gsl_south_levels_clean |> 
   group_by(year, month) |> 
   summarize(south_levels = mean(south_levels))
 
 # merge North and South levels
-gsl_levels = merge(GSL_northLevels_monthly, GSL_southLevels_monthly, by = c("year", "month"))
+gsl_levels = merge(gsl_north_levels_monthly, gsl_south_levels_monthly, by = c("year", "month"))
 
 ## February 1967 not an observation in merged dataset ##
 
@@ -77,10 +77,15 @@ gsl_levels = gsl_levels |>
 gsl_levels$month = month.abb[as.integer(gsl_levels$month)]
 
 # load GSL volume data
-load("~/560-Project/raw-data/data/gslVolume_raw.rds")
+load("~/560-Project/raw-data/data/gsl_volume_raw.rds")
+
+# select relevant variables
+gsl_volume = gsl_volume_raw |> 
+  select(date = Date,
+         volume_m3 = Total_vol_m3)
 
 # separate date column into year and month columns for merge, reorder
-gsl_volume = gsl_volume_raw |> 
+gsl_volume = gsl_volume |> 
   mutate(
     year = year(date),
     month = month(date)
