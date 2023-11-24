@@ -3,7 +3,10 @@ library(tidyverse)
 library(skimr)
 library(lubridate)
 
-load("~/560-Project/raw-data/data/raw_data.rda")
+load("~/560-Project/raw-data/data/gsl_raw.rda")
+
+#------------------------------------------------------------------------------#
+# levels data ----
 
 # select and rename variables of interest for North Arm of GSL
 gsl_north_levels_clean = gsl_north_levels |> 
@@ -76,8 +79,8 @@ gsl_levels = gsl_levels |>
 # convert month numbers to character month names
 gsl_levels$month = month.abb[as.integer(gsl_levels$month)]
 
-# load GSL volume data
-load("~/560-Project/raw-data/data/gsl_volume_raw.rds")
+#------------------------------------------------------------------------------#
+# volume data ----
 
 # select relevant variables
 gsl_volume = gsl_volume_raw |> 
@@ -102,6 +105,7 @@ gsl_merged = left_join(gsl_levels, gsl_volume, by = c("year", "month"), relation
 gsl_merged = na.omit(gsl_merged)
 
 # rename
-gsl = gsl_merged
+gsl_clean = gsl_merged
 
-save(gsl, file = "gsl_clean.rds")
+# save as .rds file
+save(gsl_clean, file = "gsl_clean.rds")

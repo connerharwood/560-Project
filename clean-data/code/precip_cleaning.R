@@ -2,8 +2,10 @@ library(dplyr)
 library(tidyverse)
 library(skimr)
 
+load("~/560-Project/raw-data/data/precip_raw.rda")
+
 # rename and add columns in Box Elder precip data 
-boxElder = precip_boxElder |>
+boxelder = precip_boxelder |>
   mutate(year = substr(Date, 1, 4),
          month = substr(Date, 5, 6),
          county = "Box Elder") |>
@@ -43,7 +45,7 @@ rich = precip_rich |>
   rename(precipitation = Value)
 
 # rename and add columns in Salt Lake precip data 
-saltLake = precip_saltLake |>
+saltlake = precip_saltlake |>
   mutate(year = substr(Date, 1, 4),
          month = substr(Date, 5, 6),
          county = "Salt Lake") |>
@@ -75,7 +77,7 @@ weber = precip_weber |>
   rename(precipitation = Value)
 
 # append data sets  
-precip = rbind(boxElder, cache, davis, morgan, rich, saltLake, tooele, utah, weber)
+precip = rbind(boxelder, cache, davis, morgan, rich, saltlake, tooele, utah, weber)
 
 # check structure of precip and missing values
 skim(precip)
@@ -107,4 +109,3 @@ print(missing_years)
 # save precip data 
 precip_clean = precip 
 save(precip_clean, file = "precip_clean.rds")
-
