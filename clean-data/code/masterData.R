@@ -2,7 +2,7 @@ library(dplyr)
 library(tidyverse)
 
 load("~/560-Project/clean-data/data/waterUse_clean.rds")
-load("~/560-Project/clean-data/data/gsl_levels_clean.rds")
+load("~/560-Project/clean-data/data/gsl_clean.rds")
 load("~/560-Project/clean-data/data/precip_clean.rds")
 load("~/560-Project/clean-data/data/landUse_clean.rds")
 load("~/560-Project/clean-data/data/countyPopulations_clean.rds")
@@ -10,18 +10,15 @@ load("~/560-Project/clean-data/data/countyPopulations_clean.rds")
 #------------------------------------------------------------------------------#
 ## Prepare data for merging by aggregating to yearly level ## 
 
-# forgot to convert year in gsl level dataset to numeric, so doing that here
-gsl_levels = gsl_levels |> 
-  mutate(year = as.numeric(year))
-
 # forgot to convert year in land use dataset to numeric, so doing that here
 landUse_clean = landUse_clean |> 
   mutate(year = as.numeric(year))
 
 # aggregate great salt lake levels to yearly average 
-gsl_levels = gsl_levels |> 
+gsl = gsl |> 
   group_by(year) |> 
-  summarize(gsl_level = mean(level))
+  summarize(gsl_level = mean(level),
+            gsl_volume = mean(volume_m3))
 
 # create a new dataset with total population across counties 
 population = countyPopulations |> 
@@ -54,8 +51,8 @@ landUse_yearly = landUse_clean |>
 #------------------------------------------------------------------------------#
 ## Merge to Master Dataset ## 
 
-# merge water use data with GSL levels data by year
-water_gsl = left_join(waterUse_yearly, gsl_levels, by = "year", relationship = "many-to-one")
+# merge water use data with GSL data by year
+water_gsl = left_join(waterUse_yearly, gsl, by = "year", relationship = "many-to-one")
 
 # merge water use and GSL levels data with precipitation data by year
 precip_water_gsl = left_join(water_gsl, precipitation, by = "year", relationship = "many-to-one")
@@ -68,7 +65,17 @@ masterData0 = left_join(pop_precip_water_gsl, landUse_yearly, by = "year", relat
 
 # reorder and rename some variables
 masterData = masterData0 |> 
-  select(year, gsl_level, population, precipitation, water_use = use_type, total_gallons = total_use, land_use, total_acres)
+  select(
+    year, 
+    gsl_level, 
+    gsl_volume, 
+    population, 
+    precipitation, 
+    water_use = use_type, 
+    total_gallons = total_use, 
+    land_use, 
+    total_acres
+    )
 
 #------------------------------------------------------------------------------#
 ## Additional cleaning with fully merged data ##

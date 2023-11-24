@@ -1,6 +1,7 @@
 library(dplyr)
-library(tidyr)
+library(tidyverse)
 library(skimr)
+library(lubridate)
 
 load("~/560-Project/raw-data/data/rawData.rda")
 
@@ -68,10 +69,34 @@ gsl_levels = merge(GSL_northLevels_monthly, GSL_southLevels_monthly, by = c("yea
 
 # calculate average between North and South levels for each month, drop North and South levels
 gsl_levels = gsl_levels |> 
-  mutate(level = (north_levels + south_levels) / 2) |> 
+  mutate(level = (north_levels + south_levels) / 2,
+         year = as.numeric(year)) |> 
   select(-north_levels, -south_levels)
 
 # convert month numbers to character month names
 gsl_levels$month = month.abb[as.integer(gsl_levels$month)]
 
-save(gsl_levels, file = "gsl_levels_clean.rds")
+# load GSL volume data
+load("~/560-Project/raw-data/data/gslVolume_raw.rds")
+
+# separate date column into year and month columns for merge, reorder
+gsl_volume = gsl_volume_raw |> 
+  mutate(
+    year = year(date),
+    month = month(date)
+  ) |> 
+  select(year, month, volume_m3)
+
+# convert month numbers to character month names
+gsl_volume$month = month.abb[as.integer(gsl_volume$month)]
+
+# merge volume data with levels data
+gsl_merged = left_join(gsl_levels, gsl_volume, by = c("year", "month"), relationship = "one-to-one")
+
+# drop missing month of October 2023
+gsl_merged = na.omit(gsl_merged)
+
+# rename
+gsl = gsl_merged
+
+save(gsl, file = "gsl_clean.rds")
