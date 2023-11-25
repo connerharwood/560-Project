@@ -2,28 +2,28 @@ library(dplyr)
 library(tidyverse)
 library(data.table)
 
-load("~/560-Project/clean-data/data/waterUse_clean.rds")
+load("~/560-Project/clean-data/data/wateruse_clean.rds")
 load("~/560-Project/clean-data/data/gsl_clean.rds")
 load("~/560-Project/clean-data/data/precip_clean.rds")
-load("~/560-Project/clean-data/data/countyPopulations_clean.rds")
+load("~/560-Project/clean-data/data/population_clean.rds")
 
 #------------------------------------------------------------------------------#
 # merge ----
 
 # merge water use and precipitation data
-merge1 = left_join(waterUse_clean, precip_clean, by = c("year", "month", "county"), relationship = "many-to-one")
+merge1 = left_join(wateruse_clean, precip_clean, by = c("year", "month", "county"), relationship = "many-to-one")
 
 # merge water use and precipitation data with GSL data
-merge2 = left_join(merge1, gsl, by = c("year", "month"), relationship = "many-to-one")
+merge2 = left_join(merge1, gsl_clean, by = c("year", "month"), relationship = "many-to-one")
 
 # merge water use, precipitation, and GSL data with population data
-merge3 = left_join(merge2, countyPopulations, by = c("year", "county"), relationship = "many-to-one")
+merge3 = left_join(merge2, population_clean, by = c("year", "county"), relationship = "many-to-one")
 
 # change merge3 to data table
 merge3 = as.data.table(merge3)
 
 # select, reorder, and rename relevant variables
-merged = merge3 |> 
+merged1 = merge3 |> 
   select(
     key,
     system_id,
@@ -48,15 +48,32 @@ merged = merge3 |>
 #------------------------------------------------------------------------------#
 # additional cleaning ----
 
-unique(merged$use_type)
+unique(merged1$use_type)
+
 # remove duplicates
-merged2 = merged |> 
+merged2 = merged1 |> 
   select(-key) |> 
-  distinct()
+  distinct() |> 
+  mutate(
+    key = row_number()) |> 
+  relocate(
+    key, .before = system_id)
 
+merged3 = merged2 |> 
+  mutate(
+    use_type = ifelse(
+      use_type %in% c("Power (Hydro-Elec)", 
+                      "Power (Fossil-Fuel)", 
+                      "Power (Geothermal)",
+                      "Geothermal"), 
+      "Power", use_type))
 
+master_data = merged3
 
-save(masterData, file = "masterData.rds")
+#------------------------------------------------------------------------------#
+# save master dataset ----
+
+save(master_data, file = "master_data.rds")
 
 #------------------------------------------------------------------------------#
 
