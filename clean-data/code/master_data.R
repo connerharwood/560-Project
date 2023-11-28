@@ -121,3 +121,6 @@ powerYears = masterData3 |>
 # filter out years before 1992
 masterData4 = masterData3 |> 
   filter(year >= 1992)
+
+distinct_coords = master_data |> 
+  distinct(latitude, longitude)
