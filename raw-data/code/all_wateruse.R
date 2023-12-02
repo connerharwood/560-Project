@@ -3,6 +3,7 @@ library(tidyverse)
 library(readxl)
 library(skimr)
 library(sf)
+library(sp)
 
 setwd("~/OneDrive - Montana State University/Data Analytics Project Backup/Original Data Files")
 
@@ -208,42 +209,8 @@ gsl_basin = st_read("~/560-Project/geospatial/gsl basin/GSLSubbasins.shp")
 
 gsl_basin = st_transform(gsl_basin, crs = st_crs("+proj=longlat +datum=WGS84"))
 
-# convert water use data to sf object
-wateruse_sf = st_as_sf(wateruse_merged, coords = c("latitude", "longitude"), crs = st_crs(gsl_basin))
+# Convert water use data to sf object
+wateruse_sf <- st_as_sf(wateruse_merged, coords = c("longitude", "latitude"), crs = st_crs(gsl_basin))
 
-wateruse_sf = st_simplify(wateruse_sf, preserveTopology = TRUE)
-gsl_basin = st_simplify(gsl_basin, preserveTopology = TRUE)
-
-
-intersection_data = st_intersection(wateruse_sf, gsl_basin)
-
-# Make sure they have the same CRS before proceeding
-wateruse_sf = st_transform(wateruse_sf, st_crs(gsl_basin))
-
-# Perform a spatial join
-joined_data = st_join(wateruse_sf, gsl_basin, join = st_within)
-
-# Filter wateruse_sf to include only the joined observations
-wateruse_sf_filtered = wateruse_sf[joined_data$gsl_basin_ID, ]
-
-# Now, wateruse_sf_filtered contains only the observations within gsl_basin
-
-
-
-within_basin = wateruse_sf |> 
-  mutate(
-    intersection = as.integer(st_intersects(geometry, gsl_basin)),
-    area = if_else(is.na(intersection), '', as.character(gsl_basin$geometry[intersection]))
-  )
-
-# check CRS
-st_crs(wateruse_sf)
-
-# Get logical matrix indicating points within the Great Salt Lake Basin
-within_basin_logical_matrix = st_within(wateruse_sf, gsl_basin, sparse = FALSE)
-
-# Use apply to collapse the matrix into a vector
-within_basin_logical = apply(within_basin_logical_matrix, 1, any)
-
-# Subset the original dataset using the logical vector
-within_basin = wateruse_sf[within_basin_logical, ]
+# Perform intersection to find points within the basin
+within_basin <- st_intersection(wateruse_sf, gsl_basin)
