@@ -5,19 +5,7 @@ library(skimr)
 load("~/560-Project/raw-data/data/wateruse_raw.rda")
 
 #------------------------------------------------------------------------------#
-
-## Data cleaning checklist ##
-
-# 1: Convert file formats
-# Already done
-
-# 2: Import data and wrangle into a tidy layout
-# Completely did not realize it needed to be converted to long format til after going through the cleaning steps,
-# so did this at a later step
-
-#------------------------------------------------------------------------------#
-
-# 3: Remove irrelevant, garbage, or empty rows and columns
+# Step 3: Remove irrelevant, garbage, or empty rows and columns ----
 
 # select & rename relevant variables from wateruse_raw
 wateruse3 = wateruse_raw |> 
@@ -53,13 +41,7 @@ which(nrow(is.na(wateruse_info3) | wateruse_info3 == "") == ncol(wateruse_info3)
 which(ncol(is.na(wateruse_info3) | wateruse_info3 == "") == nrow(wateruse_info3))
 
 #------------------------------------------------------------------------------#
-
-# 4: Identify the primary key, or define a surrogate key
-# Not necessary at this stage, might do after merging the two dataframes
-
-#------------------------------------------------------------------------------#
-
-# 5: Resolve duplicates
+# Step 5: Resolve duplicates ----
 
 # unique combination of certain variables to identify duplicates in wateruse3
 wateruse3 |> 
@@ -80,16 +62,7 @@ wateruse_info3 |>
 # Duplicates in wateruse_info3 won't matter since we're just merging with wateruse to get county info
 
 #------------------------------------------------------------------------------#
-
-# 6: Understand the definition, origin, and units of each variable
-# Most are self explanatory
-# All water usage expressed in gallons
-
-# 7: Rename variables as necessary
-# Already did
-
-#------------------------------------------------------------------------------#
-# 8: Understand patterns of missing values
+# Step 8: Understand patterns of missing values ----
 
 # explore waterUse data
 skim(wateruse3)
@@ -156,32 +129,14 @@ monthly_zeros = wateruse8 |>
            Oct == 0 &
            Nov == 0 &
            Dec == 0)
-# Going into the Utah water use database to look at some specific water rights users appear in monthly_zeros,
+# Going into the Utah water use database to look at some specific water rights users that appear in monthly_zeros,
 # it looks like there simply wasn't monthly data recorded, but for some there is a total recorded
 # This is mostly with older years and is most likely just a lack of data recorded, so we'll assume the
 # yearly usage values are correct and either keep the monthly usage equal to zero, or perhaps take the yearly
 # usage number for that observation and assign to each month the monthly average (total use / 12)
 
 #------------------------------------------------------------------------------#
-
-# 9: Convert to numeric
-# Variables already in correct class
-
-# 10: Convert to date/time
-# Not necessary/applicable
-
-# 11: Recode binary variables
-# No binary variables
-
-# 12: Convert to factors
-# Not necessary at the moment
-
-# 13: Make units and scales consistent
-# They already are
-
-#------------------------------------------------------------------------------#
-
-# 14: Perform logical checks on quantitative variables
+# Step 14: Perform logical checks on quantitative variables ----
 
 # look at unique values of certain character variables for wateruse
 wateruse8 |> 
@@ -208,20 +163,39 @@ wateruse_info8 |>
 # Relevant character variables look as they should, no need for logical checks
 
 #------------------------------------------------------------------------------#
+# Step 15: Clean string variables ----
 
-# 15: Clean string variables
-
-# use_type has two categories that could maybe be combined: "Geothermal" and "Power (Geothermal)"
+# see if some use type categories can be combined
 wateruse8 |> 
   select(use_type) |> 
   unique()
 
-# look at observations with use type of "Power (Geothermal)" and "Geothermal"
-wateruse15_geothermal = wateruse8 |> 
-  filter(use_type == c("Power (Geothermal)", "Geothermal"))
+# combine power use types into one "Power" category
+wateruse15 = wateruse8 |> 
+  mutate(
+    use_type = ifelse(
+      use_type %in% c("Power (Hydro-Elec)", 
+                      "Power (Fossil-Fuel)", 
+                      "Power (Geothermal)",
+                      "Geothermal"), 
+      "Power", use_type))
 
-# The 4 observations "Power (Geothermal)" have no water use data, so I'll ignore this for now
-# We may also remove observations without 0 water use later
+#------------------------------------------------------------------------------#
+# Additional cleaning ----
+
+# aggregate yearly water usage by use type
+wateruse_yearly = wateruse15 |> 
+  select(year, use_type, total) |> 
+  group_by(year, use_type) |> 
+  summarize(total_use = sum(total))
+
+# plot yearly water usage by use type
+ggplot(wateruse_yearly, aes(x = year, y = log(total_use), color = use_type)) +
+  geom_line() +
+  facet_wrap(~use_type) +
+  theme_minimal()
+
+# filter out "Sewage Treatment" use type (very few years of data)
 
 #------------------------------------------------------------------------------#
 
