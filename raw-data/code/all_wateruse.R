@@ -8,13 +8,6 @@ library(future.apply)
 library(future)
 library(data.table)
 
-setwd("~/OneDrive - Montana State University/Data Analytics Project Backup/Original Data Files")
-
-wateruse_info = read_csv("water_use_data.csv", skip = 1, col_names = TRUE, n_max = 25241)
-wateruse_raw = read_csv("water_use_data.csv", skip = 25244, col_names = TRUE)
-
-setwd("~/560-Project")
-
 #------------------------------------------------------------------------------#
 # Step 3: Remove irrelevant, garbage, or empty rows and columns ----
 

@@ -1,6 +1,7 @@
 library(dplyr)
 library(tidyverse)
 library(skimr)
+library(data.table)
 
 load("~/560-Project/raw-data/data/wateruse_raw.rda")
 
@@ -8,7 +9,7 @@ load("~/560-Project/raw-data/data/wateruse_raw.rda")
 # Step 3: Remove irrelevant, garbage, or empty rows and columns ----
 
 # select & rename relevant variables from wateruse_raw
-wateruse1 = wateruse_raw |> 
+wateruse1 = wateruse_data |> 
   select(
     system_name = "System Name",
     system_id = "System ID",
@@ -86,20 +87,21 @@ wateruse_missing_totaluse = wateruse2 |>
   filter(is.na(total))
 
 # observations missing total use have no water use data, so remove these from dataset
-wateruse8 = wateruse2 |> 
+wateruse3 = wateruse2 |> 
   filter(!is.na(total))
 
+# remove observations with NA use type
+wateruse3 = wateruse3 |> 
+  filter(!is.na(use_type))
+
 # explore data again
-skim(wateruse2)
+skim(wateruse3)
 
-# NA values for monthly water usage can be assumed to be 0, so change these values to 0
-# wateruse2 = wateruse2 |> 
- # mutate(across(jan:dec, ~ifelse(is.na(.), 0, .)))
-
-# convert invalid latitude and longitude to NA
-wateruse3 = wateruse2 |> 
+# convert invalid latitude and longitude to NA, then remove them
+wateruse3 = wateruse3 |> 
   mutate(latitude = ifelse(latitude < 37 | longitude == 0, NA, latitude),
-         longitude = ifelse(latitude < 37 | longitude == 0, NA, longitude))
+         longitude = ifelse(latitude < 37 | longitude == 0, NA, longitude)) |> 
+  filter(!is.na(latitude) | !is.na(longitude))
 
 # explore data again
 skim(wateruse3)
@@ -180,11 +182,102 @@ wateruse4 = wateruse3 |>
                       "Geothermal"), 
       "Power", use_type))
 
+wateruse4 |> 
+  select(use_type) |> 
+  unique()
+
+#------------------------------------------------------------------------------#
+# Merge ----
+
+# create dataset copies for merging
+wateruse_merge = wateruse4
+wateruse_info_merge = wateruse_info2
+
+# merge wateruse and wateruse_info datasets
+wateruse_merged = left_join(wateruse_merge, wateruse_info_merge, 
+                            by = "system_id", relationship = "many-to-many")
+
+#------------------------------------------------------------------------------#
+# Spatial ----
+
+# we found a shapefile for the boundaries of the Great Salt Lake Basin
+# so going to filter out all water use observations that don't lie within this basin
+
+# Great Salt Lake Basin shapefile
+gsl_basin = st_read("~/560-Project/raw-data/data/gsl-basin/GSLSubbasins.shp")
+
+# filter out Strawberry Reservoir, drop duplicate column
+gsl_basin = gsl_basin |> 
+  filter(Name != "Strawberry") |> 
+  select(-Shape_Le_1)
+
+# convert GSL Basin shapefile to WGS 84 CRS
+gsl_basin = st_transform(gsl_basin, crs = st_crs("+proj=longlat +datum=WGS84"))
+
+# convert water use data to sf object
+wateruse_sf = st_as_sf(wateruse_merged, coords = c("longitude", "latitude"), crs = st_crs(gsl_basin))
+
+# simplify geometry to run st_intersection faster
+gsl_basin = st_simplify(gsl_basin, preserveTopology = TRUE)
+wateruse_sf = st_simplify(wateruse_sf, preserveTopology = TRUE)
+
+# include only water use observations that lie within the GSL basin
+intersections = st_intersection(wateruse_sf, gsl_basin)
+
+# extract latitude and longitude from geometry column
+wateruse_within = st_as_sf(intersections, wkt = "geometry")
+wateruse_within$longitude = st_coordinates(wateruse_within)[, "X"]
+wateruse_within$latitude = st_coordinates(wateruse_within)[, "Y"]
+
+wateruse5 = as.data.table(wateruse_within)
+
+# drop irrelevant variables
+wateruse6 = wateruse5 |> 
+  select(-ID, -GRIDCODE, -Shape_Leng, -Shape_Area, -geometry, subbasin = Name)
+
+# check if correct coordinates were included
+max(wateruse6$latitude) # 41.99898
+min(wateruse6$latitude) # 39.6587
+
+max(wateruse6$longitude) # -110.7936
+min(wateruse6$longitude) # -113.1804
+
+max(st_coordinates(gsl_basin)[, "X"]) # -110.6139
+min(st_coordinates(gsl_basin)[, "X"]) # -113.3983
+
+max(st_coordinates(gsl_basin)[, "Y"]) # 42.83881
+min(st_coordinates(gsl_basin)[, "Y"]) # 39.58265
+
+# remove duplicates
+wateruse7 = wateruse6 |> 
+  distinct()
+
+# see what counties were included
+wateruse6 |> 
+  distinct(county)
+# based on this, we added 3 counties (Summit, Wasatch, and Juab to our precipitation and population data)
+
+# filter out counties that don't lie in the basin (incorrect coordinates)
+wateruse8 = wateruse7 |>
+  filter(!(county %in% c("Duchesne", 
+                         "Iron",
+                         "Emery", 
+                         "Wayne", 
+                         "Sanpete", 
+                         "Washington", 
+                         "Kane", 
+                         "Uintah", 
+                         "San Juan", 
+                         "Daggett", 
+                         "Grand")))
+
+save(wateruse8, file = "wateruse_within_backup.rds")
+
 #------------------------------------------------------------------------------#
 # Additional cleaning ----
 
 # aggregate yearly water usage by use type
-wateruse_yearly = wateruse4 |> 
+wateruse_yearly = wateruse8 |> 
   select(year, use_type, total) |> 
   group_by(year, use_type) |> 
   summarize(total_use = sum(total))
@@ -195,173 +288,150 @@ ggplot(wateruse_yearly, aes(x = year, y = log(total_use), color = use_type)) +
   facet_wrap(~use_type) +
   theme_minimal()
 
-# filter out "Sewage Treatment" use type (very few years of data)
-wateruse5 = wateruse4 |> 
-  filter(use_type != "Sewage Treatment")
+# "Sewage Treatment" use type has very few years of data, so we'll filter it out
+# "Domestic" also appears to start fully reporting around 1996-1997, so we'll find the specific year to filter the whole data from
+# "Mining" appears be start fully reporting around 2001-2002 and with hardly any variation so we'll filter it out too
+
+# see when "Domestic" began fully reporting
+domestic = wateruse8 |> 
+  filter(use_type == "Domestic") |> 
+  group_by(year) |> 
+  summarize(total = sum(total/100))
+
+# filter out "Sewage Treatment" and "Mining" use types and past year 1996, convert variables to lower case (forgot to previously)
+wateruse9 = wateruse8 |> 
+  filter((use_type != "Sewage Treatment") & (use_type != "Mining") & (year >= 1996)) |> 
+  rename_with(tolower, everything())
+
+# aggregate yearly water usage by use type again
+wateruse_yearly2 = wateruse9 |> 
+  select(year, use_type, total) |> 
+  group_by(year, use_type) |> 
+  summarize(total_use = sum(total))
+
+# plot yearly water usage by use type again
+ggplot(wateruse_yearly2, aes(x = year, y = log(total_use), color = use_type)) +
+  geom_line() +
+  facet_wrap(~use_type) +
+  theme_minimal()
+
 #------------------------------------------------------------------------------#
 
-# create dataset copies for merging
-wateruse_merge = wateruse5
-wateruse_info_merge = wateruse_info2
+# add surrogate key, reorder columns
+wateruse10 = wateruse9 |>
+  mutate(
+    key = row_number()
+  ) |>
+  select(
+    key,
+    system_id,
+    system_name,
+    source_id,
+    source_name,
+    year,
+    county,
+    subbasin,
+    use_type,
+    diversion_type,
+    system_type,
+    source_type,
+    jan:dec,
+    total,
+    latitude,
+    longitude
+  )
 
-# merge waterUse and waterUse_info datasets
-wateruse_merged1 = left_join(wateruse_merge, wateruse_info_merge, 
-                             by = "system_id", relationship = "many-to-many")
+# look at observations with total of 0
+total_zero = wateruse10 |> 
+  filter(total == 0)
 
-# drop duplicates, reorder columns, drop source_name
-wateruse_merged2 = wateruse_merged1 |> 
-  distinct() |>
-  select(-source_name) |> 
-  relocate(source_id, .after = system_id) |> 
-  relocate(year, .after = source_id) |>
-  relocate(county, .after = year) |>
-  relocate(latitude, .after = county) |> 
-  relocate(longitude, .after = latitude) |> 
-  relocate(system_type, .after = source_type) |> 
-  rename(total_gallons = total)
+skim(total_zero)
 
+# observations with 0 reported for total also report no monthly data, so filter them out
+wateruse11 = wateruse10 |> 
+  filter(total != 0)
 
-monthly_zeros = wateruse_merged2 |>
-  filter(Jan == 0 &
-           Feb == 0 &
-           Mar == 0 &
-           Apr == 0 &
-           May == 0 &
-           Jun == 0 &
-           Jul == 0 &
-           Aug == 0 &
-           Sep == 0 &
-           Oct == 0 &
-           Nov == 0 &
-           Dec == 0)
+# look at observations where all months report 0
+monthly_zeros = wateruse11 |>
+  filter(jan == 0 &
+         feb == 0 &
+         mar == 0 &
+         apr == 0 &
+         may == 0 &
+         jun == 0 &
+         jul == 0 &
+         aug == 0 &
+         sep == 0 &
+         oct == 0 &
+         nov == 0 &
+         dec == 0)
+
+# for now keep observations reporting a total but nothing for all months for use with yearly data
+# might filter out in the future if we analyze monthly data
 
 # convert to long format
-wateruse_tidy1 = wateruse_merged2 |> 
-  pivot_longer(cols = Jan:Dec,
+wateruse12 = wateruse11 |> 
+  pivot_longer(cols = jan:dec,
                names_to = "month",
                values_to = "gallons")
 
-#------------------------------------------------------------------------------#
-
-# convert from population in thousands to actual population, rename, reorder variables, drop source_id (not relevant)
-wateruse_tidy2 = wateruse_tidy1 |> 
-  select(
-    system_id,
-    system_name,
-    year,
-    county,
-    latitude,
-    longitude,
-    source_type,
-    system_type,
-    diversion_type,
-    use_type,
-    month,
-    month_gallons = gallons,
-    year_gallons = total_gallons
-  )
+# reorder and rename
+wateruse13 = wateruse12 |> 
+  rename(month_gallons = gallons, year_gallons = total) |> 
+  relocate(month, .after = year) |> 
+  relocate(month_gallons, .after = source_type)
 
 #------------------------------------------------------------------------------#
+# Outliers ----
 
-# drop observations that have no monthly or yearly water use data
-wateruse_tidy3 = wateruse_tidy2 |> 
-  filter(year_gallons != 0)
+# looking at the yearly usage plot, there are some big spikes in "Industrial" and "Water Supplier" use types
 
-# looking at the data, there are two observations with much higher usage than the rest of the data,
-# and the water use data base is not consistent with these records, so these may have been an error caused during import
-# Thus, we'll be removing these two observations below
+# "Industrial" usage spike around 2015
+industrial2014_2016 = wateruse13 |> 
+  filter(use_type == "Industrial") |> 
+  filter(year == 2014 | year == 2015 | year ==2016) |> 
+  arrange(desc(year_gallons))
 
-# define surrogate key to remove the 2 observations
-wateruse_tidy3 = wateruse_tidy3 |> 
-  mutate(key = row_number())
+# Cargill Salt reports uncharacteristically high usage in 2015, and these records do not show up in the Utah Water Use website
+# So we'll remove these as they may have been caused by an error during import
 
-# remove the two invalid observations
-wateruse_tidy4 = wateruse_tidy3 |> 
-  filter(key != 332034 & key != 332035)
+# remove 2015 "Industrial" outliers
+wateruse14 = wateruse13 |> 
+  filter(key != 13986)
+
+# "Water Supplier" usage spike around 2006
+watersupplier2005_2007 = wateruse14 |> 
+  filter(use_type == "Water Supplier") |> 
+  filter(year == 2005 | year == 2006 | year == 2007) |> 
+  arrange(desc(year_gallons))
+
+# "Water Supplier" usage spike around 2014
+watersupplier2013_2015 = wateruse14 |> 
+  filter(use_type == "Water Supplier") |> 
+  filter(year == 2013 | year == 2014 | year == 2015) |> 
+  arrange(desc(year_gallons))
+
+# remove 2006 and 2014 "Water Supplier" outliers
+wateruse15 = wateruse14 |> 
+  filter(!(key %in% c(3190, 1425, 24043, 1359, 1383, 1401)))
+
+# similarly uncharacteristic outliers were removed as they likely were not created during the data generating process
+
+# aggregate yearly water usage by use type again
+wateruse_yearly3 = wateruse15 |> 
+  select(year, use_type, year_gallons) |> 
+  group_by(year, use_type) |> 
+  summarize(total_use = sum(year_gallons))
+
+# plot yearly water usage by use type again
+ggplot(wateruse_yearly3, aes(x = year, y = log(total_use), color = use_type)) +
+  geom_line() +
+  facet_wrap(~use_type) +
+  theme_minimal()
 
 #------------------------------------------------------------------------------#
-# Potential cleaning ----
+# Save ----
 
-# calculate what months use the most water as a percentage of the total
-totals = wateruse_tidy4 |>
-  group_by(month) |> 
-  summarize(monthly_total = sum(month_gallons, na.rm = TRUE)) |> 
-  mutate(total = sum(monthly_total),
-         month_percent = monthly_total / total)
+wateruse_clean = wateruse15
 
-# extract monthly percentages from totals dataframe
-jan = totals[totals$month == "Jan", ]
-jan_percent = jan$month_percent
-
-feb = totals[totals$month == "Feb", ]
-feb_percent = feb$month_percent
-
-mar = totals[totals$month == "Mar", ]
-mar_percent = mar$month_percent
-
-apr = totals[totals$month == "Apr", ]
-apr_percent = apr$month_percent
-
-may = totals[totals$month == "May", ]
-may_percent = may$month_percent
-
-jun = totals[totals$month == "Jun", ]
-jun_percent = jun$month_percent
-
-jul = totals[totals$month == "Jul", ]
-jul_percent = jul$month_percent
-
-aug = totals[totals$month == "Aug", ]
-aug_percent = aug$month_percent
-
-sep = totals[totals$month == "Sep", ]
-sep_percent = sep$month_percent
-
-oct = totals[totals$month == "Oct", ]
-oct_percent = oct$month_percent
-
-nov = totals[totals$month == "Nov", ]
-nov_percent = nov$month_percent
-
-dec = totals[totals$month == "Dec", ]
-dec_percent = dec$month_percent
-
-total = totals$total
-total = total[1]
-
-# impute monthly averages for observations missing all months
-wateruse_impute = wateruse_tidy4 |> 
-  group_by(year_gallons) |> 
-  mutate(month_gallons = ifelse(all(month_gallons == 0) & month == "Jan", jan_percent*year_gallons,
-         ifelse(all(month_gallons == 0) & month == "Feb", feb_percent*year_gallons,
-         ifelse(all(month_gallons == 0) & month == "Mar", mar_percent*year_gallons,
-         ifelse(all(month_gallons == 0) & month == "Apr", apr_percent*year_gallons,
-         ifelse(all(month_gallons == 0) & month == "May", may_percent*year_gallons,
-         ifelse(all(month_gallons == 0) & month == "Jun", jun_percent*year_gallons,
-         ifelse(all(month_gallons == 0) & month == "Jul", jul_percent*year_gallons,
-         ifelse(all(month_gallons == 0) & month == "Aug", aug_percent*year_gallons,
-         ifelse(all(month_gallons == 0) & month == "Sep", sep_percent*year_gallons,
-         ifelse(all(month_gallons == 0) & month == "Oct", oct_percent*year_gallons,
-         ifelse(all(month_gallons == 0) & month == "Nov", nov_percent*year_gallons,
-         ifelse(all(month_gallons == 0) & month == "Dec", dec_percent*year_gallons, month_gallons)))))))))))))
-
-# look at observations with no monthly data to check a random one (system_id == 1008 is what we chose)
-check = wateruse_tidy4 |> 
-  group_by(year_gallons) |> 
-  filter(all(month_gallons == 0))
-
-# check system_id = 1008 before imputing
-sys1008_before = wateruse_tidy4 |> 
-  filter(system_id == 1008 & year == 1988)
-
-# check system_id = 1008 after imputing
-sys1008_after = wateruse_impute |> 
-  filter(system_id == 1008 & year == 1988)
-
-## IT WORKED, WE ARE BETTER THAN EVERY DATA SCIENTIST EVER ##
-#------------------------------------------------------------------------------#
-
-wateruse_clean = wateruse_impute
-
-# save as .rds file
 save(wateruse_clean, file = "wateruse_clean.rds")

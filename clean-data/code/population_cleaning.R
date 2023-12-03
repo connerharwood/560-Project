@@ -10,11 +10,14 @@ population1 = population_raw |>
     "Box Elder" = UTBOXE3POP,
     "Cache" = UTCACH0POP,
     "Davis" = UTDAVI0POP,
+    "Juab" = UTJUAB3POP,
     "Morgan" = UTMORG9POP,
     "Rich" = UTRICH3POP,
     "Salt Lake" = UTSALT5POP,
+    "Summit" = UTSUMM3POP,
     "Tooele" = UTTOOE5POP,
     "Utah" = UTUTAH9POP,
+    "Wasatch" = UTWASA1POP,
     "Weber" = UTWEBE7POP
   )
 

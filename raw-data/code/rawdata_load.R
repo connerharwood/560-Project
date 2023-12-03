@@ -3,8 +3,6 @@ library(dplyr)
 library(tidyverse)
 library(readxl)
 
-setwd("~/OneDrive - Montana State University/Data Analytics Project Backup/Original Data Files")
-
 # set appropriate working directory (IN CONSOLE) to "Original Data Files" subfolder within shared OneDrive folder
 
 #------------------------------------------------------------------------------#
@@ -73,7 +71,7 @@ population_raw = read_xls("county_populations.xls", sheet = "Annual", col_names 
 #------------------------------------------------------------------------------#
 # save data ----
 
-setwd("~/560-Project")
+# set working directory back to /560-Project
 
 # save all raw data to R data file
 save(gsl_north_levels,  

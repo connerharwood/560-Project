@@ -28,6 +28,14 @@ davis = precip_davis |>
   select(-Date) |> 
   rename(precipitation = Value)
 
+# rename and add columns in Juab precip data 
+juab = precip_juab |>
+  mutate(year = substr(Date, 1, 4),
+         month = substr(Date, 5, 6),
+         county = "Juab") |>
+  select(-Date) |> 
+  rename(precipitation = Value)
+
 # rename and add columns in Morgan precip data 
 morgan = precip_morgan |>
   mutate(year = substr(Date, 1, 4),
@@ -52,6 +60,14 @@ saltlake = precip_saltlake |>
   select(-Date) |> 
   rename(precipitation = Value)
 
+# rename and add columns in Summit precip data 
+summit = precip_summit |>
+  mutate(year = substr(Date, 1, 4),
+         month = substr(Date, 5, 6),
+         county = "Summit") |>
+  select(-Date) |> 
+  rename(precipitation = Value)
+
 # rename and add columns in Tooele precip data 
 tooele = precip_tooele |>
   mutate(year = substr(Date, 1, 4),
@@ -68,6 +84,14 @@ utah = precip_utah |>
   select(-Date) |> 
   rename(precipitation = Value)
 
+# rename and add columns in Wasatch precip data 
+wasatch = precip_wasatch |>
+  mutate(year = substr(Date, 1, 4),
+         month = substr(Date, 5, 6),
+         county = "Wasatch") |>
+  select(-Date) |> 
+  rename(precipitation = Value)
+
 # rename and add columns in Weber precip data 
 weber = precip_weber |>
   mutate(year = substr(Date, 1, 4),
@@ -77,7 +101,7 @@ weber = precip_weber |>
   rename(precipitation = Value)
 
 # append data sets  
-precip = rbind(boxelder, cache, davis, morgan, rich, saltlake, tooele, utah, weber)
+precip = rbind(boxelder, cache, davis, juab, morgan, rich, saltlake, summit, tooele, utah, wasatch, weber)
 
 # check structure of precip and missing values
 skim(precip)
