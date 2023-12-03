@@ -1,8 +1,6 @@
 library(sf)
-library(tmap)
 library(tidyverse)
 library(dplyr)
-library(patchwork)
 
 #------------------------------------------------------------------------------#
 # Counties ----
@@ -21,20 +19,6 @@ counties = counties |>
     geometry
   ) |> 
   mutate(county = str_to_title(county))
-
-# load("~/560-Project/clean-data/data/masterdata.rds")
-# 
-# # relevant counties to plot
-# counties = masterdata |> 
-#   distinct(county) |> 
-#   arrange(county) |> 
-#   pull(county)
-# 
-# # filter to include only relevant counties in shapefile
-# relevant_counties_sf = all_counties_sf |> 
-#   filter(county %in% counties)
-# 
-# plot(all_counties_sf["county"])
 
 #------------------------------------------------------------------------------#
 # GSL Basin ----
@@ -59,59 +43,51 @@ gsl_basin = st_transform(gsl_basin, st_crs(counties))
 # include only the part of GSL Basin lying within Utah
 gsl_basin = st_intersection(gsl_basin, st_union(counties))
 
-
 plot(gsl_basin["subbasin"])
 
 #------------------------------------------------------------------------------#
-# Map overlay ----
+# Map ----
 
 # plot GSL Basin with subbasins on Utah map with county outlines
 basin_plot = ggplot() +
   geom_sf(
-    data = counties, 
+    data = counties, # plot Utah counties shapefile
     color = "gray55", 
     fill = "gray90"
   ) +
   geom_sf(
-    data = gsl_basin, 
+    data = gsl_basin, # plot GSL Basin shapefile
     aes(fill = subbasin), 
     color = "black"
   ) +
+  # fill and properly label GSL subbasins
   scale_fill_manual(
     values = c("skyblue1", "salmon", "seagreen", "mediumpurple", "navajowhite"),
     breaks = c("Great Salt Lake", "Bear", "Jordan/Provo", "Weber", "West Desert"),
     labels = c("Great Salt Lake", "Bear River Subbasin", "Jordan/Provo River Subbasin", "Weber River Subbasin", "West Desert Subbasin")
   ) +
   theme_minimal() +
-  theme_void() +
-  labs(fill = "", title = "Great Salt Lake Basin") +
+  theme_void() + # remove grids and coordinates
+  labs(fill = "", title = "Great Salt Lake Basin") + # remove legend title, add plot title
   theme(
-    legend.position = c(0.925, .999),
+    legend.position = c(0.9348, 1.001), # adjust legend position to be in missing top right corner of Utah on png image
     legend.justification = c(1, 1),
     legend.margin = margin(t = 10, r = 0, b = 0, l = 0),
-    legend.key.size = unit(0.65, "cm"),
-    legend.text = element_text(size = 8.5),
-    plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -15)),
-    plot.background = element_rect(fill = "white", color = NA)
+    legend.key.size = unit(0.6, "cm"), # adjust legend size
+    legend.text = element_text(size = 8.2), # adjust legend text size
+    plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -15)), # center and move title down
+    plot.margin = margin(t = 17, r = 0, b = 0, l = 0), # add white space to top so title isn't touching top of png image
+    plot.background = element_rect(fill = "white", color = NA) # add white background for png image
   )
-
-# original position for legend: c(1.023, 0.99)
+# the plot looks weird in R because I had to adjust the legend and margins to look good on the png image
 
 # show plot
-#print(basin_plot)
+print(basin_plot)
 
-# save in higher resolution, maintain legend position
+# save in higher resolution
 ggsave(
   filename = "basin_plot.png",
   plot = basin_plot,
   units = "in", 
   dpi = 300,
 )
-
-# For some reason when I save from the "Plots" tab, the image is in very low resolution, so I used ggsave to specifiy
-# higher resolution.
-# When saving this way, the legend kept being moved out of place, so I screenshot a picture of the legend, saved
-# a plot without the legend, and photoshopped the legend into its proper position
-# Not the most ideal way to go about it, but I could not figure out how to keep it in the right spot
-
-# code for legend (removed to save a plot without the legend for photoshopping):
