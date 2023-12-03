@@ -429,6 +429,10 @@ ggplot(wateruse_yearly3, aes(x = year, y = log(total_use), color = use_type)) +
   facet_wrap(~use_type) +
   theme_minimal()
 
+# convert month variable to uppercase for merging with other datasets later
+wateruse15 = wateruse15 |> 
+  mutate(month = str_to_title(month))
+
 #------------------------------------------------------------------------------#
 # Save ----
 

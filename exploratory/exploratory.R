@@ -7,12 +7,12 @@ library(scales)
 library(lubridate)
 library(cowplot)
 
-load("~/560-Project/clean-data/data/master_data.rds")
+load("~/560-Project/clean-data/data/masterdata.rds")
 
 #------------------------------------------------------------------------------#
 
 # create table showing total water use by use type
-useType_totals = masterData |> 
+useType_totals = masterdata |> 
   group_by(water_use) |> 
   summarize("Total Gallons in Hundreds of Billions" = sum(total_gallons) / 100000000000) |> 
   rename("Water Use Type" = water_use) |> 
