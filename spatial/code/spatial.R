@@ -69,8 +69,8 @@ plot(gsl_basin["subbasin"])
 basin_plot = ggplot() +
   geom_sf(
     data = counties, 
-    color = "gray60", 
-    fill = "gray95"
+    color = "gray55", 
+    fill = "gray90"
   ) +
   geom_sf(
     data = gsl_basin, 
@@ -86,12 +86,13 @@ basin_plot = ggplot() +
   theme_void() +
   labs(fill = "", title = "Great Salt Lake Basin") +
   theme(
-    legend.position = c(0.945, .98),
+    legend.position = c(0.925, .999),
     legend.justification = c(1, 1),
-    legend.margin = margin(t = 0, r = 10, b = 0, l = 0),
+    legend.margin = margin(t = 10, r = 0, b = 0, l = 0),
     legend.key.size = unit(0.65, "cm"),
     legend.text = element_text(size = 8.5),
-    plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -15))
+    plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -15)),
+    plot.background = element_rect(fill = "white", color = NA)
   )
 
 # original position for legend: c(1.023, 0.99)
@@ -114,12 +115,3 @@ ggsave(
 # Not the most ideal way to go about it, but I could not figure out how to keep it in the right spot
 
 # code for legend (removed to save a plot without the legend for photoshopping):
-
-theme(
-  legend.position = c(1.022, 0.99),
-  legend.justification = c(1, 1),
-  legend.margin = margin(t = 0, r = 10, b = 0, l = 0),
-  legend.key.size = unit(0.43, "cm"),
-  legend.text = element_text(size = 7.3),
-  plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -15))
-)
