@@ -80,18 +80,13 @@ basin_plot = ggplot() +
   scale_fill_manual(
     values = c("skyblue1", "salmon", "seagreen", "mediumpurple", "navajowhite"),
     breaks = c("Great Salt Lake", "Bear", "Jordan/Provo", "Weber", "West Desert"),
-    labels = c("Great Salt Lake", "Bear River Subbasin", "Jordan/Provo Rivers Subbasin", "Weber River Subbasin", "West Desert Subbasin")
+    labels = c("Great Salt Lake", "Bear River Subbasin", "Jordan/Provo River Subbasin", "Weber River Subbasin", "West Desert Subbasin")
   ) +
   theme_minimal() +
-  theme(
-    legend.position = "top",
-    panel.grid = element_blank(),
-  ) +
   theme_void() +
   labs(fill = "")
 
 # show plot
 print(basin_plot)
 
-#------------------------------------------------------------------------------#
-
+ggsave(filename = "basin_plot.png", plot = basin_plot, width = 10, height = 8, units = "in", dpi = 300)
