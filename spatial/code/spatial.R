@@ -87,7 +87,7 @@ basin_plot = ggplot() +
   labs(fill = "", title = "Great Salt Lake Basin") +
   theme(
     legend.position = "none",
-    plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -30))
+    plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -20))
   )
 
 # original position for legend: c(1.023, 0.99)
