@@ -91,17 +91,18 @@ basin_plot = ggplot() +
     legend.margin = margin(t = 0, r = 10, b = 0, l = 0),
     legend.key.size = unit(0.43, "cm"),
     legend.text = element_text(size = 7.3),
-    plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -10))
+    plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -15))
   )
 
 # show plot
 print(basin_plot)
 
 # save in higher resolution, maintain legend position
-with(basin_plot, ggsave(
+ggsave(
   filename = "basin_plot.png",
-  width = 10, 
-  height = 8, 
+  plot = basin_plot,
+  width = 8, 
+  height = 6, 
   units = "in", 
   dpi = 300,
-))
+)
