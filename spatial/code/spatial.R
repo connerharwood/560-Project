@@ -1,34 +1,46 @@
 library(sf)
 library(tmap)
 library(tidyverse)
+library(dplyr)
+library(patchwork)
 
 #------------------------------------------------------------------------------#
-# counties ----
+# Counties ----
 
 # read in Utah counties shapefile
-counties = st_read("geospatial/utah counties/utahcounties.shp")
+counties = st_read("spatial/data/counties/utahcounties.shp")
 
 # cleaning
 counties = counties |> 
   select(
-    color = color4,
-    county_number = countynbr,
-    fips,
-    name,
+    county_num = countynbr,
+    county = name,
     shape_area,
     shape_length = shape_leng,
     stateplane,
     geometry
   ) |> 
-  mutate(name = str_to_title(name))
+  mutate(county = str_to_title(county))
 
-plot(counties["name"])
+# load("~/560-Project/clean-data/data/masterdata.rds")
+# 
+# # relevant counties to plot
+# counties = masterdata |> 
+#   distinct(county) |> 
+#   arrange(county) |> 
+#   pull(county)
+# 
+# # filter to include only relevant counties in shapefile
+# relevant_counties_sf = all_counties_sf |> 
+#   filter(county %in% counties)
+# 
+# plot(all_counties_sf["county"])
 
 #------------------------------------------------------------------------------#
 # GSL Basin ----
 
 # read in GSL Basin shapefile
-gsl_basin = st_read("geospatial/gsl basin/GSLSubbasins.shp")
+gsl_basin = st_read("spatial/data/basin/GSLSubbasins.shp")
 
 # cleaning
 gsl_basin = gsl_basin |> 
@@ -38,48 +50,48 @@ gsl_basin = gsl_basin |>
     shape_area = Shape_Area,
     shape_length = Shape_Leng,
     geometry
-  )
+  ) |> 
+  filter(subbasin != "Strawberry")
+
+# transform GSL Basin simple feature to have same CRS as counties simple feature
+gsl_basin = st_transform(gsl_basin, st_crs(counties))
+
+# include only the part of GSL Basin lying within Utah
+gsl_basin = st_intersection(gsl_basin, st_union(counties))
+
 
 plot(gsl_basin["subbasin"])
 
-library(sf)
-library(dplyr)
+#------------------------------------------------------------------------------#
+# Map overlay ----
 
-# Read in Utah counties shapefile
-counties <- st_read("geospatial/utah counties/utahcounties.shp")
+# plot GSL Basin with subbasins on Utah map with county outlines
+basin_plot = ggplot() +
+  geom_sf(
+    data = counties, 
+    color = "gray60", 
+    fill = "gray95"
+  ) +
+  geom_sf(
+    data = gsl_basin, 
+    aes(fill = subbasin), 
+    color = "black"
+  ) +
+  scale_fill_manual(
+    values = c("skyblue1", "salmon", "seagreen", "mediumpurple", "navajowhite"),
+    breaks = c("Great Salt Lake", "Bear", "Jordan/Provo", "Weber", "West Desert"),
+    labels = c("Great Salt Lake", "Bear River Subbasin", "Jordan/Provo Rivers Subbasin", "Weber River Subbasin", "West Desert Subbasin")
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "top",
+    panel.grid = element_blank(),
+  ) +
+  theme_void() +
+  labs(fill = "")
 
-# Cleaning
-counties <- counties %>%
-  select(
-    color = color4,
-    county_number = countynbr,
-    fips,
-    name,
-    shape_area,
-    shape_length = shape_leng,
-    stateplane,
-    geometry
-  ) %>%
-  mutate(name = stringr::str_to_title(name))
+# show plot
+print(basin_plot)
 
-# Plot Utah counties
-plot(counties["geometry"], col = counties$color, main = "Utah Counties")
+#------------------------------------------------------------------------------#
 
-# Read in GSL Basin shapefile
-gsl_basin <- st_read("geospatial/gsl basin/GSLSubbasins.shp")
-
-# Cleaning
-gsl_basin <- gsl_basin %>%
-  select(
-    grid_code = GRIDCODE,
-    subbasin = Name,
-    shape_area = Shape_Area,
-    shape_length = Shape_Leng,
-    geometry
-  )
-
-# Plot GSL Basin on the same map
-plot(gsl_basin["geometry"], col = "lightblue", add = TRUE)
-
-# Add a legend
-legend("topright", legend = c("Utah Counties", "GSL Basin"), fill = c("color1", "lightblue"))
