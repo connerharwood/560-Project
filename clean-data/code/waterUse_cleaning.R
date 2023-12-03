@@ -204,7 +204,7 @@ wateruse_merged = left_join(wateruse_merge, wateruse_info_merge,
 # so going to filter out all water use observations that don't lie within this basin
 
 # Great Salt Lake Basin shapefile
-gsl_basin = st_read("~/560-Project/raw-data/data/gsl-basin/GSLSubbasins.shp")
+gsl_basin = st_read("~/560-Project/spatial/gsl-basin/GSLSubbasins.shp")
 
 # filter out Strawberry Reservoir, drop duplicate column
 gsl_basin = gsl_basin |> 
