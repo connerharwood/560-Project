@@ -46,17 +46,19 @@ gsl_basin = st_intersection(gsl_basin, st_union(counties))
 plot(gsl_basin["subbasin"])
 
 #------------------------------------------------------------------------------#
-# Map ----
+# Map plot ----
 
 # plot GSL Basin with subbasins on Utah map with county outlines
 basin_plot = ggplot() +
+  # plot Utah counties shapefile
   geom_sf(
-    data = counties, # plot Utah counties shapefile
+    data = counties,
     color = "gray55", 
     fill = "gray90"
   ) +
+  # plot GSL Basin shapefile
   geom_sf(
-    data = gsl_basin, # plot GSL Basin shapefile
+    data = gsl_basin,
     aes(fill = subbasin), 
     color = "black"
   ) +
@@ -67,22 +69,30 @@ basin_plot = ggplot() +
     labels = c("Great Salt Lake", "Bear River Subbasin", "Jordan/Provo River Subbasin", "Weber River Subbasin", "West Desert Subbasin")
   ) +
   theme_minimal() +
-  theme_void() + # remove grids and coordinates
-  labs(fill = "", title = "Great Salt Lake Basin") + # remove legend title, add plot title
+  # remove grids and coordinates
+  theme_void() +
+  # remove legend title, add plot title
+  labs(fill = "", title = "Great Salt Lake Basin") +
   theme(
-    legend.position = c(0.9348, 1.001), # adjust legend position to be in missing top right corner of Utah on png image
+    # adjust legend position to be in missing top right corner of Utah on png image
+    legend.position = c(0.9348, 1.001),
     legend.justification = c(1, 1),
     legend.margin = margin(t = 10, r = 0, b = 0, l = 0),
-    legend.key.size = unit(0.6, "cm"), # adjust legend size
-    legend.text = element_text(size = 8.2), # adjust legend text size
-    plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -15)), # center and move title down
-    plot.margin = margin(t = 17, r = 0, b = 0, l = 0), # add white space to top so title isn't touching top of png image
-    plot.background = element_rect(fill = "white", color = NA) # add white background for png image
+    # adjust legend size
+    legend.key.size = unit(0.6, "cm"),
+    # adjust legend text size
+    legend.text = element_text(size = 8.2),
+    # center and move title down
+    plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -15)),
+    # add white space to top so title isn't touching top of png image
+    plot.margin = margin(t = 17, r = 0, b = 0, l = 0),
+    # add white background for png image
+    plot.background = element_rect(fill = "white", color = NA)
   )
-# the plot looks weird in R because I had to adjust the legend and margins to look good on the png image
 
 # show plot
 print(basin_plot)
+# the plot looks weird in R because I had to adjust the legend and margins to look good on the png image
 
 # save in higher resolution
 ggsave(
