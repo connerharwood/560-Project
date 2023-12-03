@@ -86,8 +86,12 @@ basin_plot = ggplot() +
   theme_void() +
   labs(fill = "", title = "Great Salt Lake Basin") +
   theme(
-    legend.position = "none",
-    plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -10))
+    legend.position = c(1.022, 0.99),
+    legend.justification = c(1, 1),
+    legend.margin = margin(t = 0, r = 10, b = 0, l = 0),
+    legend.key.size = unit(0.43, "cm"),
+    legend.text = element_text(size = 7.3),
+    plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -15))
   )
 
 # original position for legend: c(1.023, 0.99)
@@ -113,11 +117,11 @@ ggsave(
 
 # code for legend (removed to save a plot without the legend for photoshopping):
 
-# theme(
-#   legend.position = c(1.022, 0.99),
-#   legend.justification = c(1, 1),
-#   legend.margin = margin(t = 0, r = 10, b = 0, l = 0),
-#   legend.key.size = unit(0.43, "cm"),
-#   legend.text = element_text(size = 7.3),
-#   plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -15))
-# )
+theme(
+  legend.position = c(1.022, 0.99),
+  legend.justification = c(1, 1),
+  legend.margin = margin(t = 0, r = 10, b = 0, l = 0),
+  legend.key.size = unit(0.43, "cm"),
+  legend.text = element_text(size = 7.3),
+  plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -15))
+)
