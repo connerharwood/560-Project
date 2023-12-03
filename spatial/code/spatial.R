@@ -99,8 +99,8 @@ print(basin_plot)
 ggsave(
   filename = "basin_plot.png",
   plot = basin_plot,
-  width = 5, 
-  height = 3, 
+  #width = 5, 
+  #height = 3, 
   units = "in", 
   dpi = 300,
 )
