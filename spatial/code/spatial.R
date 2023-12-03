@@ -86,7 +86,7 @@ basin_plot = ggplot() +
   theme_void() +
   labs(fill = "", title = "Great Salt Lake Basin") +
   theme(
-    legend.position = c(1.025, 0.99),
+    legend.position = c(1.023, 0.99),
     legend.justification = c(1, 1),
     legend.margin = margin(t = 0, r = 10, b = 0, l = 0),
     legend.key.size = unit(0.43, "cm"),
@@ -97,4 +97,11 @@ basin_plot = ggplot() +
 # show plot
 print(basin_plot)
 
-ggsave(filename = "basin_plot.png", plot = basin_plot, width = 10, height = 8, units = "in", dpi = 300)
+# save in higher resolution, maintain legend position
+with(basin_plot, ggsave(
+  filename = "basin_plot.png",
+  width = 10, 
+  height = 8, 
+  units = "in", 
+  dpi = 300,
+))
