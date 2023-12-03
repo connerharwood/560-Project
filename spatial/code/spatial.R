@@ -84,8 +84,15 @@ basin_plot = ggplot() +
   ) +
   theme_minimal() +
   theme_void() +
-  labs(fill = "") +
-  theme(plot.background = element_rect(fill = "white"))
+  labs(fill = "", title = "Great Salt Lake Basin") +
+  theme(
+    legend.position = c(1.025, 0.99),
+    legend.justification = c(1, 1),
+    legend.margin = margin(t = 0, r = 10, b = 0, l = 0),
+    legend.key.size = unit(0.43, "cm"),
+    legend.text = element_text(size = 7.3),
+    plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = -10))
+  )
 
 # show plot
 print(basin_plot)
