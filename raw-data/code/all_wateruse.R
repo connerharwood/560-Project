@@ -4,6 +4,9 @@ library(readxl)
 library(skimr)
 library(sf)
 library(sp)
+library(future.apply)
+library(future)
+library(data.table)
 
 setwd("~/OneDrive - Montana State University/Data Analytics Project Backup/Original Data Files")
 
@@ -197,7 +200,7 @@ wateruse15 = wateruse8 |>
 wateruse_merge = wateruse15
 wateruse_info_merge = wateruse_info8
 
-# merge waterUse and waterUse_info datasets
+# merge wateruse and wateruse_info datasets
 wateruse_merged = left_join(wateruse_merge, wateruse_info_merge, 
                             by = "system_id", relationship = "many-to-many")
 
@@ -207,10 +210,77 @@ wateruse_merged = left_join(wateruse_merge, wateruse_info_merge,
 # Great Salt Lake Basin shapefile
 gsl_basin = st_read("~/560-Project/geospatial/gsl basin/GSLSubbasins.shp")
 
+# filter out Strawberry Reservoir and GSL itself, drop duplicate column
+gsl_basin = gsl_basin |> 
+  filter(Name != "Strawberry") |> 
+  select(-Shape_Le_1)
+
+# convert GSL Basin shapefile to WGS 84 CRS
 gsl_basin = st_transform(gsl_basin, crs = st_crs("+proj=longlat +datum=WGS84"))
 
-# Convert water use data to sf object
-wateruse_sf <- st_as_sf(wateruse_merged, coords = c("longitude", "latitude"), crs = st_crs(gsl_basin))
+# convert water use data to sf object
+wateruse_sf = st_as_sf(wateruse_merged, coords = c("longitude", "latitude"), crs = st_crs(gsl_basin))
 
-# Perform intersection to find points within the basin
-within_basin <- st_intersection(wateruse_sf, gsl_basin)
+# simplify geometry to run st_intersection faster
+gsl_basin = st_simplify(gsl_basin, preserveTopology = TRUE)
+wateruse_sf = st_simplify(wateruse_sf, preserveTopology = TRUE)
+
+# include only water use observations lying within the GSL basin
+intersections = st_intersection(wateruse_sf, gsl_basin)
+
+# extract latitude and longitude from geometry column
+wateruse_within = st_as_sf(intersections, wkt = "geometry")
+wateruse_within$longitude = st_coordinates(wateruse_within)[, "X"]
+wateruse_within$latitude = st_coordinates(wateruse_within)[, "Y"]
+
+wateruse_within = as.data.table(wateruse_within)
+
+# drop irrelevant variables
+wateruse_within = wateruse_within |> 
+  select(-ID, -GRIDCODE, -Shape_Leng, -Shape_Area, -geometry, subbasin = Name)
+
+wateruse_within |> 
+  distinct(county)
+
+# filter out counties that don't lie in the basin (incorrect coordinates)
+wateruse_within2 = wateruse_within |>
+  filter(!(county %in% c("Duchesne", 
+                         "Iron",
+                         "Emery", 
+                         "Wayne", 
+                         "Sanpete", 
+                         "Washington", 
+                         "Kane", 
+                         "Uintah", 
+                         "San Juan", 
+                         "Daggett", 
+                         "Grand")))
+
+wateruse_within2 |> distinct(county)
+# counties to add: Summit, Wasatch, Juab
+
+save(wateruse_within, file = "wateruse_within.rds")
+# counties to remove (wrong coordinates)
+# Duchesne
+# Iron
+# Emery
+# Wayne
+# Sanpete
+# Washington
+# Kane
+# Uintah
+# San Juan
+# Daggett
+# Grand county
+#------------------------------------------------------------------------------#
+max(wateruse_within$latitude) # 41.99898
+min(wateruse_within$latitude) # 39.6587
+
+max(wateruse_within$longitude) # -110.7936
+min(wateruse_within$longitude) # -113.1804
+
+max(st_coordinates(gsl_basin)[, "X"]) # -110.6139
+min(st_coordinates(gsl_basin)[, "X"]) # -113.3983
+
+max(st_coordinates(gsl_basin)[, "Y"]) # 42.83881
+min(st_coordinates(gsl_basin)[, "Y"]) # 39.58265

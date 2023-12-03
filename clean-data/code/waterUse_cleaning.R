@@ -8,7 +8,7 @@ load("~/560-Project/raw-data/data/wateruse_raw.rda")
 # Step 3: Remove irrelevant, garbage, or empty rows and columns ----
 
 # select & rename relevant variables from wateruse_raw
-wateruse3 = wateruse_raw |> 
+wateruse1 = wateruse_raw |> 
   select(
     system_name = "System Name",
     system_id = "System ID",
@@ -25,7 +25,7 @@ wateruse3 = wateruse_raw |>
   )
 
 # select & rename relevant variables from wateruse_info
-wateruse_info3 = wateruse_info |> 
+wateruse_info1 = wateruse_info |> 
   select(
     system_id = "System ID",
     system_type = "System Type",
@@ -33,28 +33,28 @@ wateruse_info3 = wateruse_info |>
   )
 
 # check for empty rows or columns in wateruse3 (there are none)
-which(nrow(is.na(wateruse3) | wateruse3 == "") == ncol(wateruse3))
-which(ncol(is.na(wateruse3) | wateruse3 == "") == nrow(wateruse3))
+which(nrow(is.na(wateruse1) | wateruse1 == "") == ncol(wateruse1))
+which(ncol(is.na(wateruse1) | wateruse1 == "") == nrow(wateruse1))
 
 # check for empty rows or columns in wateruse_info3 (there are none)
-which(nrow(is.na(wateruse_info3) | wateruse_info3 == "") == ncol(wateruse_info3))
-which(ncol(is.na(wateruse_info3) | wateruse_info3 == "") == nrow(wateruse_info3))
+which(nrow(is.na(wateruse_info1) | wateruse_info1 == "") == ncol(wateruse_info1))
+which(ncol(is.na(wateruse_info1) | wateruse_info1 == "") == nrow(wateruse_info1))
 
 #------------------------------------------------------------------------------#
 # Step 5: Resolve duplicates ----
 
 # unique combination of certain variables to identify duplicates in wateruse3
-wateruse3 |> 
+wateruse1 |> 
   count(system_name, system_id, source_name, latitude, longitude, source_type, 
         diversion_type, use_type, year, total) |> 
   filter(n > 1)
 
 # returns same number of rows as wateruse3, so no duplicates
-wateruse_distinct = wateruse3 |> 
+wateruse_distinct = wateruse1 |> 
   distinct()
 
 # unique combination of certain variables to identify duplicates in wateruse_info3
-wateruse_info3 |> 
+wateruse_info1 |> 
   count(system_id, system_type, county) |> 
   filter(n > 1)
 
@@ -65,58 +65,58 @@ wateruse_info3 |>
 # Step 8: Understand patterns of missing values ----
 
 # explore waterUse data
-skim(wateruse3)
+skim(wateruse1)
 
 # Ignore missing latitude and longitude values, this seems to be simply lack of info
 # We'll still want the water use data from observations missing coordinates
 
 # look at entries with missing year
-wateruse_missing_year = wateruse3 |> 
+wateruse_missing_year = wateruse1 |> 
   filter(is.na(year))
 
 # observations missing year have no water use data, so remove these from dataset
-wateruse8 = wateruse3 |> 
+wateruse2 = wateruse1 |> 
   filter(!is.na(year))
 
 # explore data again
-skim(wateruse8)
+skim(wateruse2)
 
 # look at entries with missing total_use
-wateruse_missing_totaluse = wateruse8 |> 
+wateruse_missing_totaluse = wateruse2 |> 
   filter(is.na(total))
 
 # observations missing total use have no water use data, so remove these from dataset
-wateruse8 = wateruse8 |> 
+wateruse8 = wateruse2 |> 
   filter(!is.na(total))
 
 # explore data again
-skim(wateruse8)
+skim(wateruse2)
 
 # NA values for monthly water usage can be assumed to be 0, so change these values to 0
-# wateruse8 = wateruse8 |> 
+# wateruse2 = wateruse2 |> 
  # mutate(across(jan:dec, ~ifelse(is.na(.), 0, .)))
 
 # convert invalid latitude and longitude to NA
-wateruse8 = wateruse8 |> 
+wateruse3 = wateruse2 |> 
   mutate(latitude = ifelse(latitude < 37 | longitude == 0, NA, latitude),
          longitude = ifelse(latitude < 37 | longitude == 0, NA, longitude))
 
 # explore data again
-skim(wateruse8)
+skim(wateruse3)
 
 # explore values of each variable in wateruse_info3
-skim(wateruse_info3)
+skim(wateruse_info1)
 
 # look at entries with missing counties
-wateruse_info3 |> 
+wateruse_info1 |> 
   filter(is.na(county))
 
 # the entries with missing counties don't seem to be entries for water rights users, so remove these observations
-wateruse_info8 = wateruse_info3 |> 
+wateruse_info2 = wateruse_info1 |> 
   filter(!is.na(county))
 
 # look at observations with no monthly data to understand those that still have total use values
-monthly_zeros = wateruse8 |>
+monthly_zeros = wateruse2 |>
   filter(Jan == 0 &
            Feb == 0 &
            Mar == 0 &
@@ -139,24 +139,24 @@ monthly_zeros = wateruse8 |>
 # Step 14: Perform logical checks on quantitative variables ----
 
 # look at unique values of certain character variables for wateruse
-wateruse8 |> 
+wateruse3 |> 
   select(source_type) |> 
   unique()
 
-wateruse8 |> 
+wateruse3 |> 
   select(diversion_type) |> 
   unique()
 
-wateruse8 |> 
+wateruse3 |> 
   select(use_type) |> 
   unique()
 
 # look at unique values of certain character variables for wateruse_info
-wateruse_info8 |> 
+wateruse_info2 |> 
   select(system_type) |> 
   unique()
 
-wateruse_info8 |> 
+wateruse_info2 |> 
   select(county) |> 
   unique()
 
@@ -166,12 +166,12 @@ wateruse_info8 |>
 # Step 15: Clean string variables ----
 
 # see if some use type categories can be combined
-wateruse8 |> 
+wateruse3 |> 
   select(use_type) |> 
   unique()
 
 # combine power use types into one "Power" category
-wateruse15 = wateruse8 |> 
+wateruse4 = wateruse3 |> 
   mutate(
     use_type = ifelse(
       use_type %in% c("Power (Hydro-Elec)", 
@@ -184,7 +184,7 @@ wateruse15 = wateruse8 |>
 # Additional cleaning ----
 
 # aggregate yearly water usage by use type
-wateruse_yearly = wateruse15 |> 
+wateruse_yearly = wateruse4 |> 
   select(year, use_type, total) |> 
   group_by(year, use_type) |> 
   summarize(total_use = sum(total))
@@ -196,19 +196,20 @@ ggplot(wateruse_yearly, aes(x = year, y = log(total_use), color = use_type)) +
   theme_minimal()
 
 # filter out "Sewage Treatment" use type (very few years of data)
-
+wateruse5 = wateruse4 |> 
+  filter(use_type != "Sewage Treatment")
 #------------------------------------------------------------------------------#
 
 # create dataset copies for merging
-wateruse_merge = wateruse8
-wateruse_info_merge = wateruse_info8
+wateruse_merge = wateruse5
+wateruse_info_merge = wateruse_info2
 
 # merge waterUse and waterUse_info datasets
-wateruse_merged = left_join(wateruse_merge, wateruse_info_merge, 
+wateruse_merged1 = left_join(wateruse_merge, wateruse_info_merge, 
                              by = "system_id", relationship = "many-to-many")
 
 # drop duplicates, reorder columns, drop source_name
-wateruse_almostclean = wateruse_merged |> 
+wateruse_merged2 = wateruse_merged1 |> 
   distinct() |>
   select(-source_name) |> 
   relocate(source_id, .after = system_id) |> 
@@ -220,7 +221,7 @@ wateruse_almostclean = wateruse_merged |>
   rename(total_gallons = total)
 
 
-monthly_zeros = wateruse_almostclean |>
+monthly_zeros = wateruse_merged2 |>
   filter(Jan == 0 &
            Feb == 0 &
            Mar == 0 &
@@ -235,7 +236,7 @@ monthly_zeros = wateruse_almostclean |>
            Dec == 0)
 
 # convert to long format
-wateruse_tidy = wateruse_almostclean |> 
+wateruse_tidy1 = wateruse_merged2 |> 
   pivot_longer(cols = Jan:Dec,
                names_to = "month",
                values_to = "gallons")
@@ -243,7 +244,7 @@ wateruse_tidy = wateruse_almostclean |>
 #------------------------------------------------------------------------------#
 
 # convert from population in thousands to actual population, rename, reorder variables, drop source_id (not relevant)
-wateruse_clean1 = wateruse_tidy |> 
+wateruse_tidy2 = wateruse_tidy1 |> 
   select(
     system_id,
     system_name,
@@ -263,25 +264,26 @@ wateruse_clean1 = wateruse_tidy |>
 #------------------------------------------------------------------------------#
 
 # drop observations that have no monthly or yearly water use data
-wateruse_clean2 = wateruse_clean1 |> 
+wateruse_tidy3 = wateruse_tidy2 |> 
   filter(year_gallons != 0)
 
 # looking at the data, there are two observations with much higher usage than the rest of the data,
-# and the water use data base is not showing these records, so these may have been an error caused during import
+# and the water use data base is not consistent with these records, so these may have been an error caused during import
 # Thus, we'll be removing these two observations below
 
 # define surrogate key to remove the 2 observations
-wateruse_clean_rm = wateruse_clean2 |> 
-  mutate(key = 1:nrow(wateruse_clean2))
+wateruse_tidy3 = wateruse_tidy3 |> 
+  mutate(key = row_number())
 
 # remove the two invalid observations
-wateruse_clean_rm = wateruse_clean_rm |> 
+wateruse_tidy4 = wateruse_tidy3 |> 
   filter(key != 332034 & key != 332035)
 
-wateruse_clean3 = wateruse_clean_rm
+#------------------------------------------------------------------------------#
+# Potential cleaning ----
 
 # calculate what months use the most water as a percentage of the total
-totals = wateruse_clean3 |>
+totals = wateruse_tidy4 |>
   group_by(month) |> 
   summarize(monthly_total = sum(month_gallons, na.rm = TRUE)) |> 
   mutate(total = sum(monthly_total),
@@ -328,7 +330,7 @@ total = totals$total
 total = total[1]
 
 # impute monthly averages for observations missing all months
-wateruse_impute = wateruse_clean3 |> 
+wateruse_impute = wateruse_tidy4 |> 
   group_by(year_gallons) |> 
   mutate(month_gallons = ifelse(all(month_gallons == 0) & month == "Jan", jan_percent*year_gallons,
          ifelse(all(month_gallons == 0) & month == "Feb", feb_percent*year_gallons,
@@ -344,16 +346,16 @@ wateruse_impute = wateruse_clean3 |>
          ifelse(all(month_gallons == 0) & month == "Dec", dec_percent*year_gallons, month_gallons)))))))))))))
 
 # look at observations with no monthly data to check a random one (system_id == 1008 is what we chose)
-check = wateruse_clean3 |> 
+check = wateruse_tidy4 |> 
   group_by(year_gallons) |> 
   filter(all(month_gallons == 0))
 
 # check system_id = 1008 before imputing
-sys1008 = wateruse_impute |> 
+sys1008_before = wateruse_tidy4 |> 
   filter(system_id == 1008 & year == 1988)
 
 # check system_id = 1008 after imputing
-sys1008_2 = wateruse_clean3 |> 
+sys1008_after = wateruse_impute |> 
   filter(system_id == 1008 & year == 1988)
 
 ## IT WORKED, WE ARE BETTER THAN EVERY DATA SCIENTIST EVER ##

@@ -48,8 +48,6 @@ merged1 = merge3 |>
 #------------------------------------------------------------------------------#
 # additional cleaning ----
 
-unique(merged1$use_type)
-
 # remove duplicates
 merged2 = merged1 |> 
   select(-key) |> 
@@ -59,16 +57,7 @@ merged2 = merged1 |>
   relocate(
     key, .before = system_id)
 
-merged3 = merged2 |> 
-  mutate(
-    use_type = ifelse(
-      use_type %in% c("Power (Hydro-Elec)", 
-                      "Power (Fossil-Fuel)", 
-                      "Power (Geothermal)",
-                      "Geothermal"), 
-      "Power", use_type))
-
-master_data = merged3
+master_data = merged2
 
 #------------------------------------------------------------------------------#
 # save master dataset ----
@@ -86,11 +75,7 @@ masterData = masterData |>
                                                     "Geothermal"),
                                    "Power", water_use))) |> 
   # remove sewage since only has a few years of observation and small water user
-  filter(water_use != "Sewage Treatment" & year >= 1970) 
-
-# check to see if regrouping categories worked
-unique_use_type2 = unique(masterData$water_use)
-unique_use_type2
+  filter(water_use != "Sewage Treatment" & year >= 1970)
 
 # add column that calculates total water usage across all use types per year, and per capita usage per year
 masterData2 = masterData |> 
@@ -121,6 +106,3 @@ powerYears = masterData3 |>
 # filter out years before 1992
 masterData4 = masterData3 |> 
   filter(year >= 1992)
-
-distinct_coords = master_data |> 
-  distinct(latitude, longitude)
