@@ -84,7 +84,8 @@ basin_plot = ggplot() +
   ) +
   theme_minimal() +
   theme_void() +
-  labs(fill = "")
+  labs(fill = "") +
+  theme(plot.background = element_rect(fill = "white"))
 
 # show plot
 print(basin_plot)
