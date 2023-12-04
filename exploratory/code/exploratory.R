@@ -88,19 +88,19 @@ wateruse_yearly = masterdata |>
   )
 
 # merge yearly datasets into one
-merge1 = left_join(wateruse_yearly, gsl_yearly, by = "year", relationship = "many-to-one")
-merge2 = left_join(merge1, pop_yearly, by = "year", relationship = "many-to-one")
-merge3 = left_join(merge2, precip_yearly, by = "year", relationship = "many-to-one")
+yearly_merge1 = left_join(wateruse_yearly, gsl_yearly, by = "year", relationship = "many-to-one")
+yearly_merge2 = left_join(yearly_merge1, pop_yearly, by = "year", relationship = "many-to-one")
+yearly_merge3 = left_join(yearly_merge2, precip_yearly, by = "year", relationship = "many-to-one")
 
 # yearly usage data for each use type
-yearly_per_use = merge3 |> 
+yearly_per_use = yearly_merge3 |> 
   # calculate yearly per capita water usage for each use type
   mutate(
     percapita_usage = year_gallons / population
   )
 
 # yearly total usage data across all use types
-yearly_total_use = merge3 |> 
+yearly_total_use = yearly_merge3 |> 
   group_by(year) |> 
   summarize(
     year_gallons = sum(year_gallons),
