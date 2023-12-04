@@ -2,6 +2,7 @@ library(dplyr)
 library(tidyverse)
 library(skimr)
 library(data.table)
+library(sf)
 
 load("~/560-Project/raw-data/data/wateruse_raw.rda")
 
@@ -204,7 +205,7 @@ wateruse_merged = left_join(wateruse_merge, wateruse_info_merge,
 # so going to filter out all water use observations that don't lie within this basin
 
 # Great Salt Lake Basin shapefile
-gsl_basin = st_read("~/560-Project/spatial/gsl-basin/GSLSubbasins.shp")
+gsl_basin = st_read("~/560-Project/spatial/data/basin/GSLSubbasins.shp")
 
 # filter out Strawberry Reservoir, drop duplicate column
 gsl_basin = gsl_basin |> 
@@ -389,7 +390,7 @@ wateruse13 = wateruse12 |>
 # "Industrial" usage spike around 2015
 industrial2014_2016 = wateruse13 |> 
   filter(use_type == "Industrial") |> 
-  filter(year == 2014 | year == 2015 | year ==2016) |> 
+  filter(year == 2014 | year == 2015 | year == 2016) |> 
   arrange(desc(year_gallons))
 
 # Cargill Salt reports uncharacteristically high usage in 2015, and these records do not show up in the Utah Water Use website
