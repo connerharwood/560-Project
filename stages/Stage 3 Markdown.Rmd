@@ -1,0 +1,104 @@
+---
+title: 'Stage 2: Draft Exploratory Analysis'
+author: "Ellie Hall and Conner Harwood"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr())
+```
+
+# Topic and Motivation
+
+We are looking at how water usage and water-related land use changes in Utah counties lying within the Great Salt Lake Basin have contributed to variations in Great Salt Lake (GSL) water levels. We'll also be using predictive analysis to look at potential future changes to GSL levels using water use trends, changes in water-related land use, and precipitation and population trends. The specific Utah counties we're focusing on, which lie fully or mostly within the GSL Basin, are Box Elder, Cache, Davis, Morgan, Rich, Salt Lake, Tooele, Utah, and Weber. 
+
+Utah has been the [fastest growing state since 2010](https://worldpopulationreview.com/state-rankings/fastest-growing-states), and much of this growth comes in counties closely connected to the Great Salt Lake. The GSL is facing dangerously low and decreasing water levels over the past several decades. If this trend continues, the economic, environmental, and ecological consequences to the region would be drastic. Declining lake levels expose lake bed that contains dangerous heavy metals, such as lead, mercury, and arsenic. As the exposed lake bed dries up, winds kick up dust storms that pose significant health risks to the surrounding communities. Lower lake levels also negatively impact the biology and wildlife that are dependent on a healthy lake, including brine shrimp and millions of migratory birds. Economic sectors closely tied to the GSL, including recreation and industry, are also negatively affected by declining levels. Thus, it's important to understand how water use in the Great Salt Lake Basin faced with population pressures and a changing climate will impact the health and future of the Great Salt Lake and its surrounding communities. 
+
+Furthermore, agriculture is the largest water user in the state of Utah, using 68% of the state's water supply, yet only generates 0.2% of Utah's GDP [source](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwjU4_Tf8aOCAxU9MjQIHS19CYEQFnoECA4QAw&url=https%3A%2F%2Fcontent.csbs.utah.edu%2F~lozada%2FResearch%2FUtahAgWaterUseHay.docx%23%3A~%3Atext%3DUsing%252068%2525%2520of%2520Utah%27s%2520water%2Cto%2520which%2520we%2520will%2520return.&usg=AOvVaw0IdpqkRNtyRjWG_ycnpIPq&opi=89978449). Thus, it’s important to understand water use and land trends in this sector to aid in enacting policies that curb their impacts on the Great Salt Lake.
+
+
+# Data Descriptions
+
+**Water Use**
+Obtained through the Utah Division of Water Rights [here](https://waterrights.utah.gov/asp_apps/generalWaterUse/WaterUseList.asp), this data includes all water rights holders in Utah dating back to 1959. Utah has surprisingly complete water use data that is publicly available. It has records on total monthly water usage in gallons for each water user, and breaks down this usage by type of use (e.g. agricultural, commercial, water supplier), as well as several other variables of interest. We're looking at data on water usage in the 9 GSL Basin counties. The data does not indicate whether water usage records are *consumptive* uses, which have much larger impacts on the Great Salt Lake than non-consumptive uses, as this water is not returned to the watershed basin. Though this is a limitation of the data, we'll still be able to gain a solid understanding of water usage impacts on the Great Salt Lake.
+
+**Great Salt Lake Elevation Levels**
+Obtained through the USGS using the `dataRetrieval` package in R, we've gathered daily water level observations dating back to 1966. The two relevant gauges are the Saltair Boat Harbor gauge in the South arm of the lake, and the gauge near Saline, UT in the North arm (the lake was split into two arms by a railroad causeway in the 1950s). Though the water levels of the two arms are typically very similar, we've used the average of the two gauge values for our observations. The gauges measure surface level elevation above sea level in feet.
+
+**Water-Related Land Use**
+Obtained through the Utah Division of Water Resources [here](https://dwre-utahdnr.opendata.arcgis.com/pages/wrlu-data), this data includes yearly composition of water-related land use by county and by basin. Each observation in a given year contains the acreage of a specific plot of land area as well as a description of the type of water use on that land (e.g. crop type, urban use, pasture). The data obtain from UDWA is incomplete; thus, we may not find it beneficial to use in future analysis. 
+
+**County Resident Populations**
+Obtained through Federal Reserve Economic Data (FRED) [here](https://fred.stlouisfed.org/categories/30154), the data contains yearly resident population numbers for each Utah county for each year dating back to 1970.
+
+**Precipitation Data**
+Obtained through NOAA [here](https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/county/time-series/UT-057/pcp/all/1/1959-2023), the data contains monthly total precipitation records in each of the 9 counties for each year dating back to 1959. 
+
+
+# Data Processing
+
+**Water Use**
+The water use .csv files for each of the 9 counties included two data tables containing different variables and information on entities with water user rights. One of the tables contained the monthly water usage data we're interested, and the other table had county information which we merged with the first table after cleaning them both. The main cleaning needed with this data was selecting and renaming the relevant variables, as well as addressing NA and 0 values. The data was also converted from wide to long format by monthly water use. Observations missing year, as well as those containing no water usage values, were removed since this data cannot be used. Some of the latitude/longitude entries were 0, which we converted to NA.
+
+Some observations had a non-zero value for total usage in a year, but their monthly values were all 0. Looking at the original database on the Utah Division of Water Rights website, the total usage numbers seemed to be correct, and the 0s for the monthly data was simply a lack of records. This occurred mostly in earlier years. Since we may want to look at monthly water usage, not just yearly, we imputed weighted averages of these months. The weights were determined by the percent of the total water usage that each month used. There are some observations with high usage in a specific month, and 0s for the other months, but since this aligned with the original data records (and likely implies zero water usage for that month), we did not impute for these observations.
+
+Two observations were removed that had water usage magnitudes much higher than the rest of the data set, and since the original database did not show values this high, we felt it safe to remove them entirely. There are also several observations with negative monthly values, but the yearly values are positive for these observations. This aligns with the original data and indicates a return of water back to the basin. We've chosen to keep these observations.
+
+**Great Salt Lake Elevation Levels**
+For the GSL levels data, we first cleaned the North Arm and South Arm data sets separately. Not much cleaning was necessary; we primarily selected and renamed relevant variables, then collapsed the daily water level values into monthly means for each year. The North and South Arms were then merged into one data set, and the average levels between the two gauges were calculated to give us the main water level values we're interested in.
+
+**Water-Related Land Use**
+The water-related land use data started out as separate data sets for different time periods, and most had slightly different variables. We selected the relevant variables from each to have consistent columns across the data sets, which were then appended into one land use data set. We then went through the cleaning steps and selected the 9 Utah counties of interest.
+
+**County Resident Populations**
+We downloaded this data from FRED for our specific counties of interest, and it came in an already mostly clean Excel file. All that was needed for further cleaning was reading the file into RStudio, converting to long format, extracting year from the date column, and changing some variables names. This data was then merged with the water use data by county and year. Populations were expressed in thousands of people, which we converted by multiplying by 1000 to express it as its actual number.
+
+**Precipitation Data**
+The precipitation data was downloaded separately for each county, from which we then cleaned the date values and added a county variable for each county. That data was then appended into one data set, and we did a few checks of the data before finalizing it. Overall, not much cleaning was needed here.
+
+**Master Dataset**
+Before merging into a master data set, we found it best fit to aggregate all data to yearly levels. This included either taking the sum of all months (precipitation, water use), or taking the mean of all months (population, land use acreage, and GSL lake levels). We decided that month-to-month fluctuations were not as important to observe as yearly time trends. To get the data in the same observation period, we filtered out all observations before 1992, since data on a couple of significant water use types constrains us to this time period. 
+
+We log transformed water usage variables in a few situations due to right-skewed data and very significant outliers.
+
+Despite a lengthy and exhaustive cleaning process, during our explanatory stage we frequently encountered issues with our data that needed attention and further cleaning. The data seem to have significant limitations that we hope to better address as we continue with our analysis.
+
+
+# Exploratory Analysis
+
+**Great Salt Lake Levels and Agricultural Water Use**
+
+```{r echo=FALSE}
+include_graphics("~/560-Project/exploratory/output/agWater_GSL.png")
+```
+
+Here we plot yearly Great Salt Lake elevations measured as feet above sea level, with log yearly agricultural water usage below. These trends show a clear rise in agricultural water use along with a consistently declining Great Salt Lake. We also added a line at 4198 feet - this number represents the minimum water level needed to support a healthy ecosystem. The GSL continues to fall well below this important threshold, with agricultural water usage showing no signs of slowing down.
+
+**Water Use by Use Type**
+
+```{r echo=FALSE}
+include_graphics("~/560-Project/exploratory/output/waterUse_byType.png")
+```
+
+We looked at water use trends broken down by the type of water use. Most uses show a steady but small increase over time, with agricultural uses increasing at a significantly faster rate than other uses. Water suppliers, industrial, and mining water uses have remained high with little fluctuations across years. However, we find that agricultural recently overtook mining in water usage. If the upward trend continues, agriculture will become an even more significant water user in the Great Salt Lake basin. 
+
+**Precipitation and Water Usage**
+
+```{r echo=FALSE}
+include_graphics("~/560-Project/exploratory/output/precip_waterUsage.png")
+```
+
+This plot shows how water use within each use type changes as precipitation in the Great Salt Lake Basin counties increases. Most uses see either no change or a small decrease in use as precipitation increases, with agricultural uses declining more significantly. This aligns with what we would expect, as agricultural practices such as irrigation may not be as necessary with higher levels of rainfall. It also shows a problematic trend the other way; in drier years, the agricultural sector increases its water usage. This, in conjunction with the lack of precipitation, could exacerbate declining lake levels.
+
+**Per Capita Water Usage**
+
+```{r echo=FALSE}
+include_graphics("~/560-Project/exploratory/output/perCapita_usage.png")
+```
+
+Here we divided total yearly water usage in the GSL Basin by the total population of all the Basin counties in that year to obtain a measure for per capita water usage. The data show a positive relationship here, meaning that with an already sharply increasing population, water usage is increasing at an even faster rate.
+
+### Bigger Picture
+
+Overall, the data show that the Great Salt Lake is showing no signs of reversing its decline, and water users in the Great Salt Lake Basin don't seem to be curbing their usage. The health, economic, environmental, and ecological impacts of a shrinking Great Salt Lake have already been felt and seen. Without significant behavioral and policy changes in this region, the GSL could reach irreversibly low water levels in the not-so-distant future. Our next step will be predicting when lake levels will reach these lows using what we've observed with water usage in the Great Salt Lake Basin, along with precipitation and population trends for a more accurate measure.
