@@ -87,7 +87,7 @@ Through our best efforts of cleaning and processing the data, we came across a n
 **Great Salt Lake Levels and Agricultural Water Use**
 
 ```{r echo=FALSE}
-include_graphics("~/560-Project/exploratory/output/agWater_GSL.png")
+include_graphics("~/560-Project/exploratory/output/ag_gsl.png")
 ```
 
 Here we plot yearly Great Salt Lake elevations measured as feet above sea level, with log yearly agricultural water usage below. These trends show a clear rise in agricultural water use along with a consistently declining Great Salt Lake. We also added a line at 4198 feet - this number represents the minimum water level needed to support a healthy ecosystem. The GSL continues to fall well below this important threshold, with agricultural water usage showing no signs of slowing down.
@@ -95,7 +95,7 @@ Here we plot yearly Great Salt Lake elevations measured as feet above sea level,
 **Water Use by Use Type**
 
 ```{r echo=FALSE}
-include_graphics("~/560-Project/exploratory/output/waterUse_byType.png")
+include_graphics("~/560-Project/exploratory/output/wateruse_by_type.png")
 ```
 
 We looked at water use trends broken down by the type of water use. Most uses show a steady but small increase over time, with agricultural uses increasing at a significantly faster rate than other uses. Water suppliers, industrial, and mining water uses have remained high with little fluctuations across years. However, we find that agricultural recently overtook mining in water usage. If the upward trend continues, agriculture will become an even more significant water user in the Great Salt Lake basin. 
@@ -103,7 +103,7 @@ We looked at water use trends broken down by the type of water use. Most uses sh
 **Precipitation and Water Usage**
 
 ```{r echo=FALSE}
-include_graphics("~/560-Project/exploratory/output/precip_waterUsage.png")
+include_graphics("~/560-Project/exploratory/output/precip_wateruse.png")
 ```
 
 This plot shows how water use within each use type changes as precipitation in the Great Salt Lake Basin counties increases. Most uses see either no change or a small decrease in use as precipitation increases, with agricultural uses declining more significantly. This aligns with what we would expect, as agricultural practices such as irrigation may not be as necessary with higher levels of rainfall. It also shows a problematic trend the other way; in drier years, the agricultural sector increases its water usage. This, in conjunction with the lack of precipitation, could exacerbate declining lake levels.
