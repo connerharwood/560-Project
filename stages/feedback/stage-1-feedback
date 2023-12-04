@@ -1,0 +1,9 @@
+Conner and Ellie,
+
+This sounds awesome! There are definitely a few conceptual pieces you still need to fit together, but you’ll get there.
+
+The trickiest part is that agricultural water use both is affected by streamflow, and affects streamflow. Controlling for weather variables is not going to really take care of the issue, first because streamflow is determined by weather so you don’t really even want to control for it, and second because even if there is residual variation, you could still have that reverse causality. Maybe you can think carefully about the difference between upstream and downstream streamflow gauges? Like, maybe upstream gauge readings are not affected by ag, so you can compare years that had similar upstream flows but different ag land/water uses, and see whether downstream gauges were different as a result. Another way to go would be to take a very descriptive approach and ask how much of the decline in the lake levels is *explained* by, but not necessarily caused by, changes in ag water use.
+
+Also, your second question mentions crop yields – I’m not sure that’s the most relevant factor here. I think you want to focus on ag water use and land use, rather than how much output they’re producing per unit land area.
+
+Excited to see what you come up with! Let me know when I can help.

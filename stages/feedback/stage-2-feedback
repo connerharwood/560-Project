@@ -1,0 +1,19 @@
+Fascinating project! Great motivation. Some comments:
+
+1. Nice data compilation, and great attention to detail and accuracy. Don’t impute water use if it is a treatment variable for a causal question.
+
+2. On consumptive vs. nonconsumptive water use, you can generally get 90% of the way just by filtering on uses. For example, you can filter out uses for power generation.
+
+3. The ag water graph is shocking! Is there an easy way you can convert the GSL level data to a lake volume number? Then you could graph the change in lake volume against the change in (untransformed) ag water use so we can see them on the same scale.
+
+4. In the plots by sector: What is the main point you want to highlight in each graph? I think it may be that ag behaves so much more differently than other sectors. So maybe there is a way to improve these graphs to make that point more clearly? For example, maybe use faceting to make lots of little graphs, or change the colors and line thickness to highlight the ag line?
+
+5. What is happening with domestic water use prior to 1997? That looks like a data problem. Worth looking into.
+
+6. In precipitation vs. water use: Why are these line graphs? They are not time series. Are they local regressions showing smoothed CEFs? If so, explain that more clearly (and also consider whether plotting the raw data or binscatters instead, or in addition, would provide useful context or not).
+
+7. Water use per capita: Local regression is useful when you have too many data points for the raw data to be informative. But this is just plotting a single aggregate time series, right? I think this would be a perfect place to just plot the raw data! If they are pretty noisy then maybe it also makes sense to show the smoothed lines. But I don’t think you want to suppress the actual data points.
+
+8. When you run regressions, if you’re planning to put the lake level on the left hand side, I’d suggest using changes in lake level relative to the prior year. That makes it more of a “flow” variable that better matches the DGP to the water use variables.
+
+9. Fantastic project organization, code organization, commenting, etc. The one thing I could quibble with is that some of your data cleaning steps could be abstracted more. I’m not sure if you’re better than every data scientist ever but you’re definitely better than a lot of them!
