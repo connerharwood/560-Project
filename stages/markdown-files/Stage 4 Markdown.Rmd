@@ -1,5 +1,5 @@
 ---
-title: 'Stage 2: Draft Exploratory Analysis'
+title: 'Stage 4: Econometric Analysis'
 author: "Elliane Hall and Conner Harwood"
 output: html_document
 ---

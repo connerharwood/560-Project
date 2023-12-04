@@ -1,6 +1,6 @@
 ---
-title: 'Stage 2: Draft Exploratory Analysis'
-author: "Ellie Hall and Conner Harwood"
+title: 'Stage 3: Final Exploratory Analysis'
+author: "Elliane Hall and Conner Harwood"
 output: html_document
 ---
 
