@@ -216,16 +216,16 @@ plot1 = ggplot() +
     data = yearly_per_use[yearly_per_use$use_type != "Agricultural", ], 
     aes(x = year, y = log(year_gallons), color = use_type), 
     size = 0.5, 
-    alpha = 0.6) +
+    alpha = 0.55) +
   geom_line(
     data = yearly_per_use[yearly_per_use$use_type == "Agricultural", ], 
     aes(x = year, y = log(year_gallons), color = use_type), 
     size = 1, 
     alpha = 1) +
   labs(
-    title = "Log Yearly Water Usage by Use Type",
+    title = "Yearly Water Usage by Use Type",
     x = "Year",  
-    y = "Log Yearly Water Usage", 
+    y = "Log Gallons", 
     color = "Use Type"
   ) +
   scale_color_manual(
@@ -236,7 +236,7 @@ plot1 = ggplot() +
                "Power" = "#CC79A7",
                "Domestic" = "#0072B2",
                "Commercial" = "#D55E00"),
-    breaks = c("Agricultural", "Irrigation", "Water Supplier", "Industrial", "Power", "Domestic", "Commercial")
+    breaks = c("Agricultural", "Irrigation", "Water Supplier", "Industrial", "Power", "Commercial", "Domestic")
   ) +
   theme_minimal() +
   theme(
@@ -301,19 +301,44 @@ ggsave("percapita_usage.png", plot = plot3)
 #------------------------------------------------------------------------------#
 # Precipitation vs water usage plot ----
 
-# create a scatterplot showing precipitation and water usage 
-plot4 = ggplot(masterdata, aes(x = precip_in, y = log(year_gallons), color = use_type)) + 
-  geom_smooth(span = 0.5, se = FALSE) + 
-  labs( 
-    title = "Yearly Total Precipitation vs. Log Yearly Water Usage",
-    x = "Total Precipitation in Inches", 
-    y = "Log Yearly Water Usage") + 
-  theme_minimal()
+wateruse_precip_plot = ggplot(yearly_per_use, aes(x = precip_in, y = log(year_gallons), color = use_type)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~use_type) +
+  scale_color_manual(
+    values = c(
+      "Agricultural" = "black",
+      "Irrigation" = "#E69F00",
+      "Water Supplier" = "#56B4E9",
+      "Industrial" = "#009E73",
+      "Power" = "#CC79A7",
+      "Domestic" = "#0072B2",
+      "Commercial" = "#D55E00"
+    )
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(
+    x = "Precipitation (Inches)",
+    y = "Log Gallons",
+    title = "Precipitation vs. Log Water Usage"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
 
-print(plot4)
+print(wateruse_precip_plot)
 
-# save plot as .png file
-ggsave("precip_wateruse.png", plot = plot4)
+# save in higher resolution
+ggsave(
+  filename = "wateruse_precip_plot.png",
+  plot = wateruse_precip_plot,
+  height = 7,
+  width = 8.5,
+  units = "in", 
+  dpi = 300,
+)
 
 #------------------------------------------------------------------------------#
 # Agricultural water use vs GSL plot ----
@@ -367,8 +392,63 @@ print(plot6)
 # save plot as .png file
 ggsave("ag_gsl.png", plot = plot6)
 
-min_volume = masterdata |> 
-  filter(gsl_level_ft <= 4198.01 & gsl_level_ft >= 4197.99)
+#------------------------------------------------------------------------------#
 
-min_volume = masterdata |> 
-  filter(gsl_level_ft == 4198.001)
+# yearly total water usage per use type
+wateruse_yearly2 = masterdata |> 
+  select(year, use_type, year_gallons) |> 
+  mutate(use_type = ifelse(use_type == "Irrigation", "Agricultural", use_type)) |> 
+  group_by(year, use_type) |> 
+  summarize(
+    year_gallons = sum(year_gallons)
+  )
+
+# merge yearly datasets into one
+yearly_merge1_2 = left_join(wateruse_yearly2, gsl_yearly, by = "year", relationship = "many-to-one")
+yearly_merge2_2 = left_join(yearly_merge1_2, pop_yearly, by = "year", relationship = "many-to-one")
+yearly_merge3_2 = left_join(yearly_merge2_2, precip_yearly, by = "year", relationship = "many-to-one")
+
+# yearly usage data for each use type
+yearly_per_use2 = yearly_merge3_2 |> 
+  # calculate yearly per capita water usage for each use type
+  mutate(
+    percapita_usage = year_gallons / population
+  )
+
+plot1_2 = ggplot() +
+  geom_line(
+    data = yearly_per_use2[yearly_per_use2$use_type != "Agricultural", ], 
+    aes(x = year, y = log(year_gallons), color = use_type), 
+    size = 0.5, 
+    alpha = 0.55) +
+  geom_line(
+    data = yearly_per_use2[yearly_per_use2$use_type == "Agricultural", ], 
+    aes(x = year, y = log(year_gallons), color = use_type), 
+    size = 1, 
+    alpha = 1) +
+  labs(
+    title = "Yearly Water Usage by Use Type",
+    x = "Year",  
+    y = "Log Gallons", 
+    color = "Use Type"
+  ) +
+  scale_color_manual(
+    values = c("Agricultural" = "black",
+               "Water Supplier" = "#56B4E9",
+               "Industrial" = "#009E73",
+               "Power" = "#CC79A7",
+               "Domestic" = "#0072B2",
+               "Commercial" = "#D55E00"),
+    breaks = c("Agricultural", "Water Supplier", "Industrial", "Power", "Commercial", "Domestic")
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+print(plot1_2)
+
+irrigation = masterdata |> 
+  filter(use_type == "Irrigation") |> 
+  distinct(system_name)

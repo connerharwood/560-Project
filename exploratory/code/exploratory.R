@@ -259,27 +259,6 @@ print(plot2)
 ggsave("gsl_levels.png", plot = plot2)
 
 #------------------------------------------------------------------------------#
-# Water use per capita plot ----
-
-# to plot yearly per capita usage for each use type, use yearly_per_use dataset
-# to plot yearly per capita usage across all use types, use yearly_total_use dataset
-
-# create a graph showing water usage per capita 
-plot3 = ggplot(masterdata, aes(x = year, y = percapita_usage / 1000)) +
-  geom_smooth(span = 0.01) +
-  labs( 
-    title = "Water Usage Per Capita",
-    x = "Year", 
-    y = "Water Usage Per Capita") + 
-  theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5))
-
-print(plot3)
-
-# save plot as .png file
-ggsave("percapita_usage.png", plot = plot3)
-
-#------------------------------------------------------------------------------#
 # Precipitation vs water usage plot ----
 
 # create a scatterplot showing precipitation and water usage 
