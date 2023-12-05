@@ -75,24 +75,8 @@ yearly_per_use = yearly_merge3 |>
     percapita_usage = year_gallons / population
   )
 
-# yearly total usage data across all use types
-yearly_total_use = yearly_merge3 |> 
-  group_by(year) |> 
-  summarize(
-    year_gallons = sum(year_gallons),
-    gsl_level_ft = mean(gsl_level_ft),
-    gsl_volume_gal = mean(gsl_volume_gal),
-    gsl_level_change = mean(gsl_level_change),
-    gsl_volume_change = mean(gsl_volume_change),
-    population = mean(population),
-    precip_in = mean(precip_in)
-  ) |> 
-  # calculate yearly per capita water usage
-  mutate(
-    percapita_usage = year_gallons / population
-  )
-
-reg_yearly = saveRDS(yearly_per_use, file = "reg_yearly.rds")
+reg_yearly = yearly_per_use
+save(reg_yearly, file = "reg_yearly.rds")
 
 #------------------------------------------------------------------------------#
 # Aggregate monthly data ----
@@ -169,21 +153,5 @@ monthly_per_use = monthly_merge3 |>
     percapita_usage = month_gallons / population
   )
 
-# monthly total usage data across all use types
-monthly_total_use = monthly_merge3 |> 
-  group_by(date) |> 
-  summarize(
-    month_gallons = sum(month_gallons),
-    gsl_level_ft = mean(gsl_level_ft),
-    gsl_volume_gal = mean(gsl_volume_gal),
-    gsl_level_change = mean(gsl_level_change),
-    gsl_volume_change = mean(gsl_volume_change),
-    population = mean(population),
-    precip_in = mean(precip_in)
-  ) |> 
-  # calculate monthly per capita water usage
-  mutate(
-    percapita_usage = month_gallons / population
-  )
-
-reg_monthly = saveRDS(monthly_per_use, file = "reg_monthly.rds")
+reg_monthly = monthly_per_use
+save(reg_monthly, file = "reg_monthly.rds")
