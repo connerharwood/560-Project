@@ -15,6 +15,12 @@ This project investigates how water use within the Utah portion of the Great Sal
 
 Utah has been the [fastest growing state since 2010](https://worldpopulationreview.com/state-rankings/fastest-growing-states), and much of this growth comes in counties closely connected to the Great Salt Lake. The GSL has been facing dangerously low and decreasing water levels over the past several decades. If this trend continues, the economic, environmental, and ecological consequences to the region would be drastic. Declining lake levels expose lake bed containing dangerous heavy metals, such as lead, mercury, and arsenic. As the exposed lake bed dries up, winds kick up dust storms that pose significant health risks to the surrounding communities. Lower lake levels also negatively impact the biology and wildlife that are dependent on a healthy lake. These include brine shrimp and [one of the largest populations of migratory birds in North America](https://wildlife.utah.gov/gslep/wildlife/birds.html). Economic sectors reliant on the GSL, including recreation and industry, are also negatively affected by declining levels. 
 
+Below is a map of the Utah portion of the Great Salt Lake Basin. There are four subbasins within the GSL Basin: Bear River, Jordan/Provo River, Weber River, and West Desert.
+
+```{r basin map}
+include_graphics("~/560-Project/spatial/output/basin_plot.png")
+```
+
 While climate change is expected to play a role in the future, current GSL level declines are primarily attributed to anthropogenic activities stemming from water development ([source](https://link.springer.com/chapter/10.1007/978-3-030-40352-2_1#Sec6)). Understanding the impact of water use in the Great Salt Lake Basin, coupled with population pressures and a changing climate, is crucial for the lake's health and the well-being of surrounding communities.
 
 Furthermore, agriculture is the largest water user in the state of Utah, using 68% of the state's water supply, yet it only generates 0.2% of Utah's GDP ([source](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwjU4_Tf8aOCAxU9MjQIHS19CYEQFnoECA4QAw&url=https%3A%2F%2Fcontent.csbs.utah.edu%2F~lozada%2FResearch%2FUtahAgWaterUseHay.docx%23%3A~%3Atext%3DUsing%252068%2525%2520of%2520Utah%27s%2520water%2Cto%2520which%2520we%2520will%2520return.&usg=AOvVaw0IdpqkRNtyRjWG_ycnpIPq&opi=89978449)). Examining water use trends in this sector is essential for formulating policies that mitigate its impact on the Great Salt Lake.
@@ -84,37 +90,29 @@ Through our best efforts of cleaning and processing the data, we came across a n
 
 # Exploratory Analysis
 
-**Great Salt Lake Levels and Agricultural Water Use**
+**Yearly Water Use by Use Type**
 
-```{r echo=FALSE}
-include_graphics("~/560-Project/exploratory/output/ag_gsl.png")
-```
-
-Here we plot yearly Great Salt Lake elevations measured as feet above sea level, with log yearly agricultural water usage below. These trends show a clear rise in agricultural water use along with a consistently declining Great Salt Lake. We also added a line at 4198 feet - this number represents the minimum water level needed to support a healthy ecosystem. The GSL continues to fall well below this important threshold, with agricultural water usage showing no signs of slowing down.
-
-**Water Use by Use Type**
-
-```{r echo=FALSE}
-include_graphics("~/560-Project/exploratory/output/wateruse_by_type.png")
+```{r water use by type plot, echo=FALSE}
+include_graphics("~/560-Project/exploratory/output/wateruse_by_type_plot.png")
 ```
 
 We looked at water use trends broken down by the type of water use. Most uses show a steady but small increase over time, with agricultural uses increasing at a significantly faster rate than other uses. Water suppliers, industrial, and mining water uses have remained high with little fluctuations across years. However, we find that agricultural recently overtook mining in water usage. If the upward trend continues, agriculture will become an even more significant water user in the Great Salt Lake basin. 
 
-**Precipitation and Water Usage**
+**Agricultural Water Use and Great Salt Lake Volume**
 
-```{r echo=FALSE}
-include_graphics("~/560-Project/exploratory/output/precip_wateruse.png")
+```{r ag water use and GSL volume plot, echo=FALSE}
+include_graphics("~/560-Project/exploratory/output/ag_gsl_plot.png")
+```
+
+Here we plot yearly Great Salt Lake elevations measured as feet above sea level, with log yearly agricultural water usage below. These trends show a clear rise in agricultural water use along with a consistently declining Great Salt Lake. We also added a line at 4198 feet - this number represents the minimum water level needed to support a healthy ecosystem. The GSL continues to fall well below this important threshold, with agricultural water usage showing no signs of slowing down.
+
+**Water Use and Precipitation**
+
+```{r water use and precipitation plot, echo=FALSE}
+include_graphics("~/560-Project/exploratory/output/wateruse_precip_plot.png")
 ```
 
 This plot shows how water use within each use type changes as precipitation in the Great Salt Lake Basin counties increases. Most uses see either no change or a small decrease in use as precipitation increases, with agricultural uses declining more significantly. This aligns with what we would expect, as agricultural practices such as irrigation may not be as necessary with higher levels of rainfall. It also shows a problematic trend the other way; in drier years, the agricultural sector increases its water usage. This, in conjunction with the lack of precipitation, could exacerbate declining lake levels.
-
-**Per Capita Water Usage**
-
-```{r echo=FALSE}
-include_graphics("~/560-Project/exploratory/output/perCapita_usage.png")
-```
-
-Here we divided total yearly water usage in the GSL Basin by the total population of all the Basin counties in that year to obtain a measure for per capita water usage. The data show a positive relationship here, meaning that with an already sharply increasing population, water usage is increasing at an even faster rate.
 
 ### Bigger Picture
 
