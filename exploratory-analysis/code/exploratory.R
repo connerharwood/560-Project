@@ -1,8 +1,7 @@
 library(dplyr)
-
+library(zoo)
 library(tidyverse)
 
-library(zoo)
 
 library(binsreg)
 
@@ -101,101 +100,9 @@ yearly_total_use = yearly_merge3 |>
   )
 
 #------------------------------------------------------------------------------#
-# Aggregate monthly data ----
-
-# convert month and year to date format
-masterdata_monthly = masterdata |> 
-  mutate(
-    date = as.Date(paste(year, month, "01"), format = "%Y %b %d"),
-    date = as.yearmon(date)
-  )
-
-# GSL monthly level and volume
-gsl_monthly = masterdata_monthly |> 
-  # convert volume from cubic meters to gallons
-  mutate(
-    gsl_volume_gal = gsl_volume_m3 * 264.172052
-  ) |> 
-  select(date, gsl_level_ft, gsl_volume_gal) |> 
-  group_by(date) |> 
-  summarize(
-    gsl_level_ft = mean(gsl_level_ft),
-    gsl_volume_gal = mean(gsl_volume_gal)
-  ) |> 
-  arrange(date) |> 
-  # calculate year-over-year change in level and volume
-  mutate(
-    gsl_level_change = (gsl_level_ft - lag(gsl_level_ft)) / lag(gsl_level_ft) * 100,
-    gsl_volume_change = (gsl_volume_gal - lag(gsl_volume_gal)) / lag(gsl_volume_gal) * 100
-  )
-
-# monthly total population across GSL Basin counties
-pop_monthly = masterdata_monthly |> 
-  select(date, county, population_thousands) |> 
-  mutate(population = population_thousands * 1000) |> 
-  group_by(date, county) |> 
-  summarize(
-    population = mean(population)
-  ) |> 
-  group_by(date) |> 
-  summarize(
-    population = sum(population)
-  )
-
-# monthly average precipitation across GSL Basin counties
-precip_monthly = masterdata_monthly |> 
-  select(date, county, precip_in) |> 
-  group_by(date, county) |> 
-  summarize(
-    precip_in = mean(precip_in)
-  ) |> 
-  group_by(date) |> 
-  summarize(
-    precip_in = mean(precip_in)
-  )
-
-# monthly total water usage per use type
-wateruse_monthly = masterdata_monthly |>
-  filter(month_gallons != 0) |> 
-  select(date, use_type, month_gallons) |> 
-  group_by(date, use_type) |> 
-  summarize(
-    month_gallons = sum(month_gallons)
-  )
-
-# merge monthly datasets into one
-monthly_merge1 = left_join(wateruse_monthly, gsl_monthly, by = "date", relationship = "many-to-one")
-monthly_merge2 = left_join(monthly_merge1, pop_monthly, by = "date", relationship = "many-to-one")
-monthly_merge3 = left_join(monthly_merge2, precip_monthly, by = "date", relationship = "many-to-one")
-
-# monthly usage data for each use type
-monthly_per_use = monthly_merge3 |> 
-  # calculate monthly per capita water usage for each use type
-  mutate(
-    percapita_usage = month_gallons / population
-  )
-
-# monthly total usage data across all use types
-monthly_total_use = monthly_merge3 |> 
-  group_by(date) |> 
-  summarize(
-    month_gallons = sum(month_gallons),
-    gsl_level_ft = mean(gsl_level_ft),
-    gsl_volume_gal = mean(gsl_volume_gal),
-    gsl_level_change = mean(gsl_level_change),
-    gsl_volume_change = mean(gsl_volume_change),
-    population = mean(population),
-    precip_in = mean(precip_in)
-  ) |> 
-  # calculate monthly per capita water usage
-  mutate(
-    percapita_usage = month_gallons / population
-  )
-
-#------------------------------------------------------------------------------#
 # Water usage by use type plot ----
 
-plot1 = ggplot() +
+wateruse_by_type_plot = ggplot() +
   # make lines non-agricultural use types thinner and faded
   geom_line(
     data = yearly_per_use[yearly_per_use$use_type != "Agricultural", ], 
@@ -209,7 +116,7 @@ plot1 = ggplot() +
     size = 1, 
     alpha = 1) +
   labs(
-    title = "Yearly Water Usage by Use Type",
+    title = "Yearly Water Use by Use Type",
     x = "Year",  
     y = "Log Gallons", 
     color = "Use Type"
@@ -221,8 +128,8 @@ plot1 = ggplot() +
                "Water Supplier" = "#56B4E9",
                "Industrial" = "#009E73",
                "Power" = "#CC79A7",
-               "Domestic" = "#0072B2",
-               "Commercial" = "#D55E00"),
+               "Commercial" = "#D55E00",
+               "Domestic" = "#0072B2"),
     breaks = c("Agricultural", "Irrigation", "Water Supplier", "Industrial", "Power", "Commercial", "Domestic")
   ) +
   theme_minimal() +
@@ -231,12 +138,12 @@ plot1 = ggplot() +
     plot.background = element_rect(fill = "white", color = NA)
   )
 
-print(plot1)
+print(wateruse_by_type_plot)
 
-# save in higher resolution
+# save as higher resolution png image
 ggsave(
   filename = "wateruse_by_type.png",
-  plot = plot1,
+  plot = wateruse_by_type_plot,
   height = 7,
   width = 10,
   units = "in", 
@@ -266,7 +173,7 @@ wateruse_precip_plot = ggplot(yearly_per_use, aes(x = precip_in, y = log(year_ga
   labs(
     x = "Precipitation (Inches)",
     y = "Log Gallons",
-    title = "Precipitation vs. Log Water Usage"
+    title = "Water Use vs Precipitation"
   ) +
   theme(
     plot.title = element_text(hjust = 0.5, size = 16),
@@ -275,7 +182,7 @@ wateruse_precip_plot = ggplot(yearly_per_use, aes(x = precip_in, y = log(year_ga
 
 print(wateruse_precip_plot)
 
-# save in higher resolution
+# save as higher resolution png image
 ggsave(
   filename = "wateruse_precip_plot.png",
   plot = wateruse_precip_plot,
@@ -289,45 +196,49 @@ ggsave(
 # Ag water use vs GSL volume plot ----
 
 # select only agricultural water use
-ag_gsl_levels = yearly_per_use |> 
+ag_use = yearly_per_use |> 
   filter(use_type == "Agricultural")
 
-# aggregate total water usage per year across agricultural water uses
-ag_gsl_levels = ag_gsl_levels |> 
-  distinct(year, use_type, gsl_volume_gal, .keep_all = TRUE) |> 
-  group_by(year) |> 
-  mutate(gsl_volume_gal = sum(gsl_volume_gal))
-
 # create plot with ag water use and GSL volume
-combined_plot <- ggplot(ag_gsl_levels, aes(x = year)) +
+ag_gsl_plot = ggplot(ag_use, aes(x = year)) +
+  # convert GSL volume to one trillion gallons (later converted to one hundred billion gallons in sec.axis), plot
   geom_line(aes(y = gsl_volume_gal/1e12, color = "GSL Volume"), size = 1.2) +
+  # convert ag water use to one hundred billion gallons, plot
   geom_line(aes(y = year_gallons/1e11, color = "Ag Water Use"), size = 1.2) +
-  labs(y = "GSL Volume (Gallons)",
-       title = "Agricultural Water Use and GSL Volume",
-       x = "Year"
+  # rename axes and title
+  labs(
+    x = "Year",
+    y = "GSL Volume (Gallons)",
+    title = "Agricultural Water Use and GSL Volume"
   ) +
+  # choose colors for lines
   scale_color_manual(values = c("GSL Volume" = "lightblue", "Ag Water Use" = "pink")) +
   theme_minimal() +
+  # center title
   theme(plot.title = element_text(hjust = 0.5)) +
+  # position legend to bottom of graph
   theme(legend.position = "bottom") +
+  # create separate y-axes for ag water use and GSL volume
   scale_y_continuous(
     name = "Ag Water Use (100Bn Gallons)",
     sec.axis = sec_axis(~.*10, name = "GSL Volume (100Bn Gallons)")
   ) +
+  # remove vertical grids
   theme(
     panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank()
   ) +
+  # remove legend title
   labs(color = NULL) +
+  # add horizontal line indicating minimum GSL volume for a healthy lake
   geom_hline(yintercept = 4.475119e+12/1e12, linetype = "dashed", color = "blue") + 
-  geom_text(aes(x = 2018, y = 4.65, label = "Min Healthy Lake Volume = 44.75"), color = "blue", hjust = 1, size = 3)
+  geom_text(aes(x = 2015.5, y = 4.65, label = "Min Healthy Lake Volume = 44.75"), color = "blue", hjust = 1, size = 3)
 
-# Display the combined plot
-print(combined_plot)
+print(ag_gsl_plot)
 
-# save in higher resolution
+# save as higher resolution png image
 ggsave(
-  filename = "wateruse_precip_plot.png",
+  filename = "ag_gsl_plot.png",
   plot = wateruse_precip_plot,
   height = 7,
   width = 8.5,
