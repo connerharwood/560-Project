@@ -109,14 +109,16 @@ wateruse_by_type_plot = ggplot() +
     aes(x = year, y = log(year_gallons), color = use_type), 
     # decrease size of non-agricultural use type lines and fade
     size = 0.5, 
-    alpha = 0.6) +
+    alpha = 0.6
+  ) +
   geom_line(
     # plot agricultural use type
     data = yearly_per_use[yearly_per_use$use_type == "Agricultural", ], 
     aes(x = year, y = log(year_gallons), color = use_type), 
     # increase size of agricultural use type and don't fade
     size = 1, 
-    alpha = 1) +
+    alpha = 1
+  ) +
   labs(
     title = "Yearly Water Use by Use Type",
     x = "Year",  
@@ -188,7 +190,7 @@ ag_gsl_plot = ggplot(ag_use, aes(x = year)) +
     # remove vertical gridlines
     panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank()
-    ) +
+  ) +
   # create separate y-axes for ag water use and GSL volume
   scale_y_continuous(
     name = "Ag Water Use (100Bn Gallons)",
@@ -203,7 +205,8 @@ ag_gsl_plot = ggplot(ag_use, aes(x = year)) +
     aes(x = 2015.5, y = 4.65, label = "Min Healthy Lake Volume = 44.75"), 
     color = "blue", 
     hjust = 1, 
-    size = 3)
+    size = 3
+  )
 
 print(ag_gsl_plot)
 
