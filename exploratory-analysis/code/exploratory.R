@@ -2,9 +2,6 @@ library(dplyr)
 library(zoo)
 library(tidyverse)
 
-
-library(binsreg)
-
 library(scales)
 
 library(lubridate)
