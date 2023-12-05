@@ -4,6 +4,8 @@ library(zoo)
 
 load("~/560-Project/clean-data/data/masterdata.rds")
 
+# create aggregated data at yearly and monthly level by use type for regression model
+
 #------------------------------------------------------------------------------#
 # Aggregate yearly data ----
 
@@ -184,4 +186,4 @@ monthly_total_use = monthly_merge3 |>
     percapita_usage = month_gallons / population
   )
 
-reg_yearly = saveRDS(yearly_per_use, file = "reg_yearly.rds")
+reg_monthly = saveRDS(monthly_per_use, file = "reg_monthly.rds")
