@@ -203,9 +203,9 @@ plot1 = ggplot() +
     size = 1, 
     alpha = 1) +
   labs(
-    title = "Log Yearly Water Usage by Use Type",
+    title = "Yearly Water Usage by Use Type",
     x = "Year",  
-    y = "Log Yearly Water Usage", 
+    y = "Log Gallons", 
     color = "Use Type"
   ) +
   # select colors and manually select order of legend
@@ -217,7 +217,7 @@ plot1 = ggplot() +
                "Power" = "#CC79A7",
                "Domestic" = "#0072B2",
                "Commercial" = "#D55E00"),
-    breaks = c("Agricultural", "Irrigation", "Water Supplier", "Industrial", "Power", "Domestic", "Commercial")
+    breaks = c("Agricultural", "Irrigation", "Water Supplier", "Industrial", "Power", "Commercial", "Domestic")
   ) +
   theme_minimal() +
   theme(
@@ -238,42 +238,46 @@ ggsave(
 )
 
 #------------------------------------------------------------------------------#
-# GSL plot ----
-
-# create a graph showing GSL levels over time 
-plot2 = ggplot(masterdata, aes(x = year, y = gsl_level_ft)) + 
-  geom_line(color = "blue") +
-  geom_hline(yintercept = 4198, linetype = "dashed", color = "red") +
-  geom_text(aes(x = max(year), y = 4198.5, label = "Minimum Healthy Lake Level", color = "red"), hjust = 1) +
-  labs( 
-    title = "Great Salt Lake Levels",
-    x = "Year", 
-    y = "Level in Feet") + 
-  theme_minimal() +
-  guides(color = "none") +
-  theme(plot.title = element_text(hjust = 0.5))
-
-print(plot2)
-
-# save plot as .png file
-ggsave("gsl_levels.png", plot = plot2)
-
-#------------------------------------------------------------------------------#
 # Precipitation vs water usage plot ----
 
-# create a scatterplot showing precipitation and water usage 
-plot4 = ggplot(masterdata, aes(x = precip_in, y = log(year_gallons), color = use_type)) + 
-  geom_smooth(span = 0.5, se = FALSE) + 
-  labs( 
-    title = "Yearly Total Precipitation vs. Log Yearly Water Usage",
-    x = "Total Precipitation in Inches", 
-    y = "Log Yearly Water Usage") + 
-  theme_minimal()
+wateruse_precip_plot = ggplot(yearly_per_use, aes(x = precip_in, y = log(year_gallons), color = use_type)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~use_type) +
+  scale_color_manual(
+    values = c(
+      "Agricultural" = "black",
+      "Irrigation" = "#E69F00",
+      "Water Supplier" = "#56B4E9",
+      "Industrial" = "#009E73",
+      "Power" = "#CC79A7",
+      "Domestic" = "#0072B2",
+      "Commercial" = "#D55E00"
+    )
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(
+    x = "Precipitation (Inches)",
+    y = "Log Gallons",
+    title = "Precipitation vs. Log Water Usage"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
 
-print(plot4)
+print(wateruse_precip_plot)
 
-# save plot as .png file
-ggsave("precip_wateruse.png", plot = plot4)
+# save in higher resolution
+ggsave(
+  filename = "wateruse_precip_plot.png",
+  plot = wateruse_precip_plot,
+  height = 7,
+  width = 8.5,
+  units = "in", 
+  dpi = 300,
+)
 
 #------------------------------------------------------------------------------#
 # Agricultural water use vs GSL plot ----
