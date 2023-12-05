@@ -316,47 +316,35 @@ ag_gsl_levels = ag_gsl_levels |>
   group_by(year) |> 
   mutate(gsl_volume_gal = sum(gsl_volume_gal))
 
-# create a plot showing GSL levels in feet over time
-plot_gsl_levels = ggplot(ag_gsl_levels, aes(x = year, y = gsl_volume_gal/100000000000)) +
-  geom_smooth(color = "lightblue", se = FALSE, span = 0.1) +
+# create plot with ag water use and GSL volume
+combined_plot <- ggplot(ag_gsl_levels, aes(x = year)) +
+  geom_line(aes(y = gsl_volume_gal/1e12, color = "GSL Volume"), size = 1.2) +
+  geom_line(aes(y = year_gallons/1e11, color = "Ag Water Use"), size = 1.2) +
   labs(y = "GSL Volume (Gallons)",
-       title = "Agricultural Water Use and GSL Volume" 
-       ) +
-  guides(color = "none") +
+       title = "Agricultural Water Use and GSL Volume",
+       x = "Year"
+  ) +
+  scale_color_manual(values = c("GSL Volume" = "lightblue", "Ag Water Use" = "pink")) +
   theme_minimal() +
-  # remove x-axis since irrelevant 
-  theme(
-    axis.text.x = element_blank(),
-    axis.ticks.x = element_blank(),
-    axis.title.x = element_blank()
-  ) +
   theme(plot.title = element_text(hjust = 0.5)) +
-  scale_color_manual(values = c("blue" = "blue"))
-
-print(plot_gsl_levels)
-
-# create a plot showing agricultural water usage 
-plot_ag_water_use = ggplot(ag_gsl_levels, aes(x = year, y = year_gallons/100000000000)) +
-  geom_smooth(color = "pink", se = FALSE, span = 0.1) +
-  labs(y = "Ag Water Use (Gallons)", 
-       x = "Year") +
-  theme_minimal()
-
-print(plot_ag_water_use)
-
-# Combine the two plots into one 
-combined_plot <- plot_ag_water_use + 
-  geom_line(data = ag_gsl_levels, aes(x = year, y = log(gsl_volume_gal), color = "GSL Volume (Gallons)"), size = 1) +
-  scale_y_continuous(
-    sec.axis = sec_axis(~ exp(.), name = "GSL Volume (Gallons)", 
-                        breaks = pretty(range(ag_gsl_levels$gsl_volume_gal), n = 5),
-                        labels = scales::comma_format())
-  ) +
   theme(legend.position = "bottom") +
-  guides(color = guide_legend(title = NULL, order = 2))
+  scale_y_continuous(
+    name = "Ag Water Use (100Bn Gallons)",
+    sec.axis = sec_axis(~.*10, name = "GSL Volume (100Bn Gallons)")
+  ) +
+  theme(
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank()
+  ) +
+  labs(color = NULL) +
+  geom_hline(yintercept = 4.475119e+12/1e12, linetype = "dashed", color = "blue") + 
+  geom_text(aes(x = 2018, y = 4.65, label = "Min Healthy Lake Volume = 44.75"), color = "blue", hjust = 1, size = 3)
 
 # Display the combined plot
-print(plot_gsl_levels)
+print(combined_plot)
 
 # save plot as .png file
-ggsave("ag_gsl.png", plot = plot_gsl_levels)
+ggsave("ag_gsl.png", plot = combined_plot)
+
+
+
