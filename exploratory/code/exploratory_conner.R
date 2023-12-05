@@ -259,44 +259,44 @@ monthly_total_use = monthly_merge3 |>
 #------------------------------------------------------------------------------#
 # Precipitation vs water usage plot ----
 
-wateruse_precip_plot = ggplot(yearly_per_use, aes(x = precip_in, y = log(year_gallons), color = use_type)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  facet_wrap(~use_type) +
-  scale_color_manual(
-    values = c(
-      "Agricultural" = "black",
-      "Irrigation" = "#E69F00",
-      "Water Supplier" = "#56B4E9",
-      "Industrial" = "#009E73",
-      "Power" = "#CC79A7",
-      "Domestic" = "#0072B2",
-      "Commercial" = "#D55E00"
-    )
-  ) +
-  theme_minimal() +
-  theme(legend.position = "none") +
-  labs(
-    x = "Precipitation (Inches)",
-    y = "Log Gallons",
-    title = "Precipitation vs. Log Water Usage"
-  ) +
-  theme(
-    plot.title = element_text(hjust = 0.5, size = 16),
-    plot.background = element_rect(fill = "white", color = NA)
-  )
-
-print(wateruse_precip_plot)
-
-# save in higher resolution
-ggsave(
-  filename = "wateruse_precip_plot.png",
-  plot = wateruse_precip_plot,
-  height = 7,
-  width = 8.5,
-  units = "in", 
-  dpi = 300,
-)
+# wateruse_precip_plot = ggplot(yearly_per_use, aes(x = precip_in, y = log(year_gallons), color = use_type)) +
+#   geom_point() +
+#   geom_smooth(method = "lm", se = FALSE) +
+#   facet_wrap(~use_type) +
+#   scale_color_manual(
+#     values = c(
+#       "Agricultural" = "black",
+#       "Irrigation" = "#E69F00",
+#       "Water Supplier" = "#56B4E9",
+#       "Industrial" = "#009E73",
+#       "Power" = "#CC79A7",
+#       "Domestic" = "#0072B2",
+#       "Commercial" = "#D55E00"
+#     )
+#   ) +
+#   theme_minimal() +
+#   theme(legend.position = "none") +
+#   labs(
+#     x = "Precipitation (Inches)",
+#     y = "Log Gallons",
+#     title = "Precipitation vs. Log Water Usage"
+#   ) +
+#   theme(
+#     plot.title = element_text(hjust = 0.5, size = 16),
+#     plot.background = element_rect(fill = "white", color = NA)
+#   )
+# 
+# print(wateruse_precip_plot)
+# 
+# # save in higher resolution
+# ggsave(
+#   filename = "wateruse_precip_plot.png",
+#   plot = wateruse_precip_plot,
+#   height = 7,
+#   width = 8.5,
+#   units = "in", 
+#   dpi = 300,
+# )
 
 #------------------------------------------------------------------------------#
 # Agricultural water use vs GSL plot ----
@@ -355,64 +355,3 @@ print(plot_gsl_levels)
 
 # save plot as .png file
 ggsave("ag_gsl.png", plot = plot6)
-
-#------------------------------------------------------------------------------#
-
-# yearly total water usage per use type
-wateruse_yearly2 = masterdata |> 
-  select(year, use_type, year_gallons) |> 
-  mutate(use_type = ifelse(use_type == "Irrigation", "Agricultural", use_type)) |> 
-  group_by(year, use_type) |> 
-  summarize(
-    year_gallons = sum(year_gallons)
-  )
-
-# merge yearly datasets into one
-yearly_merge1_2 = left_join(wateruse_yearly2, gsl_yearly, by = "year", relationship = "many-to-one")
-yearly_merge2_2 = left_join(yearly_merge1_2, pop_yearly, by = "year", relationship = "many-to-one")
-yearly_merge3_2 = left_join(yearly_merge2_2, precip_yearly, by = "year", relationship = "many-to-one")
-
-# yearly usage data for each use type
-yearly_per_use2 = yearly_merge3_2 |> 
-  # calculate yearly per capita water usage for each use type
-  mutate(
-    percapita_usage = year_gallons / population
-  )
-
-plot1_2 = ggplot() +
-  geom_line(
-    data = yearly_per_use2[yearly_per_use2$use_type != "Agricultural", ], 
-    aes(x = year, y = log(year_gallons), color = use_type), 
-    size = 0.5, 
-    alpha = 0.55) +
-  geom_line(
-    data = yearly_per_use2[yearly_per_use2$use_type == "Agricultural", ], 
-    aes(x = year, y = log(year_gallons), color = use_type), 
-    size = 1, 
-    alpha = 1) +
-  labs(
-    title = "Yearly Water Usage by Use Type",
-    x = "Year",  
-    y = "Log Gallons", 
-    color = "Use Type"
-  ) +
-  scale_color_manual(
-    values = c("Agricultural" = "black",
-               "Water Supplier" = "#56B4E9",
-               "Industrial" = "#009E73",
-               "Power" = "#CC79A7",
-               "Domestic" = "#0072B2",
-               "Commercial" = "#D55E00"),
-    breaks = c("Agricultural", "Water Supplier", "Industrial", "Power", "Commercial", "Domestic")
-  ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 0.5, size = 16),
-    plot.background = element_rect(fill = "white", color = NA)
-  )
-
-print(plot1_2)
-
-irrigation = masterdata |> 
-  filter(use_type == "Irrigation") |> 
-  distinct(system_name)
