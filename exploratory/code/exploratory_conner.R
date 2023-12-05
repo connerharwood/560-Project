@@ -209,16 +209,6 @@ monthly_total_use = monthly_merge3 |>
   )
 
 #------------------------------------------------------------------------------#
-# Water usage by use type table ----
-
-# create table showing total water use by use type
-use_type_totals = masterdata |> 
-  group_by(use_type) |> 
-  summarize("Total Gallons in Hundreds of Billions" = sum(year_gallons) / 100000000000) |> 
-  rename("Water Use Type" = use_type) |> 
-  arrange(desc(`Total Gallons in Hundreds of Billions`))
-
-#------------------------------------------------------------------------------#
 # Water usage by use type plot ----
 
 plot1 = ggplot() +
@@ -376,3 +366,9 @@ print(plot6)
 
 # save plot as .png file
 ggsave("ag_gsl.png", plot = plot6)
+
+min_volume = masterdata |> 
+  filter(gsl_level_ft <= 4198.01 & gsl_level_ft >= 4197.99)
+
+min_volume = masterdata |> 
+  filter(gsl_level_ft == 4198.001)

@@ -8,28 +8,6 @@ library(cowplot)
 
 load("~/560-Project/clean-data/data/masterdata.rds")
 
-# notes (delete when done)
-
-# 5 plots that we've tried in this script:
-
-# 1. water usage by use type (included in Stage 2 submission)
-
-# 2. GSL levels plot
-# we plotted GSL levels against ag use, so not necessary to focus on this plot
-
-# 3. Ag water use vs GSL levels plot (included in Stage 2)
-# need to do ag water use vs GSL volume to be on same scale (should GSL volume be log transformed since water use is?)
-
-# 4. water use per capita plot (included in Stage 2)
-
-# 5. precipitation vs water usage (included in Stage 2)
-
-# also have a table of water usage by use type (total across all the years), not sure if we care to use this one at all
-# the masterdata, yearly_per_use, and yearly_total_use don't have any transformed variables, so do that in ggplot if necessary
-# log transform some, or maybe divide units with very large numbers by 10000 or so
-
-# also could be worth looking into monthly level plots
-
 #------------------------------------------------------------------------------#
 # Aggregate yearly data ----
 
@@ -209,35 +187,55 @@ monthly_total_use = monthly_merge3 |>
   )
 
 #------------------------------------------------------------------------------#
-# Water usage by use type table ----
-
-# create table showing total water use by use type
-use_type_totals = masterdata |> 
-  group_by(use_type) |> 
-  summarize("Total Gallons in Hundreds of Billions" = sum(year_gallons) / 100000000000) |> 
-  rename("Water Use Type" = use_type) |> 
-  arrange(desc(`Total Gallons in Hundreds of Billions`))
-
-#------------------------------------------------------------------------------#
 # Water usage by use type plot ----
 
-# create a graph showing water usage by use type over time 
-plot1 = ggplot(masterdata, aes(x = year, y = log(year_gallons), color = reorder(use_type, -year_gallons))) +
-  geom_smooth(se = FALSE, span = 0.09, size = 0.5) +
+plot1 = ggplot() +
+  # make lines non-agricultural use types thinner and faded
+  geom_line(
+    data = yearly_per_use[yearly_per_use$use_type != "Agricultural", ], 
+    aes(x = year, y = log(year_gallons), color = use_type), 
+    size = 0.5, 
+    alpha = 0.6) +
+  # make lines for agricultural use type thicker
+  geom_line(
+    data = yearly_per_use[yearly_per_use$use_type == "Agricultural", ], 
+    aes(x = year, y = log(year_gallons), color = use_type), 
+    size = 1, 
+    alpha = 1) +
   labs(
     title = "Log Yearly Water Usage by Use Type",
     x = "Year",  
     y = "Log Yearly Water Usage", 
     color = "Use Type"
   ) +
-  scale_color_brewer(palette = "Set2") +
+  # select colors and manually select order of legend
+  scale_color_manual(
+    values = c("Agricultural" = "black",
+               "Irrigation" = "#E69F00",
+               "Water Supplier" = "#56B4E9",
+               "Industrial" = "#009E73",
+               "Power" = "#CC79A7",
+               "Domestic" = "#0072B2",
+               "Commercial" = "#D55E00"),
+    breaks = c("Agricultural", "Irrigation", "Water Supplier", "Industrial", "Power", "Domestic", "Commercial")
+  ) +
   theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
 
 print(plot1)
 
-# save plot as .png file
-ggsave("wateruse_by_type.png", plot = plot1)
+# save in higher resolution
+ggsave(
+  filename = "wateruse_by_type.png",
+  plot = plot1,
+  height = 7,
+  width = 10,
+  units = "in", 
+  dpi = 300,
+)
 
 #------------------------------------------------------------------------------#
 # GSL plot ----
