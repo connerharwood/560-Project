@@ -221,23 +221,50 @@ use_type_totals = masterdata |>
 #------------------------------------------------------------------------------#
 # Water usage by use type plot ----
 
-# create a graph showing water usage by use type over time 
-plot1 = ggplot(masterdata, aes(x = year, y = log(year_gallons), color = reorder(use_type, -year_gallons))) +
-  geom_smooth(se = FALSE, span = 0.09, size = 0.5) +
+plot1 = ggplot() +
+  geom_line(
+    data = yearly_per_use[yearly_per_use$use_type != "Agricultural", ], 
+    aes(x = year, y = log(year_gallons), color = use_type), 
+    size = 0.5, 
+    alpha = 0.6) +
+  geom_line(
+    data = yearly_per_use[yearly_per_use$use_type == "Agricultural", ], 
+    aes(x = year, y = log(year_gallons), color = use_type), 
+    size = 1, 
+    alpha = 1) +
   labs(
     title = "Log Yearly Water Usage by Use Type",
     x = "Year",  
     y = "Log Yearly Water Usage", 
     color = "Use Type"
   ) +
-  scale_color_brewer(palette = "Set2") +
+  scale_color_manual(
+    values = c("Agricultural" = "black",
+               "Irrigation" = "#E69F00",
+               "Water Supplier" = "#56B4E9",
+               "Industrial" = "#009E73",
+               "Power" = "#CC79A7",
+               "Domestic" = "#0072B2",
+               "Commercial" = "#D55E00"),
+    breaks = c("Agricultural", "Irrigation", "Water Supplier", "Industrial", "Power", "Domestic", "Commercial")
+  ) +
   theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
 
 print(plot1)
 
-# save plot as .png file
-ggsave("wateruse_by_type.png", plot = plot1)
+# save in higher resolution
+ggsave(
+  filename = "wateruse_by_type.png",
+  plot = plot1,
+  height = 7,
+  width = 10,
+  units = "in", 
+  dpi = 300,
+)
 
 #------------------------------------------------------------------------------#
 # GSL plot ----
