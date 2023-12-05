@@ -17,6 +17,12 @@ Utah has been the [fastest growing state since 2010](https://worldpopulationrevi
 
 Furthermore, agriculture is the largest water user in the state of Utah, using 68% of the state's water supply, yet only generates 0.2% of Utah's GDP [source](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwjU4_Tf8aOCAxU9MjQIHS19CYEQFnoECA4QAw&url=https%3A%2F%2Fcontent.csbs.utah.edu%2F~lozada%2FResearch%2FUtahAgWaterUseHay.docx%23%3A~%3Atext%3DUsing%252068%2525%2520of%2520Utah%27s%2520water%2Cto%2520which%2520we%2520will%2520return.&usg=AOvVaw0IdpqkRNtyRjWG_ycnpIPq&opi=89978449). Thus, it’s important to understand water use and land trends in this sector to aid in enacting policies that curb their impacts on the Great Salt Lake.
 
+**WE WILL MOVE THIS**
+
+```{r}
+include_graphics("~/560-Project/spatial/output/basin_plot.png")
+```
+
 
 # Data Descriptions
 
@@ -67,10 +73,10 @@ Despite a lengthy and exhaustive cleaning process, during our explanatory stage 
 
 # Exploratory Analysis
 
-**Great Salt Lake Levels and Agricultural Water Use**
+**Great Salt Lake Volume and Agricultural Water Use**
 
 ```{r echo=FALSE}
-include_graphics("~/560-Project/exploratory/output/agWater_GSL.png")
+include_graphics("~/560-Project/exploratory-analysis/output/ag_gsl_plot.png")
 ```
 
 Here we plot yearly Great Salt Lake elevations measured as feet above sea level, with log yearly agricultural water usage below. These trends show a clear rise in agricultural water use along with a consistently declining Great Salt Lake. We also added a line at 4198 feet - this number represents the minimum water level needed to support a healthy ecosystem. The GSL continues to fall well below this important threshold, with agricultural water usage showing no signs of slowing down.
@@ -78,7 +84,7 @@ Here we plot yearly Great Salt Lake elevations measured as feet above sea level,
 **Water Use by Use Type**
 
 ```{r echo=FALSE}
-include_graphics("~/560-Project/exploratory/output/waterUse_byType.png")
+include_graphics("~/560-Project/exploratory-analysis/output/wateruse_by_type_plot.png")
 ```
 
 We looked at water use trends broken down by the type of water use. Most uses show a steady but small increase over time, with agricultural uses increasing at a significantly faster rate than other uses. Water suppliers, industrial, and mining water uses have remained high with little fluctuations across years. However, we find that agricultural recently overtook mining in water usage. If the upward trend continues, agriculture will become an even more significant water user in the Great Salt Lake basin. 
@@ -86,18 +92,11 @@ We looked at water use trends broken down by the type of water use. Most uses sh
 **Precipitation and Water Usage**
 
 ```{r echo=FALSE}
-include_graphics("~/560-Project/exploratory/output/precip_waterUsage.png")
+include_graphics("~/560-Project/exploratory-analysis/output/wateruse_precip_plot.png")
 ```
 
 This plot shows how water use within each use type changes as precipitation in the Great Salt Lake Basin counties increases. Most uses see either no change or a small decrease in use as precipitation increases, with agricultural uses declining more significantly. This aligns with what we would expect, as agricultural practices such as irrigation may not be as necessary with higher levels of rainfall. It also shows a problematic trend the other way; in drier years, the agricultural sector increases its water usage. This, in conjunction with the lack of precipitation, could exacerbate declining lake levels.
 
-**Per Capita Water Usage**
-
-```{r echo=FALSE}
-include_graphics("~/560-Project/exploratory/output/perCapita_usage.png")
-```
-
-Here we divided total yearly water usage in the GSL Basin by the total population of all the Basin counties in that year to obtain a measure for per capita water usage. The data show a positive relationship here, meaning that with an already sharply increasing population, water usage is increasing at an even faster rate.
 
 ### Bigger Picture
 
