@@ -2,12 +2,6 @@ library(dplyr)
 library(zoo)
 library(tidyverse)
 
-library(scales)
-
-library(lubridate)
-
-library(cowplot)
-
 load("~/560-Project/clean-data/data/masterdata.rds")
 
 #------------------------------------------------------------------------------#
@@ -137,7 +131,7 @@ wateruse_by_type_plot = ggplot() +
   theme_minimal() +
   theme(
     # center and resize title
-    plot.title = element_text(hjust = 0.5, size = 16),
+    plot.title = element_text(hjust = 0.5, size = 15),
     # create white background for png image
     plot.background = element_rect(fill = "white", color = NA)
   )
@@ -179,7 +173,7 @@ ag_gsl_plot = ggplot(ag_use, aes(x = year)) +
   theme_minimal() +
   theme(
     # center and resize title
-    plot.title = element_text(hjust = 0.5),
+    plot.title = element_text(hjust = 0.5, size = 15),
     # remove legend title
     legend.position = "bottom",
     # create white background for png image
@@ -210,8 +204,8 @@ print(ag_gsl_plot)
 # save as higher resolution png image
 ggsave(
   filename = "ag_gsl_plot.png",
-  plot = wateruse_precip_plot,
-  height = 7,
+  plot = ag_gsl_plot,
+  height = 6,
   width = 8.5,
   units = "in",
   dpi = 300,
@@ -249,7 +243,7 @@ wateruse_precip_plot = ggplot(yearly_per_use, aes(x = precip_in, y = log(year_ga
   ) +
   theme(
     # center and resize title
-    plot.title = element_text(hjust = 0.5, size = 16),
+    plot.title = element_text(hjust = 0.5, size = 15),
     # create white background for png image
     plot.background = element_rect(fill = "white", color = NA)
   )
@@ -260,7 +254,7 @@ print(wateruse_precip_plot)
 ggsave(
   filename = "wateruse_precip_plot.png",
   plot = wateruse_precip_plot,
-  height = 7,
+  height = 6.5,
   width = 8.5,
   units = "in", 
   dpi = 300,
