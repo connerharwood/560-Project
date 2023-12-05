@@ -5,6 +5,7 @@ library(binsreg)
 library(scales)
 library(lubridate)
 library(cowplot)
+library(cowplot)
 
 load("~/560-Project/clean-data/data/masterdata.rds")
 
@@ -218,12 +219,14 @@ use_type_totals = masterdata |>
   rename("Water Use Type" = use_type) |> 
   arrange(desc(`Total Gallons in Hundreds of Billions`))
 
+print(use_type_totals)
+
 #------------------------------------------------------------------------------#
 # Water usage by use type plot ----
 
 # create a graph showing water usage by use type over time 
-plot1 = ggplot(masterdata, aes(x = year, y = log(year_gallons), color = reorder(use_type, -year_gallons))) +
-  geom_smooth(se = FALSE, span = 0.09, size = 0.5) +
+plot1 = ggplot(yearly_per_use, aes(x = year, y = log(year_gallons), color = reorder(use_type, -year_gallons))) +
+  geom_line() +
   labs(
     title = "Log Yearly Water Usage by Use Type",
     x = "Year",  
@@ -231,6 +234,8 @@ plot1 = ggplot(masterdata, aes(x = year, y = log(year_gallons), color = reorder(
     color = "Use Type"
   ) +
   scale_color_brewer(palette = "Set2") +
+  scale_alpha_continuous(guide = "none") +
+  scale_size_continuous(guide = "none") +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
 
@@ -267,8 +272,8 @@ ggsave("gsl_levels.png", plot = plot2)
 # to plot yearly per capita usage across all use types, use yearly_total_use dataset
 
 # create a graph showing water usage per capita 
-plot3 = ggplot(masterdata, aes(x = year, y = percapita_usage / 1000)) +
-  geom_smooth(span = 0.01) +
+plot3 = ggplot(yearly_total_use, aes(x = year, y = percapita_usage)) +
+  geom_point() +
   labs( 
     title = "Water Usage Per Capita",
     x = "Year", 
@@ -302,23 +307,21 @@ ggsave("precip_wateruse.png", plot = plot4)
 # Agricultural water use vs GSL plot ----
 
 # select only agricultural water use
-ag_gsl1 = masterdata |> 
-  filter(water_use == "Agricultural")
+ag_gsl_levels = yearly_per_use |> 
+  filter(use_type == "Agricultural")
 
 # aggregate total water usage per year across agricultural water uses
-ag_gsl = ag_gsl1 |> 
-  distinct(year, use_type, year_gallons, .keep_all = TRUE) |> 
+ag_gsl_levels = ag_gsl_levels |> 
+  distinct(year, use_type, gsl_volume_gal, .keep_all = TRUE) |> 
   group_by(year) |> 
-  mutate(total_gallons = sum(year_gallons))
+  mutate(gsl_volume_gal = sum(gsl_volume_gal))
 
 # create a plot showing GSL levels in feet over time
-plot_gsl_levels = ggplot(ag_gsl, aes(x = year, y = gsl_level_ft)) +
+plot_gsl_levels = ggplot(ag_gsl_levels, aes(x = year, y = gsl_volume_gal/100000000000)) +
   geom_smooth(color = "lightblue", se = FALSE, span = 0.1) +
-  labs(y = "GSL Levels (Feet)",
-       title = "Agricultural Water Use and GSL Levels" 
+  labs(y = "GSL Volume (Gallons)",
+       title = "Agricultural Water Use and GSL Volume" 
        ) +
-  geom_hline(yintercept = 4198, linetype = "dashed", color = "blue") +
-  geom_text(aes(x = max(year), y = 4198.5, label = "Minimum Healthy Level = 4198", color = "blue"), hjust = 1, size = 3) +
   guides(color = "none") +
   theme_minimal() +
   # remove x-axis since irrelevant 
@@ -330,22 +333,30 @@ plot_gsl_levels = ggplot(ag_gsl, aes(x = year, y = gsl_level_ft)) +
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_color_manual(values = c("blue" = "blue"))
 
+print(plot_gsl_levels)
+
 # create a plot showing agricultural water usage 
-plot_ag_water_use = ggplot(ag_gsl, aes(x = year, y = log(total_gallons))) +
+plot_ag_water_use = ggplot(ag_gsl_levels, aes(x = year, y = year_gallons/100000000000)) +
   geom_smooth(color = "pink", se = FALSE, span = 0.1) +
-  labs(y = "Log Ag Water Use", 
+  labs(y = "Ag Water Use (Gallons)", 
        x = "Year") +
   theme_minimal()
 
-# combine the two plots into one 
-plot6 = plot_grid(
-  plot_gsl_levels,
-  plot_ag_water_use,
-  ncol = 1,
-  align = "v"
-)
+print(plot_ag_water_use)
 
-print(plot6)
+# Combine the two plots into one 
+combined_plot <- plot_ag_water_use + 
+  geom_line(data = ag_gsl_levels, aes(x = year, y = log(gsl_volume_gal), color = "GSL Volume (Gallons)"), size = 1) +
+  scale_y_continuous(
+    sec.axis = sec_axis(~ exp(.), name = "GSL Volume (Gallons)", 
+                        breaks = pretty(range(ag_gsl_levels$gsl_volume_gal), n = 5),
+                        labels = scales::comma_format())
+  ) +
+  theme(legend.position = "bottom") +
+  guides(color = guide_legend(title = NULL, order = 2))
+
+# Display the combined plot
+print(plot_gsl_levels)
 
 # save plot as .png file
-ggsave("ag_gsl.png", plot = plot6)
+ggsave("ag_gsl.png", plot = plot_gsl_levels)
