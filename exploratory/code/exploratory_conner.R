@@ -288,15 +288,15 @@ monthly_total_use = monthly_merge3 |>
 # 
 # print(wateruse_precip_plot)
 # 
-# # save in higher resolution
-# ggsave(
-#   filename = "wateruse_precip_plot.png",
-#   plot = wateruse_precip_plot,
-#   height = 7,
-#   width = 8.5,
-#   units = "in", 
-#   dpi = 300,
-# )
+# save in higher resolution
+ggsave(
+  filename = "wateruse_precip_plot.png",
+  plot = wateruse_precip_plot,
+  height = 7,
+  width = 8.5,
+  units = "in",
+  dpi = 300,
+)
 
 #------------------------------------------------------------------------------#
 # Agricultural water use vs GSL plot ----
