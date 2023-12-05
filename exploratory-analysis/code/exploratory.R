@@ -100,19 +100,21 @@ yearly_total_use = yearly_merge3 |>
   )
 
 #------------------------------------------------------------------------------#
-# Water usage by use type plot ----
+# Water use by use type plot ----
 
 wateruse_by_type_plot = ggplot() +
-  # make lines non-agricultural use types thinner and faded
   geom_line(
+    # plot non-agricultural use types
     data = yearly_per_use[yearly_per_use$use_type != "Agricultural", ], 
     aes(x = year, y = log(year_gallons), color = use_type), 
+    # decrease size of non-agricultural use type lines and fade
     size = 0.5, 
     alpha = 0.6) +
-  # make lines for agricultural use type thicker
   geom_line(
+    # plot agricultural use type
     data = yearly_per_use[yearly_per_use$use_type == "Agricultural", ], 
     aes(x = year, y = log(year_gallons), color = use_type), 
+    # increase size of agricultural use type and don't fade
     size = 1, 
     alpha = 1) +
   labs(
@@ -121,8 +123,8 @@ wateruse_by_type_plot = ggplot() +
     y = "Log Gallons", 
     color = "Use Type"
   ) +
-  # select colors and manually select order of legend
   scale_color_manual(
+    # select colors for each use type line
     values = c("Agricultural" = "black",
                "Irrigation" = "#E69F00",
                "Water Supplier" = "#56B4E9",
@@ -130,11 +132,14 @@ wateruse_by_type_plot = ggplot() +
                "Power" = "#CC79A7",
                "Commercial" = "#D55E00",
                "Domestic" = "#0072B2"),
+    # manually select order of legend by descending log water use in last year on plot
     breaks = c("Agricultural", "Irrigation", "Water Supplier", "Industrial", "Power", "Commercial", "Domestic")
   ) +
   theme_minimal() +
   theme(
+    # center and resize title
     plot.title = element_text(hjust = 0.5, size = 16),
+    # create white background for png image
     plot.background = element_rect(fill = "white", color = NA)
   )
 
@@ -146,48 +151,6 @@ ggsave(
   plot = wateruse_by_type_plot,
   height = 7,
   width = 10,
-  units = "in", 
-  dpi = 300,
-)
-
-#------------------------------------------------------------------------------#
-# Precipitation vs water usage plot ----
-
-wateruse_precip_plot = ggplot(yearly_per_use, aes(x = precip_in, y = log(year_gallons), color = use_type)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  facet_wrap(~use_type) +
-  scale_color_manual(
-    values = c(
-      "Agricultural" = "black",
-      "Irrigation" = "#E69F00",
-      "Water Supplier" = "#56B4E9",
-      "Industrial" = "#009E73",
-      "Power" = "#CC79A7",
-      "Domestic" = "#0072B2",
-      "Commercial" = "#D55E00"
-    )
-  ) +
-  theme_minimal() +
-  theme(legend.position = "none") +
-  labs(
-    x = "Precipitation (Inches)",
-    y = "Log Gallons",
-    title = "Water Use vs Precipitation"
-  ) +
-  theme(
-    plot.title = element_text(hjust = 0.5, size = 16),
-    plot.background = element_rect(fill = "white", color = NA)
-  )
-
-print(wateruse_precip_plot)
-
-# save as higher resolution png image
-ggsave(
-  filename = "wateruse_precip_plot.png",
-  plot = wateruse_precip_plot,
-  height = 7,
-  width = 8.5,
   units = "in", 
   dpi = 300,
 )
@@ -209,30 +172,38 @@ ag_gsl_plot = ggplot(ag_use, aes(x = year)) +
   labs(
     x = "Year",
     y = "GSL Volume (Gallons)",
-    title = "Agricultural Water Use and GSL Volume"
+    title = "Agricultural Water Use and GSL Volume",
+    color = NULL
   ) +
   # choose colors for lines
   scale_color_manual(values = c("GSL Volume" = "lightblue", "Ag Water Use" = "pink")) +
   theme_minimal() +
-  # center title
-  theme(plot.title = element_text(hjust = 0.5)) +
-  # position legend to bottom of graph
-  theme(legend.position = "bottom") +
+  theme(
+    # center and resize title
+    plot.title = element_text(hjust = 0.5),
+    # remove legend title
+    legend.position = "bottom",
+    # create white background for png image
+    plot.background = element_rect(fill = "white", color = NA),
+    # remove vertical gridlines
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank()
+    ) +
   # create separate y-axes for ag water use and GSL volume
   scale_y_continuous(
     name = "Ag Water Use (100Bn Gallons)",
     sec.axis = sec_axis(~.*10, name = "GSL Volume (100Bn Gallons)")
   ) +
-  # remove vertical grids
-  theme(
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor.x = element_blank()
-  ) +
-  # remove legend title
-  labs(color = NULL) +
   # add horizontal line indicating minimum GSL volume for a healthy lake
-  geom_hline(yintercept = 4.475119e+12/1e12, linetype = "dashed", color = "blue") + 
-  geom_text(aes(x = 2015.5, y = 4.65, label = "Min Healthy Lake Volume = 44.75"), color = "blue", hjust = 1, size = 3)
+  geom_hline(
+    yintercept = 4.475119e+12/1e12, 
+    linetype = "dashed", 
+    color = "blue") + 
+  geom_text(
+    aes(x = 2015.5, y = 4.65, label = "Min Healthy Lake Volume = 44.75"), 
+    color = "blue", 
+    hjust = 1, 
+    size = 3)
 
 print(ag_gsl_plot)
 
@@ -243,5 +214,54 @@ ggsave(
   height = 7,
   width = 8.5,
   units = "in",
+  dpi = 300,
+)
+
+#------------------------------------------------------------------------------#
+# Water use vs precipitation plot ----
+
+wateruse_precip_plot = ggplot(yearly_per_use, aes(x = precip_in, y = log(year_gallons), color = use_type)) +
+  # scatterplot of water use vs precipitation
+  geom_point() +
+  # add line of best fit to each panel plot
+  geom_smooth(method = "lm", se = FALSE) +
+  # individual panel plots for each water use type
+  facet_wrap(~use_type) +
+  # select colors for each use type panel plot
+  scale_color_manual(
+    values = c(
+      "Agricultural" = "black",
+      "Irrigation" = "#E69F00",
+      "Water Supplier" = "#56B4E9",
+      "Industrial" = "#009E73",
+      "Power" = "#CC79A7",
+      "Domestic" = "#0072B2",
+      "Commercial" = "#D55E00"
+    )
+  ) +
+  theme_minimal() +
+  # remove legend
+  theme(legend.position = "none") +
+  labs(
+    x = "Precipitation (Inches)",
+    y = "Log Gallons",
+    title = "Water Use vs Precipitation"
+  ) +
+  theme(
+    # center and resize title
+    plot.title = element_text(hjust = 0.5, size = 16),
+    # create white background for png image
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+print(wateruse_precip_plot)
+
+# save as higher resolution png image
+ggsave(
+  filename = "wateruse_precip_plot.png",
+  plot = wateruse_precip_plot,
+  height = 7,
+  width = 8.5,
+  units = "in", 
   dpi = 300,
 )
