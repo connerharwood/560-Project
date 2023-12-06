@@ -100,14 +100,14 @@ wateruse_by_type_plot = ggplot() +
     aes(x = year, y = log(year_gallons), color = use_type), 
     # decrease size of non-agricultural use type lines and fade
     size = 0.5, 
-    alpha = 0.6
+    alpha = 0.5
   ) +
   geom_line(
     # plot agricultural use type
     data = yearly_per_use[yearly_per_use$use_type == "Agricultural", ], 
     aes(x = year, y = log(year_gallons), color = use_type), 
     # increase size of agricultural use type and don't fade
-    size = 1, 
+    size = 1.2, 
     alpha = 1
   ) +
   labs(
@@ -119,21 +119,27 @@ wateruse_by_type_plot = ggplot() +
   scale_color_manual(
     # select colors for each use type line
     values = c("Agricultural" = "black",
-               "Irrigation" = "#E69F00",
-               "Water Supplier" = "#56B4E9",
+               "Irrigation" = "#56B4E9",
+               "Water Supplier" = "#E69F00",
                "Industrial" = "#009E73",
                "Power" = "#CC79A7",
                "Commercial" = "#D55E00",
                "Domestic" = "#0072B2"),
     # manually select order of legend by descending log water use in last year on plot
-    breaks = c("Agricultural", "Irrigation", "Water Supplier", "Industrial", "Power", "Commercial", "Domestic")
+    breaks = c("Agricultural", "Water Supplier", "Industrial", "Irrigation", "Power", "Domestic", "Commercial")
   ) +
+  scale_x_continuous(breaks = seq(1996, 2014, by = 2)) +
   theme_minimal() +
   theme(
     # center and resize title
     plot.title = element_text(hjust = 0.5, size = 15),
     # create white background for png image
-    plot.background = element_rect(fill = "white", color = NA)
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.line = element_line(color = "gray", size = 0.2)
   )
 
 print(wateruse_by_type_plot)
@@ -149,57 +155,40 @@ ggsave(
 )
 
 #------------------------------------------------------------------------------#
-# Ag water use vs GSL volume plot ----
+# GSL plot ----
 
-# select only agricultural water use
-ag_use = yearly_per_use |> 
-  filter(use_type == "Agricultural")
+gsl_monthly = masterdata |> 
+  group_by(year, month) |> 
+  summarize(gsl_level_ft = mean(gsl_level_ft)) |> 
+  mutate(
+    date = as.Date(paste(year, month, "01"), format = "%Y %b %d"),
+    date = as.yearmon(date)
+  ) |> 
+  select(date, gsl_level_ft)
 
-# create plot with ag water use and GSL volume
-ag_gsl_plot = ggplot(ag_use, aes(x = year)) +
-  # convert GSL volume to one trillion gallons (later converted to one hundred billion gallons in sec.axis), plot
-  geom_line(aes(y = gsl_volume_gal/1e12, color = "GSL Volume"), size = 1.2) +
-  # convert ag water use to one hundred billion gallons, plot
-  geom_line(aes(y = year_gallons/1e11, color = "Ag Water Use"), size = 1.2) +
-  # rename axes and title
-  labs(
-    x = "Year",
-    y = "GSL Volume (Gallons)",
-    title = "Agricultural Water Use and GSL Volume",
-    color = NULL
-  ) +
-  # choose colors for lines
-  scale_color_manual(values = c("GSL Volume" = "lightblue", "Ag Water Use" = "pink")) +
+# create a graph showing GSL levels over time 
+gsl_plot = ggplot(gsl_monthly, aes(x = date, y = gsl_level_ft)) + 
+  geom_smooth(method = "loess", span = 0.12, color = "cornflowerblue", se = FALSE) +
+  geom_hline(yintercept = 4198, linetype = "dashed", color = "coral3") +
+  geom_text(aes(x = max(year), y = 4198.3, label = "Minimum Healthy Lake Level", color = "coral3"), hjust = 1) +
+  labs( 
+    title = "Great Salt Lake Water Level",
+    x = "Year", 
+    y = "Feet") + 
   theme_minimal() +
+  guides(color = "none") +
   theme(
     # center and resize title
     plot.title = element_text(hjust = 0.5, size = 15),
-    # remove legend title
-    legend.position = "bottom",
     # create white background for png image
     plot.background = element_rect(fill = "white", color = NA),
-    # remove vertical gridlines
     panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank()
   ) +
-  # create separate y-axes for ag water use and GSL volume
-  scale_y_continuous(
-    name = "Ag Water Use (100Bn Gallons)",
-    sec.axis = sec_axis(~.*10, name = "GSL Volume (100Bn Gallons)")
-  ) +
-  # add horizontal line indicating minimum GSL volume for a healthy lake
-  geom_hline(
-    yintercept = 4.475119e+12/1e12, 
-    linetype = "dashed", 
-    color = "blue") + 
-  geom_text(
-    aes(x = 2015.5, y = 4.65, label = "Min Healthy Lake Volume = 44.75"), 
-    color = "blue", 
-    hjust = 1, 
-    size = 3
-  )
+  scale_x_yearmon(format = "%Y", n = 9) +
+  scale_y_continuous(breaks = seq(4194, 4204, by = 2))
 
-print(ag_gsl_plot)
+print(gsl_plot)
 
 # save as higher resolution png image
 ggsave(
@@ -259,3 +248,27 @@ ggsave(
   units = "in", 
   dpi = 300,
 )
+
+#------------------------------------------------------------------------------#
+# Water use histogram ----
+
+# convert month and year to date format
+masterdata_monthly = masterdata |> 
+  mutate(
+    date = as.Date(paste(year, month, "01"), format = "%Y %b %d"),
+    date = as.yearmon(date)
+  )
+
+# monthly total water usage per use type
+wateruse_monthly = masterdata_monthly |>
+  select(date, use_type, month_gallons) |> 
+  group_by(date, use_type) |> 
+  summarize(
+    month_gallons = sum(month_gallons)
+  )
+
+# histogram of water use by use type
+wateruse_hist = ggplot(wateruse_monthly, aes(x = month_gallons/1e10, color = use_type, fill = use_type)) +
+  geom_histogram(bins = 100000) +
+  facet_wrap(~use_type)
+print(wateruse_hist)
