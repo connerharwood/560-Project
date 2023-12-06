@@ -456,11 +456,11 @@ save(wateruse_clean, file = "wateruse_clean.rds")
 #------------------------------------------------------------------------------#
 # 1996-2022 ----
 
-# for robustness, we'll also run a regression with 2015-2022 data
+# for robustness, we'll also run a regression with 1996-2022 data
 
-# filter dataset to period 2015-2022
+# filter dataset to period 1996-2022
 wateruse_recent1 = wateruse8 |> 
-  filter(year >= 2015)
+  filter(year >= 1996)
 
 # add surrogate key, reorder columns
 wateruse_recent2 = wateruse_recent1 |>
