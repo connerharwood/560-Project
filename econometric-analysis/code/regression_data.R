@@ -167,3 +167,55 @@ reg_1996_2022 = all_monthly_merge3
 # save ----
 
 save(reg_1996_2022, file = "reg_1996_2022.rds")
+
+#------------------------------------------------------------------------------#
+# create new dataset with total use by each use type for 1996-2022 ---- 
+
+reg_type_1996_2022 = reg_1996_2022 |> 
+  group_by(use_type) |>
+  mutate(value = month_gallons) |>
+  ungroup() |>
+  spread(use_type, value, fill = 0) |>
+  select(-c(month_gallons, month_gallons_change))
+
+reg_type_1996_2022 <- reg_type_1996_2022 |>
+  rename(water_supplier = "Water Supplier") |> 
+  group_by(date, gsl_level_ft, gsl_volume_gal, gsl_level_change, gsl_volume_change, population, precip_in, precip_change) |>
+  summarise(agricultural = sum(Agricultural),
+            commercial = sum(Commercial), 
+            domestic = sum(Domestic),
+            industrial = sum(Industrial), 
+            irrigation = sum(Irrigation), 
+            power = sum(Power), 
+            water_supplier = sum(water_supplier))
+
+#------------------------------------------------------------------------------#
+# save ----
+
+save(reg_type_1996_2022, file = "reg_type_1996_2022.rds")
+
+#------------------------------------------------------------------------------#
+# create new dataset with total use by each use type for 1996-2014 ---- 
+
+reg_type_1996_2014 = reg_data |> 
+  group_by(use_type) |>
+  mutate(value = month_gallons) |>
+  ungroup() |>
+  spread(use_type, value, fill = 0) |>
+  select(-c(month_gallons, month_gallons_change))
+
+reg_type_1996_2014 <- reg_type_1996_2014 |>
+  rename(water_supplier = "Water Supplier") |> 
+  group_by(date, gsl_level_ft, gsl_volume_gal, gsl_level_change, gsl_volume_change, population, precip_in, precip_change) |>
+  summarise(agricultural = sum(Agricultural),
+            commercial = sum(Commercial), 
+            domestic = sum(Domestic),
+            industrial = sum(Industrial), 
+            irrigation = sum(Irrigation), 
+            power = sum(Power), 
+            water_supplier = sum(water_supplier))
+
+#------------------------------------------------------------------------------#
+# save ----
+
+save(reg_type_1996_2014, file = "reg_type_1996_2014.rds")
