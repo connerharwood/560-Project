@@ -74,16 +74,73 @@ monthly_merge1 = left_join(wateruse_monthly, gsl_monthly, by = "date", relations
 monthly_merge2 = left_join(monthly_merge1, pop_monthly, by = "date", relationship = "many-to-one")
 monthly_merge3 = left_join(monthly_merge2, precip_monthly, by = "date", relationship = "many-to-one")
 
-# monthly usage data for each use type
-monthly_per_use = monthly_merge3 |> 
-  # calculate monthly per capita water usage for each use type
-  mutate(
-    percapita_usage = month_gallons / population
-  )
+reg_data = monthly_merge3
 
-reg_monthly = monthly_per_use
-save(reg_monthly, file = "reg_monthly.rds")
+save(reg_data, file = "reg_data.rds")
 
 #------------------------------------------------------------------------------#
-# 2015-2022 ----
+# 1996-2022 ----
 
+# for robustness, include years 2015-2022 in the regression
+
+load("~/560-Project/clean-data/data/wateruse_1996_2022.rds")
+load("~/560-Project/clean-data/data/gsl_clean.rds")
+load("~/560-Project/clean-data/data/precip_clean.rds")
+load("~/560-Project/clean-data/data/population_clean.rds")
+
+# merge water use and precipitation data
+merge1 = left_join(wateruse_1996_2022, precip_clean, by = c("year", "month", "county"), relationship = "many-to-one")
+
+# merge water use and precipitation data with GSL data
+merge2 = left_join(merge1, gsl_clean, by = c("year", "month"), relationship = "many-to-one")
+
+# merge water use, precipitation, and GSL data with population data
+merge3 = left_join(merge2, population_clean, by = c("year", "county"), relationship = "many-to-one")
+
+# change merge3 to data table
+merge3 = as.data.table(merge3)
+
+# select, reorder, and rename relevant variables
+merge4 = merge3 |> 
+  mutate(key = row_number()) |> 
+  select(
+    key,
+    system_id:longitude,
+    precip_in,
+    gsl_level_ft = level,
+    gsl_volume_m3 = volume_m3,
+    population_thousands
+  )
+
+masterdata_1996_2022 = merge4
+
+#------------------------------------------------------------------------------#
+# Aggregate 1996-2022 monthly data ----
+
+# convert month and year to date format
+masterdata_1996_2022_2 = masterdata_1996_2022 |> 
+  mutate(
+    date = as.Date(paste(year, month, "01"), format = "%Y %b %d"),
+    date = as.yearmon(date)
+  )
+
+# monthly total water usage per use type
+wateruse_1996_2022_monthly = masterdata_1996_2022_2 |>
+  filter(month_gallons != 0) |> 
+  select(date, use_type, month_gallons) |> 
+  group_by(date, use_type) |> 
+  summarize(
+    month_gallons = sum(month_gallons)
+  )
+
+# merge monthly datasets into one
+all_monthly_merge1 = left_join(wateruse_1996_2022_monthly, gsl_monthly, by = "date", relationship = "many-to-one")
+all_monthly_merge2 = left_join(all_monthly_merge1, pop_monthly, by = "date", relationship = "many-to-one")
+all_monthly_merge3 = left_join(all_monthly_merge2, precip_monthly, by = "date", relationship = "many-to-one")
+
+reg_1996_2022 = all_monthly_merge3
+
+#------------------------------------------------------------------------------#
+# save ----
+
+save(reg_1996_2022, file = "reg_1996_2022.rds")
