@@ -190,6 +190,39 @@ gsl_plot = ggplot(gsl_monthly, aes(x = date, y = gsl_level_ft)) +
 
 print(gsl_plot)
 
+#------------------------------------------------------------------------------#
+
+gsl_monthly2 = gsl_clean |> 
+  mutate(
+    date = as.Date(paste(year, month, "01"), format = "%Y %b %d"),
+    date = as.yearmon(date)
+  ) |> 
+  select(date, level)
+
+# create a graph showing GSL levels over time 
+gsl_plot2 = ggplot(gsl_monthly2, aes(x = date, y = level)) + 
+  geom_smooth(method = "loess", span = 0.08, color = "cornflowerblue", se = FALSE) +
+  geom_hline(yintercept = 4198, linetype = "dashed", color = "coral3") +
+  geom_text(aes(x = max(date), y = 4198.3, label = "Minimum Healthy Lake Level", color = "coral3"), hjust = 1) +
+  labs( 
+    title = "Great Salt Lake Water Level",
+    x = "Year", 
+    y = "Feet") + 
+  theme_minimal() +
+  guides(color = "none") +
+  theme(
+    # center and resize title
+    plot.title = element_text(hjust = 0.5, size = 15),
+    # create white background for png image
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank()
+  ) +
+  scale_x_yearmon(format = "%Y", n = 9) +
+  scale_y_continuous(breaks = seq(4188, 4212, by = 2))
+
+print(gsl_plot2)
+
 # save as higher resolution png image
 ggsave(
   filename = "gsl_plot.png",
