@@ -293,9 +293,39 @@ users_per_year = wateruse8 |>
   summarize(n_system_id = n_distinct(system_id))
 
 # facet scatterplot of number of users reporting per year for each use type
-ggplot(users_per_year, aes(x = year, y = n_system_id, color = use_type)) +
+user_report_plot = ggplot(users_per_year, aes(x = year, y = n_system_id, color = use_type)) +
   geom_point(size = 0.5) +
-  facet_wrap(~use_type, scale = "free_y")
+  facet_wrap(~use_type, scale = "free_y") + 
+  labs(
+    title = "System Users by Use Type", 
+    x = "Year", 
+    y = "Count"
+  ) +
+  scale_color_manual(
+    values = c(
+      "Agricultural" = "black",
+      "Irrigation" = "#E69F00",
+      "Water Supplier" = "#56B4E9",
+      "Industrial" = "#009E73",
+      "Power" = "#CC79A7",
+      "Domestic" = "#0072B2",
+      "Commercial" = "#D55E00"
+    )) + 
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 15), 
+        legend.position = "none")
+
+print(user_report_plot)
+
+# save as higher resolution png image
+ggsave(
+  filename = "user_report_plot.png",
+  plot = user_report_plot,
+  height = 6,
+  width = 8.5,
+  units = "in",
+  dpi = 300,
+)
 
 # restrict data to 1996-2014 when reporting was consistent
 users_1996_2014 = wateruse8 |> 
@@ -304,9 +334,40 @@ users_1996_2014 = wateruse8 |>
   summarize(n_system_id = n_distinct(system_id))
 
 # facet scatterplot of number of users reporting per year for each use type, 1996-2014
-ggplot(users_1996_2014, aes(x = year, y = n_system_id, color = use_type)) +
+user_1996_2014_plot = ggplot(users_1996_2014, aes(x = year, y = n_system_id, color = use_type)) +
   geom_point(size = 0.5) +
-  facet_wrap(~use_type, scale = "free_y")
+  facet_wrap(~use_type, scale = "free_y") +
+  labs(
+    title = "System Users by Use Type (1996-2014)", 
+    x = "Year", 
+    y = "Count"
+  ) +
+  scale_color_manual(
+    values = c(
+      "Agricultural" = "black",
+      "Irrigation" = "#E69F00",
+      "Water Supplier" = "#56B4E9",
+      "Industrial" = "#009E73",
+      "Power" = "#CC79A7",
+      "Domestic" = "#0072B2",
+      "Commercial" = "#D55E00"
+    )) + 
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 15),
+        legend.position = "none") +
+  scale_x_continuous(breaks = seq(1996, 2014, by = 6))
+
+print(user_1996_2014_plot)
+
+# save as higher resolution png image
+ggsave(
+  filename = "user_1996_2014_plot.png",
+  plot = user_1996_2014_plot,
+  height = 6,
+  width = 8.5,
+  units = "in",
+  dpi = 300,
+)
 
 # filter dataset to period 1996-2014, filter out mining
 wateruse9 = wateruse8 |> 
