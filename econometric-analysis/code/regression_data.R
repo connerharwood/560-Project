@@ -29,13 +29,15 @@ gsl_monthly = masterdata_monthly |>
     gsl_volume_gal = mean(gsl_volume_gal)
   ) |> 
   arrange(date) |> 
-  # calculate year-over-year change in level and volume
+  # calculate year-over-year change in level and volume for each month
   mutate(
-    gsl_level_change = (gsl_level_ft - lag(gsl_level_ft)) / lag(gsl_level_ft) * 100,
-    gsl_volume_change = (gsl_volume_gal - lag(gsl_volume_gal)) / lag(gsl_volume_gal) * 100
-  )
+    gsl_level_change = gsl_level_ft - lag(gsl_level_ft, 12),
+    gsl_volume_change = gsl_volume_gal - lag(gsl_volume_gal, 12)
+  ) |> 
+  # filter out 1996, which has NAs for change variables
+  filter(date >= 1997)
 
-# monthly total population across GSL Basin counties
+# yearly total population across GSL Basin counties, assigned to each month for the regression
 pop_monthly = masterdata_monthly |> 
   select(date, county, population_thousands) |> 
   mutate(population = population_thousands * 1000) |> 
@@ -46,7 +48,8 @@ pop_monthly = masterdata_monthly |>
   group_by(date) |> 
   summarize(
     population = sum(population)
-  )
+  ) |> 
+  filter(date >= 1997)
 
 # monthly average precipitation across GSL Basin counties
 precip_monthly = masterdata_monthly |> 
@@ -58,7 +61,11 @@ precip_monthly = masterdata_monthly |>
   group_by(date) |> 
   summarize(
     precip_in = mean(precip_in)
-  )
+  ) |>
+  # calculate year-over-year change in precipitation for each month
+  mutate(precip_change = precip_in - lag(precip_in, 12)) |> 
+  # filter out 1996, which has NAs for precip_change
+  filter(date >= 1997)
 
 # monthly total water usage per use type
 wateruse_monthly = masterdata_monthly |>
@@ -67,7 +74,16 @@ wateruse_monthly = masterdata_monthly |>
   group_by(date, use_type) |> 
   summarize(
     month_gallons = sum(month_gallons)
-  )
+  ) |> 
+  group_by(use_type) |> 
+  arrange(use_type, date) |> 
+  # calculate year-over-year change in water use for each month
+  mutate(
+    month_gallons_change = month_gallons - lag(month_gallons, 12)
+  ) |>
+  # filter out 1996, which has NAs for month_gallons_change
+  filter(date >= 1997) |> 
+  mutate(month_gallons_change = ifelse(is.na(month_gallons_change), 0, month_gallons_change))
 
 # merge monthly datasets into one
 monthly_merge1 = left_join(wateruse_monthly, gsl_monthly, by = "date", relationship = "many-to-one")
@@ -131,7 +147,14 @@ wateruse_1996_2022_monthly = masterdata_1996_2022_2 |>
   group_by(date, use_type) |> 
   summarize(
     month_gallons = sum(month_gallons)
-  )
+  ) |> 
+  group_by(use_type) |> 
+  arrange(use_type, date) |> 
+  mutate(
+    month_gallons_change = month_gallons - lag(month_gallons, 12)
+  ) |>
+  filter(date >= 1997) |> 
+  mutate(month_gallons_change = ifelse(is.na(month_gallons_change), 0, month_gallons_change))
 
 # merge monthly datasets into one
 all_monthly_merge1 = left_join(wateruse_1996_2022_monthly, gsl_monthly, by = "date", relationship = "many-to-one")
