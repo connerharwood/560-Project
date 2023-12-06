@@ -192,8 +192,8 @@ print(gsl_plot)
 
 # save as higher resolution png image
 ggsave(
-  filename = "ag_gsl_plot.png",
-  plot = ag_gsl_plot,
+  filename = "gsl_plot.png",
+  plot = gsl_plot,
   height = 6,
   width = 8.5,
   units = "in",
