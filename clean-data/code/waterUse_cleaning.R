@@ -277,63 +277,43 @@ save(wateruse8, file = "wateruse_within_backup.rds")
 #------------------------------------------------------------------------------#
 # Balance the panel data ----
 
-# need to filter out water users who did not report in all years
+# After talking with Nick and thinking more about the inconsistencies in reporting, we looked deeper into Utah water reporting
+# laws, as well as the number of water rights per sector being issued each year
+# From this, we found a drastic increase in water rights users in our data, and found that this is likely due to a 2015
+# law changing water use reporting requirements
+# Thus, we filtered out observations before 2015, and looked at changes in number of users during this period (1959-2014)
+# During this period, we looked at trends in number of water users per year for each use type and saw a consistent upward
+# trend among all use types except mining and sewage treatment between 1996 and 2014
+# Thus, we filtered out mining and sewage treatment use types to have consistent reporting across use types and restricted
+# our data to the period 1996-2014
 
-wateruse_filtered = wateruse8 |> 
-  filter(year >= 1995)
+# sum number of water users reporting per year for each use type
+users_per_year = wateruse8 |> 
+  group_by(year, use_type) |> 
+  summarize(n_system_id = n_distinct(system_id))
 
-years_per_user = wateruse_filtered |> 
-  group_by(system_id, source_id) |> 
-  summarize(total_years = n_distinct(year))
+# facet scatterplot of number of users reporting per year for each use type
+ggplot(users_per_year, aes(x = year, y = n_system_id, color = use_type)) +
+  geom_point(size = 0.5) +
+  facet_wrap(~use_type, scale = "free_y")
 
-ninety_percent = years_per_user |> 
-  filter((total_years / n_distinct(wateruse_filtered$year)) >= 1)
+# restrict data to 1996-2014 when reporting was consistent
+users_1996_2014 = wateruse8 |> 
+  filter(year >= 1996 & year <= 2014) |> 
+  group_by(year, use_type) |> 
+  summarize(n_system_id = n_distinct(system_id))
 
-wateruse1993 = wateruse8 |> 
-  filter(system_id %in% ninety_percent$system_id)
+# facet scatterplot of number of users reporting per year for each use type, 1996-2014
+ggplot(users_1996_2014, aes(x = year, y = n_system_id, color = use_type)) +
+  geom_point(size = 0.5) +
+  facet_wrap(~use_type, scale = "free_y")
+
+# filter dataset to period 1996-2014, filter out mining
+wateruse9 = wateruse8 |> 
+  filter(year >= 1996 & year <= 2014 & use_type != "Mining")
+
 #------------------------------------------------------------------------------#
 # Additional cleaning ----
-
-# aggregate yearly water usage by use type
-wateruse_yearly = wateruse8 |> 
-  select(year, use_type, total) |> 
-  group_by(year, use_type) |> 
-  summarize(total_use = sum(total))
-
-# plot yearly water usage by use type
-ggplot(wateruse_yearly, aes(x = year, y = log(total_use), color = use_type)) +
-  geom_line() +
-  facet_wrap(~use_type) +
-  theme_minimal()
-
-# "Sewage Treatment" use type has very few years of data, so we'll filter it out
-# "Domestic" also appears to start fully reporting around 1996-1997, so we'll find the specific year to filter the whole data from
-# "Mining" appears be start fully reporting around 2001-2002 and with hardly any variation so we'll filter it out too
-
-# see when "Domestic" began fully reporting
-domestic = wateruse8 |> 
-  filter(use_type == "Domestic") |> 
-  group_by(year) |> 
-  summarize(total = sum(total/100))
-
-# filter out "Sewage Treatment" and "Mining" use types and past year 1996, convert variables to lower case (forgot to previously)
-wateruse9 = wateruse8 |> 
-  filter((use_type != "Sewage Treatment") & (use_type != "Mining") & (year >= 1996)) |> 
-  rename_with(tolower, everything())
-
-# aggregate yearly water usage by use type again
-wateruse_yearly2 = wateruse9 |> 
-  select(year, use_type, total) |> 
-  group_by(year, use_type) |> 
-  summarize(total_use = sum(total))
-
-# plot yearly water usage by use type again
-ggplot(wateruse_yearly2, aes(x = year, y = log(total_use), color = use_type)) +
-  geom_line() +
-  facet_wrap(~use_type) +
-  theme_minimal()
-
-#------------------------------------------------------------------------------#
 
 # add surrogate key, reorder columns
 wateruse10 = wateruse9 |>
@@ -353,7 +333,7 @@ wateruse10 = wateruse9 |>
     diversion_type,
     system_type,
     source_type,
-    jan:dec,
+    Jan:Dec,
     total,
     latitude,
     longitude
@@ -371,25 +351,26 @@ wateruse11 = wateruse10 |>
 
 # look at observations where all months report 0
 monthly_zeros = wateruse11 |>
-  filter(jan == 0 &
-         feb == 0 &
-         mar == 0 &
-         apr == 0 &
-         may == 0 &
-         jun == 0 &
-         jul == 0 &
-         aug == 0 &
-         sep == 0 &
-         oct == 0 &
-         nov == 0 &
-         dec == 0)
+  group_by(system_id, source_id) |> 
+  filter(Jan == 0 &
+         Feb == 0 &
+         Mar == 0 &
+         Apr == 0 &
+         May == 0 &
+         Jun == 0 &
+         Jul == 0 &
+         Aug == 0 &
+         Sep == 0 &
+         Oct == 0 &
+         Nov == 0 &
+         Dec == 0)
 
 # for now keep observations reporting a total but nothing for all months for use with yearly data
 # might filter out in the future if we analyze monthly data
 
 # convert to long format
 wateruse12 = wateruse11 |> 
-  pivot_longer(cols = jan:dec,
+  pivot_longer(cols = Jan:Dec,
                names_to = "month",
                values_to = "gallons")
 
@@ -400,55 +381,69 @@ wateruse13 = wateruse12 |>
   relocate(month_gallons, .after = source_type)
 
 #------------------------------------------------------------------------------#
-# Outliers ----
+# Extreme values ----
 
-# looking at the yearly usage plot, there are some big spikes in "Industrial" and "Water Supplier" use types
+# yearly total water usage per use type to look at extreme values
+wateruse_yearly = wateruse13 |> 
+  select(year, use_type, year_gallons) |> 
+  group_by(year, use_type) |> 
+  summarize(
+    year_gallons = sum(year_gallons)
+  )
 
-# "Industrial" usage spike around 2015
-industrial2014_2016 = wateruse13 |> 
-  filter(use_type == "Industrial") |> 
-  filter(year == 2014 | year == 2015 | year == 2016) |> 
-  arrange(desc(year_gallons))
+# plot yearly water use by use type to look at extreme values
+ggplot(wateruse_yearly, aes(x = year, y = year_gallons, color = use_type)) +
+  geom_line() +
+  facet_wrap(~use_type, scale = "free_y")
 
-# Cargill Salt reports uncharacteristically high usage in 2015, and these records do not show up in the Utah Water Use website
-# So we'll remove these as they may have been caused by an error during import
-
-# remove 2015 "Industrial" outliers
-wateruse14 = wateruse13 |> 
-  filter(key != 13986)
+# looking at the yearly usage plot, there are some big spikes in the "Water Supplier" use type
 
 # "Water Supplier" usage spike around 2006
-watersupplier2005_2007 = wateruse14 |> 
+watersupplier2005_2007 = wateruse13 |> 
   filter(use_type == "Water Supplier") |> 
   filter(year == 2005 | year == 2006 | year == 2007) |> 
   arrange(desc(year_gallons))
 
 # "Water Supplier" usage spike around 2014
-watersupplier2013_2015 = wateruse14 |> 
+watersupplier2013_2015 = wateruse13 |> 
   filter(use_type == "Water Supplier") |> 
   filter(year == 2013 | year == 2014 | year == 2015) |> 
   arrange(desc(year_gallons))
 
+# select specific observations that are likely invalid
+watersupplier2006 = watersupplier2005_2007 |> 
+  mutate(n = row_number()) |> 
+  filter(n <= 24) |> 
+  pull(key)
+
+# select specific observations that are likely invalid
+watersupplier2014 = watersupplier2013_2015 |> 
+  mutate(n = row_number()) |> 
+  filter(n <= 60) |> 
+  pull(key)
+
+# observations to remove
+watersupplier_remove = c(watersupplier2006, watersupplier2014)
+
 # remove 2006 and 2014 "Water Supplier" outliers
-wateruse15 = wateruse14 |> 
-  filter(!(key %in% c(3190, 1425, 24043, 1359, 1383, 1401)))
+wateruse14 = wateruse13 |> 
+  filter(!(key %in% watersupplier_remove))
 
-# similarly uncharacteristic outliers were removed as they likely were not created during the data generating process
-
-# aggregate yearly water usage by use type again
-wateruse_yearly3 = wateruse15 |> 
+# yearly total water usage per use type to look at extreme values
+wateruse_yearly = wateruse14 |> 
   select(year, use_type, year_gallons) |> 
   group_by(year, use_type) |> 
-  summarize(total_use = sum(year_gallons))
+  summarize(
+    year_gallons = sum(year_gallons)
+  )
 
-# plot yearly water usage by use type again
-ggplot(wateruse_yearly3, aes(x = year, y = log(total_use), color = use_type)) +
+# plot yearly water use by use type to see if filter took care of extreme values
+ggplot(wateruse_yearly, aes(x = year, y = year_gallons, color = use_type)) +
   geom_line() +
-  facet_wrap(~use_type) +
-  theme_minimal()
+  facet_wrap(~use_type, scale = "free_y")
 
 # convert month variable to uppercase for merging with other datasets later
-wateruse15 = wateruse15 |> 
+wateruse15 = wateruse14 |> 
   mutate(month = str_to_title(month))
 
 #------------------------------------------------------------------------------#
