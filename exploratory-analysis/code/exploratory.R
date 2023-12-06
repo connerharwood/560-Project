@@ -146,7 +146,7 @@ print(wateruse_by_type_plot)
 
 # save as higher resolution png image
 ggsave(
-  filename = "wateruse_by_type.png",
+  filename = "wateruse_by_type_plot.png",
   plot = wateruse_by_type_plot,
   height = 7,
   width = 10,
