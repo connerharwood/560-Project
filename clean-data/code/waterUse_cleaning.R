@@ -275,6 +275,23 @@ wateruse8 = wateruse7 |>
 save(wateruse8, file = "wateruse_within_backup.rds")
 
 #------------------------------------------------------------------------------#
+# Balance the panel data ----
+
+# need to filter out water users who did not report in all years
+
+wateruse_filtered = wateruse8 |> 
+  filter(year >= 1995)
+
+years_per_user = wateruse_filtered |> 
+  group_by(system_id, source_id) |> 
+  summarize(total_years = n_distinct(year))
+
+ninety_percent = years_per_user |> 
+  filter((total_years / n_distinct(wateruse_filtered$year)) >= 1)
+
+wateruse1993 = wateruse8 |> 
+  filter(system_id %in% ninety_percent$system_id)
+#------------------------------------------------------------------------------#
 # Additional cleaning ----
 
 # aggregate yearly water usage by use type
