@@ -4,79 +4,7 @@ library(zoo)
 
 load("~/560-Project/clean-data/data/masterdata.rds")
 
-# create aggregated data at yearly and monthly level by use type for regression model
-
-#------------------------------------------------------------------------------#
-# Aggregate yearly data ----
-
-# GSL yearly average level and volume
-gsl_yearly = masterdata |> 
-  # convert volume from cubic meters to gallons
-  mutate(gsl_volume_gal = gsl_volume_m3 * 264.172052) |> 
-  select(year, gsl_level_ft, gsl_volume_gal) |> 
-  group_by(year) |> 
-  summarize(
-    gsl_level_ft = mean(gsl_level_ft),
-    gsl_volume_gal = mean(gsl_volume_gal)
-  ) |> 
-  arrange(year) |> 
-  # calculate year-over-year change in level and volume
-  mutate(
-    gsl_level_change = (gsl_level_ft - lag(gsl_level_ft)) / lag(gsl_level_ft) * 100,
-    gsl_volume_change = (gsl_volume_gal - lag(gsl_volume_gal)) / lag(gsl_volume_gal) * 100
-  )
-
-# yearly total population across GSL Basin counties
-pop_yearly = masterdata |> 
-  select(year, county, population_thousands) |> 
-  mutate(population = population_thousands * 1000) |> 
-  group_by(year, county) |> 
-  summarize(
-    population = mean(population)
-  ) |> 
-  group_by(year) |> 
-  summarize(
-    population = sum(population)
-  )
-
-# yearly average precipitation across GSL Basin counties
-precip_yearly = masterdata |> 
-  select(year, month, county, precip_in) |> 
-  group_by(year, month, county) |> 
-  summarize(
-    precip_in = mean(precip_in)
-  ) |> 
-  group_by(year, county) |> 
-  summarize(
-    precip_in = sum(precip_in)
-  ) |> 
-  group_by(year) |> 
-  summarize(
-    precip_in = mean(precip_in)
-  )
-
-# yearly total water usage per use type
-wateruse_yearly = masterdata |> 
-  select(year, use_type, year_gallons) |> 
-  group_by(year, use_type) |> 
-  summarize(
-    year_gallons = sum(year_gallons)
-  )
-
-# merge yearly datasets into one
-yearly_merge1 = left_join(wateruse_yearly, gsl_yearly, by = "year", relationship = "many-to-one")
-yearly_merge2 = left_join(yearly_merge1, pop_yearly, by = "year", relationship = "many-to-one")
-yearly_merge3 = left_join(yearly_merge2, precip_yearly, by = "year", relationship = "many-to-one")
-
-# yearly usage data for each use type
-yearly_per_use = yearly_merge3 |> 
-  # calculate yearly per capita water usage for each use type
-  mutate(
-    percapita_usage = year_gallons / population
-  )
-
-reg_yearly = yearly_per_use
-save(reg_yearly, file = "reg_yearly.rds")
+# create aggregated data at monthly level by use type for regression model
 
 #------------------------------------------------------------------------------#
 # Aggregate monthly data ----
@@ -155,3 +83,7 @@ monthly_per_use = monthly_merge3 |>
 
 reg_monthly = monthly_per_use
 save(reg_monthly, file = "reg_monthly.rds")
+
+#------------------------------------------------------------------------------#
+# 2015-2022 ----
+

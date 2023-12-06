@@ -452,3 +452,89 @@ wateruse15 = wateruse14 |>
 wateruse_clean = wateruse15
 
 save(wateruse_clean, file = "wateruse_clean.rds")
+
+#------------------------------------------------------------------------------#
+# 1996-2022 ----
+
+# for robustness, we'll also run a regression with 2015-2022 data
+
+# filter dataset to period 2015-2022
+wateruse_recent1 = wateruse8 |> 
+  filter(year >= 2015)
+
+# add surrogate key, reorder columns
+wateruse_recent2 = wateruse_recent1 |>
+  mutate(
+    key = row_number()
+  ) |>
+  select(
+    key,
+    system_id,
+    system_name,
+    source_id,
+    source_name,
+    year,
+    county,
+    subbasin,
+    use_type,
+    diversion_type,
+    system_type,
+    source_type,
+    Jan:Dec,
+    total,
+    latitude,
+    longitude
+  )
+
+# observations with 0 reported for total also report no monthly data, so filter them out
+wateruse_recent3 = wateruse_recent2 |> 
+  filter(total != 0)
+
+# convert to long format
+wateruse_recent4 = wateruse_recent3 |> 
+  pivot_longer(cols = Jan:Dec,
+               names_to = "month",
+               values_to = "gallons")
+
+# reorder and rename
+wateruse_recent5 = wateruse_recent4 |> 
+  rename(month_gallons = gallons, year_gallons = total) |> 
+  relocate(month, .after = year) |> 
+  relocate(month_gallons, .after = source_type)
+
+#------------------------------------------------------------------------------#
+# Extreme values 2015-2022 ----
+
+# yearly total water usage per use type to look at extreme values
+wateruse_yearly_recent = wateruse_recent5 |> 
+  select(year, use_type, year_gallons) |> 
+  group_by(year, use_type) |> 
+  summarize(
+    year_gallons = sum(year_gallons)
+  )
+
+# plot yearly water use by use type to look at extreme values
+ggplot(wateruse_yearly_recent, aes(x = year, y = year_gallons, color = use_type)) +
+  geom_line() +
+  facet_wrap(~use_type, scale = "free_y")
+
+# looking at the yearly usage plot, there are some big spikes in the "Water Supplier" and "Industrial use type
+
+# "Water Supplier" usage spike in 2015
+watersupplier_recent2015 = wateruse_recent5 |> 
+  filter(use_type == "Water Supplier") |> 
+  filter(year == 2015) |> 
+  arrange(desc(year_gallons))
+
+# select specific observations that are likely invalid
+watersupplier_remove2015 = watersupplier_recent2015 |> 
+  mutate(n = row_number()) |> 
+  filter(n <= 12) |> 
+  pull(key)
+
+# observations to remove
+watersupplier_remove = c(watersupplier2006, watersupplier2014)
+
+# remove 2006 and 2014 "Water Supplier" outliers
+wateruse14 = wateruse13 |> 
+  filter(!(key %in% watersupplier_remove))

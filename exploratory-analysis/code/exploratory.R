@@ -203,7 +203,10 @@ gsl_monthly2 = gsl_clean |>
 gsl_plot2 = ggplot(gsl_monthly2, aes(x = date, y = level)) + 
   geom_smooth(method = "loess", span = 0.08, color = "cornflowerblue", se = FALSE) +
   geom_hline(yintercept = 4198, linetype = "dashed", color = "coral3") +
-  geom_text(aes(x = max(date), y = 4198.3, label = "Minimum Healthy Lake Level", color = "coral3"), hjust = 1) +
+  geom_vline(xintercept = 1996, linetype = "solid", color = "black") +
+  geom_vline(xintercept = 2014, linetype = "solid", color = "black") +
+  geom_text(aes(x = max(date), y = 4198.5, label = "Minimum Healthy Lake Level", color = "coral3"), hjust = 0.9) +
+  geom_text(x = 2005, y = 4200, label = "___ Study Period ___", color = "black", vjust = -17) +
   labs( 
     title = "Great Salt Lake Water Level",
     x = "Year", 
