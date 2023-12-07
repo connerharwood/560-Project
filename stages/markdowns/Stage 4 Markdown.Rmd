@@ -17,11 +17,9 @@ We use an OLS linear regression model to attempt to measure the relationships be
 
 To try to estimate the effect of water use in the GSL Basin on the difference in GSL volume between time *t* and time *t-1*, we define two sets of models. The lagged time period is observed in the same month as the current time period. In the first set of models, we estimate each sector's water use on GSL volume changes. In the second set of models, we estimate total water use on GSL volume changes. Each model is estimated on two sets of data: the first dataset includes data from 1996 to 2014, while the second dataset includes data from 1996 to 2022. The purpose of testing our models on the larger set of data is to see how impactful the 2015 law was on reporting; if we see a drastic change in the effect of water use on GSL volume using the second dataset, we can confidently assume that there is a large difference in trends after 2015.
 
-<<<<<<< HEAD
 In the first set of models, we look at the association between water use by each sector and GSL volume, while controlling for precipitation and population. Each water use by sector is log transformed since they are right-skewed (shown in Appendix Table 1) and contain outliers. We lag all independent variables by one year, since we expect a delayed effect of water use, precipitation, and population on lake volume. Further, we run the model using monthly water use and precipitation, and we impute values for monthly population by assuming that yearly population changes happen linearly from month to month. The results for the first set of models are shown below:
-=======
+
 In the first model, we look at how water use by each sector effects GSL volume, while controlling for precipitation and population. Each water use by sector is log transformed since they are right-skewed (shown in Appendix Table 3). We lag all independent variables by one year, since we expect a delayed effect of water use, precipitation, and population on lake levels. Further, we run the model using monthly water use and precipitation, and we impute values for monthly population by assuming that yearly population changes happen linearly from month to month. The results for Model 1 are shown below:
->>>>>>> 6e6af0311693a90eef7968c764fcba416b67a8a8
 
 ```{r table 1, echo=FALSE, out.width="400px", out.height="640px"}
 include_graphics("~/560-Project/econometric-analysis/output/table 1.png")
