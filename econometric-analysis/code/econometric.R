@@ -1,9 +1,10 @@
 library(dplyr)
 library(tidyverse)
 
-load("~/560-Project/econometric-analysis/data/reg_type_1996_2014.rds")
-load("~/560-Project/econometric-analysis/data/reg_type_1996_2022.rds")
 load("~/560-Project/econometric-analysis/data/reg_data2014.rds")
+load("~/560-Project/econometric-analysis/data/reg_data2022.rds")
+load("~/560-Project/econometric-analysis/data/total_data2014.rds")
+load("~/560-Project/econometric-analysis/data/total_data2022.rds")
 
 reg1 = lm(gsl_volume_change ~ 
             agricultural + 
