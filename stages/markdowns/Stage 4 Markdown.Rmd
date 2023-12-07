@@ -7,7 +7,6 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(knitr())
-library(pandoc)
 ```
 
 # Motivation
@@ -18,8 +17,20 @@ We use an OLS linear regression to attempt to measure the relationships between 
 
 To try to estimate the effect of water usage in the GSL Basin on the difference in GSL volume between time *t* and time *t-1*, we define two models. In the first model, we estimate each sectors water use on GSL volume. In the second model, we estimate total water use on GSL volume. We estimate both models using two sets of data: the first dataset includes data from 1996 to 2014, while the second dataset includes data from 1996 to 2022. The purpose of testing our models on the larger set of data is to see how impactful the 2015 law was on reporting; if we see a drastic change in the effect of water using the second dataset, we can confidently assume that a larger number of people likely began reporting after 2015. 
 
-In the first model, we look at how water use by each sector effects GSL volume, while controlling for precipitation and population. Each water use by sector is log transformed since they are right-skewed (shown in Appendix Table 1). We lag all independent variables by one year, since we expect a delayed effect of water use, precipitation, and population on lake levels. Further, we run the model using monthly water use and precipitation, and we impute values for monthly population by assuming that yearly population changes happen linearly from month to month. The results for Model 1 are shown below. 
+In the first model, we look at how water use by each sector effects GSL volume, while controlling for precipitation and population. Each water use by sector is log transformed since they are right-skewed (shown in Appendix Table 1). We lag all independent variables by one year, since we expect a delayed effect of water use, precipitation, and population on lake levels. Further, we run the model using monthly water use and precipitation, and we impute values for monthly population by assuming that yearly population changes happen linearly from month to month. The results for Model 1 are shown below:
+
+```{r table 1, echo=FALSE, out.width="400px", out.height="640px"}
+include_graphics("~/560-Project/econometric-analysis/output/table 1.png")
+```
 
 In the second model, we look at how total water use, regardless of the sector, effects GSL volume. In this model, we again control for precipitation and population. Total water use is log transformed, and we run the model using monthly water use, precipitation, and population. Further, we lag total water use, precipitation, and population by one year, as in Model 1. The results for Model 2 are shown below:
+
+```{r table 2, echo=FALSE, out.width="400px", out.height="360px"}
+include_graphics("~/560-Project/econometric-analysis/output/table 2.png")
+```
+
+GSL volume is measured in billions of gallons in both models above. Further, in model 1, water use in each sector is log transformed. Thus, the coefficient estimates on *Agricultural*, *Commercial*, etc. are 
+
+
 
 # Results
