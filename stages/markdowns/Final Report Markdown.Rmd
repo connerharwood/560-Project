@@ -173,6 +173,9 @@ In Model 1 from Table 2, we find an insignificant relationship between monthly t
 In both Table 1 and Table 2, Model 2 exhibits quite different results than Model 1. This implies that water use from 2015 to 2022 varies significantly from our time period in Model 1 (1996-2014). This is likely not true, and we attribute this difference in the models to the increase in reporting after the 2015 law.
 
 
+### 
+
+
 ### Appendix 
 
 
