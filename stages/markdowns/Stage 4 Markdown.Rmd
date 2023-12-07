@@ -29,8 +29,6 @@ In the second model, we look at how total water use, regardless of the sector, e
 include_graphics("~/560-Project/econometric-analysis/output/table 2.png")
 ```
 
-GSL volume is measured in billions of gallons in both models above. Further, in model 1, water use in each sector is log transformed. Thus, the coefficient estimates on *Agricultural*, *Commercial*, etc. are 
-
-
+GSL volume is measured in billions of gallons in both models above. Further, in model 1, water use in each sector is log transformed. Thus, the coefficient estimates on *Agricultural*, *Commercial*, etc. indicates the estimated change in GSL volume from time *t-1* to time *t* from a one percent increase in water use by each respective sector in time *t-1*. For example, for Agricultural water use in Table 1, a one percent increase in water use by the agricultural sector in time *t-1* is associated with a 86.595 billion gallon decrease in lake volume from time *t-1*. In model 2, water use is interpreted in the same way, but for total water use instead of by sector. The interpretation of the estimated coefficient on precipitation and population is similar to water use; however, these coefficients indicate the estimated change in GSL volume from a one-inch increase in precipitation and a one-person increase in population in time *t-1*. 
 
 # Results
