@@ -129,6 +129,8 @@ monthly_merge3 = left_join(monthly_merge2, precip_monthly, by = "date", relation
 
 data2014 = monthly_merge3
 
+save(data2014, file = "total_data2014.rds")
+
 #------------------------------------------------------------------------------#
 # 1996-2022 ----
 
@@ -203,6 +205,8 @@ monthly2022_merge2 = left_join(monthly2022_merge1, pop_monthly, by = "date", rel
 monthly2022_merge3 = left_join(monthly2022_merge2, precip_monthly, by = "date", relationship = "many-to-one")
 
 data2022 = monthly2022_merge3
+
+save(data2022, file = "total_data2022.rds")
 
 #------------------------------------------------------------------------------#
 # Create variables for total use by each use type for 1996-2014 ---- 
