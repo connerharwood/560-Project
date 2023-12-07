@@ -1,9 +1,6 @@
 library(dplyr)
 library(zoo)
 library(tidyverse)
-library(gganimate)
-library(gapminder)
-library(gifski)
 
 load("~/560-Project/clean-data/data/masterdata.rds")
 
@@ -93,6 +90,20 @@ yearly_total_use = yearly_merge3 |>
     percapita_usage = year_gallons / population
   )
 
+#------------------------------------------------------------------------------#
+# Aggregate yearly data for 2015-2022 period ----
+
+load("~/560-Project/clean-data/data/wateruse_1996_2022.rds")
+
+# yearly total water use per use type
+wateruse2015_2022 = wateruse_1996_2022 |> 
+  filter(year >= 2015) |> 
+  select(year, use_type, year_gallons) |> 
+  group_by(year, use_type) |> 
+  summarize(
+    year_gallons = sum(year_gallons)
+  )
+  
 #------------------------------------------------------------------------------#
 # Aggregate monthly data ---- 
 
@@ -233,6 +244,71 @@ print(wateruse_by_type_plot)
 ggsave(
   filename = "wateruse_by_type.png",
   plot = wateruse_by_type_plot,
+  height = 7,
+  width = 10,
+  units = "in", 
+  dpi = 300,
+)
+
+#------------------------------------------------------------------------------#
+# Water use by use type plot for 2015-2022 ----
+
+wateruse_by_type_plot2022 = ggplot() +
+  geom_line(
+    # plot non-agricultural use types
+    data = wateruse2015_2022[wateruse2015_2022$use_type != "Agricultural", ], 
+    aes(x = year, y = log(year_gallons), color = use_type), 
+    # decrease size of non-agricultural use type lines and fade
+    size = 0.5, 
+    alpha = 0.5
+  ) +
+  geom_line(
+    # plot agricultural use type
+    data = wateruse2015_2022[wateruse2015_2022$use_type == "Agricultural", ], 
+    aes(x = year, y = log(year_gallons), color = use_type), 
+    # increase size of agricultural use type and don't fade
+    size = 1.2, 
+    alpha = 1
+  ) +
+  labs(
+    title = "Yearly Water Use by Use Type (2015-2022)",
+    x = "Year",  
+    y = "Log Gallons", 
+    color = "Use Type"
+  ) +
+  scale_color_manual(
+    # select colors for each use type line
+    values = c("Agricultural" = "black",
+               "Water Supplier" = "#E69F00",
+               "Industrial" = "#56B4E9",
+               "Irrigation" = "#009E73",
+               "Power" = "#CC79A7",
+               "Domestic" = "#D55E00",
+               "Commercial" = "#0072B2"),
+    # manually select order of legend by descending log water use in last year on plot
+    breaks = c("Agricultural", "Water Supplier", "Industrial", "Irrigation", "Power", "Domestic", "Commercial")
+  ) +
+  scale_x_continuous(breaks = seq(2015, 2022, by = 1)) +
+  theme_minimal() +
+  theme(
+    # center and resize title
+    plot.title = element_text(hjust = 0.5, size = 15),
+    # create white background for png image
+    plot.background = element_rect(fill = "white", color = NA), 
+    # remove grid lines 
+    panel.grid.major.x = element_blank(),  
+    panel.grid.minor.x = element_blank(), 
+    panel.grid.major.y = element_blank(), 
+    panel.grid.minor.y = element_blank(), 
+    axis.line = element_line(color = "gray", size = 0.2)
+  )
+
+print(wateruse_by_type_plot2022)
+
+# save as higher resolution png image
+ggsave(
+  filename = "wateruse_by_type2022.png",
+  plot = wateruse_by_type_plot2022,
   height = 7,
   width = 10,
   units = "in", 
