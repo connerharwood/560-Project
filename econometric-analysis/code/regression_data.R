@@ -71,7 +71,7 @@ pop_monthly_impute = pop_monthly1 |>
 pop_monthly_imputed = left_join(pop_monthly1, pop_monthly_impute, by = "year", relationship = "many-to-one")
 
 pop_monthly = pop_monthly_imputed |> 
-  select(date, pop_change) |> 
+  select(date, population = population.x, pop_change) |> 
   filter(date >= 1997)
   
 # monthly average precipitation across GSL Basin counties
@@ -214,14 +214,14 @@ save(data2022, file = "total_data2022.rds")
 # assign change in monthly gallons for each use type to new use type variable
 reg_data2014_1 = data2014 |> 
   group_by(use_type) |>
-  mutate(value = log_month_gallons_change) |>
+  mutate(value = log_month_gallons) |>
   ungroup() |>
   spread(use_type, value, fill = 0) 
 
 # sum across rows to have one observation for each date and use type
 reg_data2014_2 = reg_data2014_1 |>
   rename(water_supplier = "Water Supplier") |> 
-  group_by(date, gsl_level_ft, gsl_volume_gal, gsl_level_change, gsl_volume_change, pop_change, precip_in, precip_change) |>
+  group_by(date, gsl_level_ft, gsl_volume_gal, gsl_level_change, gsl_volume_change, population, precip_in, precip_change) |>
   summarise(
     agricultural = sum(Agricultural),
     commercial = sum(Commercial), 
@@ -237,19 +237,19 @@ reg_data2014 = reg_data2014_2
 save(reg_data2014, file = "reg_data2014.rds")
 
 #------------------------------------------------------------------------------#
-# Create variables for total use by each use type for 1996-2014 ---- 
+# Create variables for total use by each use type for 1996-2022 ---- 
 
 # assign change in monthly gallons for each use type to new use type variable
 reg_data2022_1 = data2022 |> 
   group_by(use_type) |>
-  mutate(value = log_month_gallons_change) |>
+  mutate(value = log_month_gallons) |>
   ungroup() |>
   spread(use_type, value, fill = 0) 
 
 # sum across rows to have one observation for each date and use type 
 reg_data2022_2 = reg_data2022_1 |>
   rename(water_supplier = "Water Supplier") |> 
-  group_by(date, gsl_level_ft, gsl_volume_gal, gsl_level_change, gsl_volume_change, pop_change, precip_in, precip_change) |> 
+  group_by(date, gsl_level_ft, gsl_volume_gal, gsl_level_change, gsl_volume_change, population, precip_in, precip_change) |> 
   summarise(agricultural = sum(Agricultural),
             commercial = sum(Commercial), 
             domestic = sum(Domestic),
