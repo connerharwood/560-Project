@@ -150,7 +150,11 @@ To try to estimate the effect of water use in the GSL Basin on the difference in
 
 In the first set of models, we look at the association between water use by each sector and GSL volume, while controlling for precipitation and population. Each water use by sector is log transformed since they are right-skewed (shown in Appendix Figure 3) and contain outliers. We lag all independent variables by one year, since we expect a delayed effect of water use, precipitation, and population on lake volume. Further, we run the model using monthly water use and precipitation, and we impute values for monthly population by assuming that yearly population changes happen linearly from month to month. The results for the first set of models are shown below:
 
-In the first model, we look at how water use by each sector effects GSL volume, while controlling for precipitation and population. Each water use by sector is log transformed since they are right-skewed (shown in Appendix Figure 3). We lag all independent variables by one year, since we expect a delayed effect of water use, precipitation, and population on lake levels. Further, we run the model using monthly water use and precipitation, and we impute values for monthly population by assuming that yearly population changes happen linearly from month to month. The results for Model 1 are shown below:
+In the first model, we look at how water use by each sector effects GSL volume, while controlling for precipitation and population. Each water use by sector is log transformed since they are right-skewed (shown in Appendix Figure 3). We lag all independent variables by one year, since we expect a delayed effect of water use, precipitation, and population on lake levels. Further, we run the model using monthly water use and precipitation, and we impute values for monthly population by assuming that yearly population changes happen linearly from month to month. The estimating model is as follows:
+
+gsl_volume\_t = beta0 + beta1 * agriculture\_{t-1} + beta2 * precipitation\_{t-1} + beta3 * population\_{t-1} + error
+
+The results for Model 1 are shown below:
 
 ```{r table 1, echo=FALSE, out.width="400px", out.height="640px"}
 include_graphics("~/560-Project/econometric-analysis/output/table 1.png")
@@ -173,7 +177,9 @@ In Model 1 from Table 2, we find an insignificant relationship between monthly t
 In both Table 1 and Table 2, Model 2 exhibits quite different results than Model 1. This implies that water use from 2015 to 2022 varies significantly from our time period in Model 1 (1996-2014). This is likely not true, and we attribute this difference in the models to the increase in reporting after the 2015 law.
 
 
-### 
+### AI Disclosure 
+
+Throughout the project, we utilized ChatGPT to help us with troubleshooting code and enhancing our figures. We used ChatGPT during the cleaning process, mainly while pivoting the data to wide/long format and troubleshooting code. Further, we used ChatGPT for assistance with removing gridlines, adding and removing legends, adding a horizontal line in the "Total Water Use and GSL Volume" graph, and plotting two lines on one graph. 
 
 
 ### Appendix 
@@ -203,3 +209,10 @@ include_graphics("~/560-Project/exploratory-analysis/output/wateruse_untransform
 ```{r water use histogram plot log, echo=FALSE}
 include_graphics("~/560-Project/exploratory-analysis/output/wateruse_log_plot.png")
 ```
+
+
+**Figure 5** 
+```{r ag water use 2015-2022 plot, echo=FALSE}
+include_graphics("~/560-Project/exploratory-analysis/output/wateruse_by_type2022.png")
+```
+
