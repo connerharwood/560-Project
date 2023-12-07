@@ -135,17 +135,3 @@ include_graphics("~/560-Project/exploratory-analysis/output/wateruse_precip_plot
 ### Bigger Picture
 
 Overall, the data show that the Great Salt Lake is showing a continued downward trajectory, and water users in the Great Salt Lake Basin do not seem to be curbing their usage. The health, economic, environmental, and ecological impacts of a shrinking Great Salt Lake have already been felt and seen. Without significant behavioral and policy changes in this region, the GSL could reach irreversibly low water levels in the not-so-distant future. Our next step is to measure how water use by sector in the Great Salt Lake Basin are associated with GSL volume. We will control for precipitation and population to better isolate the relationship between water use and GSL volume.
-
-### Appendix 
-
-**Figure 1** 
-```{r user reporting all years plot, echo=FALSE}
-include_graphics("~/560-Project/exploratory-analysis/output/user_report_plot.png")
-```
-
-**Figure 2** 
-```{r user reporting restricted years plot, echo=FALSE}
-include_graphics("~/560-Project/exploratory-analysis/output/user_1996_2014_plot.png")
-```
-
-*Note:* Sewage Treatment is not included in this figure since that use type does not start reporting until after 2014. 
