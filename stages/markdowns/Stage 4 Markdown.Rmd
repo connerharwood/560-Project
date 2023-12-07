@@ -11,7 +11,7 @@ library(knitr())
 
 # Motivation
 
-We use an OLS linear regression to attempt to measure the relationships between different water use types and Great Salt Lake water volume. Though we add controls such as population and precipitation into our regression, our results are not to be interpreted causally. They are mere associations, and perhaps a first step towards a more in-depth project to get closer to a causal finding. 
+We use an OLS linear regression to attempt to measure the relationships between different water use types and Great Salt Lake water volume. Though we add controls such as population and precipitation into our regression, our results are not to be interpreted causally. They are mere associations, and perhaps a first step towards a more in-depth project to get closer to a causal finding.
 
 # Methods
 
