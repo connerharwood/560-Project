@@ -99,10 +99,31 @@ wateruse_monthly2014 = masterdata2014 |>
     month_gallons = sum(month_gallons)
   )
 
-# look at distributuon of monthly gallons per use type to see if we should log transform
-ggplot(wateruse_monthly2014, aes(x = month_gallons, color = use_type, fill = use_type)) +
-  geom_histogram(bins = 50) +
-  facet_wrap(~use_type)
+# look at distribution of monthly gallons per use type to see if we should log transform
+wateruse_untransformed_hist = ggplot(wateruse_monthly2014, aes(x = month_gallons, color = use_type, fill = use_type)) +
+  geom_histogram(bins = 60) +
+  theme_minimal() +
+  facet_wrap(~use_type, scale = "free_y") +
+  theme(
+    legend.position = "null",
+    plot.title = element_text(hjust = 0.5, size = 15),
+    plot.background = element_rect(fill = "white", color = NA)
+  ) +
+  labs(
+    x = "Gallons",
+    y = "Count",
+    title = "Distribution of Water Use Untransformed"
+  )
+
+print(wateruse_untransformed_hist)
+
+# save in higher resolution png image
+ggsave(
+  file = "wateruse_untransformed_plot.png",
+  wateruse_untransformed_hist,
+  units = "in",
+  dpi = 300
+)
 
 wateruse_monthly2014_2 = wateruse_monthly2014 |> 
   # log transform monthly gallons
@@ -117,10 +138,31 @@ wateruse_monthly2014_2 = wateruse_monthly2014 |>
   filter(date >= 1997) |> 
   mutate(log_month_gallons_change = ifelse(is.na(log_month_gallons_change), 0, log_month_gallons_change))
 
-# check distribution of log transformed water use
-ggplot(wateruse_monthly2014_2, aes(x = log_month_gallons_change, color = use_type, fill = use_type)) +
-  geom_histogram() +
-  facet_wrap(~use_type)
+# look at distribution of log transformed monthly gallons per use type to check transformation
+wateruse_log_hist = ggplot(wateruse_monthly2014_2, aes(x = log_month_gallons, color = use_type, fill = use_type)) +
+  geom_histogram(bins = 60) +
+  theme_minimal() +
+  facet_wrap(~use_type, scale = "free_y") +
+  theme(
+    legend.position = "null",
+    plot.title = element_text(hjust = 0.5, size = 15),
+    plot.background = element_rect(fill = "white", color = NA)
+  ) +
+  labs(
+    x = "Log Gallons",
+    y = "Count",
+    title = "Distribution of Water Use Log Transformed"
+  )
+
+print(wateruse_log_hist)
+
+# save in higher resolution png image
+ggsave(
+  file = "wateruse_log_plot.png",
+  wateruse_log_hist,
+  units = "in",
+  dpi = 300
+)
 
 # merge monthly datasets into one
 monthly2014_merge1 = left_join(wateruse_monthly2014_2, gsl_monthly2014, by = "date", relationship = "many-to-one")
