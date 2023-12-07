@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(knitr())
 ```
 
-# Topic and Motivation
+## Topic and Motivation
 
 This project investigates how water use within the Utah portion of the Great Salt Lake Basin contributes to yearly variations in Great Salt Lake (GSL) water volume. Our research explores relationships between GSL levels and water use, population, and precipitation. Utilizing an OLS linear regression model, the study aims to identify specific water use types, such as agricultural and industrial, that offer the best explanation for a shrinking lake.
 
@@ -28,7 +28,7 @@ While climate change is expected to play a role in the future, current GSL volum
 
 Furthermore, agriculture is the largest water user in the state of Utah, using 68% of the state's water supply, yet it only generates 0.2% of Utah's GDP ([source](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwjU4_Tf8aOCAxU9MjQIHS19CYEQFnoECA4QAw&url=https%3A%2F%2Fcontent.csbs.utah.edu%2F~lozada%2FResearch%2FUtahAgWaterUseHay.docx%23%3A~%3Atext%3DUsing%252068%2525%2520of%2520Utah%27s%2520water%2Cto%2520which%2520we%2520will%2520return.&usg=AOvVaw0IdpqkRNtyRjWG_ycnpIPq&opi=89978449)). Examining water use trends in this sector is essential for formulating policies that mitigate its impact on the Great Salt Lake.
 
-# Data Descriptions
+## Data Descriptions
 
 **Water Use**
 
@@ -58,7 +58,7 @@ Obtained through the State of Utah Open Data Catalog [here](https://opendata.uta
 
 Obtained through HydroShare [here](https://www.hydroshare.org/resource/2796b46fa75140be821032846d6140c0/), this dataset contains a shapefile with geographic boundaries of the Great Salt Lake and of the Great Salt Lake Basin's 4 subbasins. A significant portion of the western half of the West Desert Subbasin is omitted from the geometry, which has previously been deemed not relevant for hydrology studies of the GSL.
 
-# Data Processing
+## Data Processing
 
 **Water Use**
 
@@ -106,7 +106,7 @@ Through our best efforts of cleaning and processing the data, we encountered a n
 
 *Consumptive* vs. *non-consumptive* water use is another limitation. Our data does not specify between these two, and consumptive use is of much greater concern to declining GSL volume since consumptive water use is not returned to the watershed. Some use types, such as agricultural and power, are understood to have high consumptive use. Other use types are less clear. Our regression model does however give a better idea of consumptive use for each use type. Overall, despite these limitations, we are confident that our data provides a baseline understanding of the impacts of water usage on the Great Salt Lake volume. 
 
-# Exploratory Analysis
+## Exploratory Analysis
 
 **Great Salt Lake Volume Decreases with Greater Water Use**
 
