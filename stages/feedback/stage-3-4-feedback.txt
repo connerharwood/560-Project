@@ -1,0 +1,13 @@
+Code & Data:
+
+Figuring out all this water data is not easy! Bonus points for all the careful work with the water use data.
+
+
+Exploratory Analysis:
+
+Fantastic analysis. I worry the self-reported water use is pretty fundamentally unreliable -- for future projects you might need another data source. I'd still like to see water use vs. yearly change in lake level, maybe as a scatterplot. And you could take better advantage of the monthly data -- maybe showing rainfall vs. lake level? Bonus points for the spatial work.
+
+
+Econometric Analysis:
+
+Still think "change in volume" is the better Y variable. Log transforms don't seem appropriate since we already know the physical process is linear not multiplicative. As discussed, if Y and X are in the same units (and X is as good as randomly assigned) then in principle you could interpret the coefficients as the consumptive fraction of each sector's water use. Did you try using current (not lagged) variables? Need to adjust standard errors for autocorrelation. Would like to see more discussion of the likely magnitudes and directions of omitted variables biases. What do we learn from your results -- how can we tell whether they are worth paying some attention to or are hopelessly confounded?
