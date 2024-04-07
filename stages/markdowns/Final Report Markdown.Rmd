@@ -33,7 +33,7 @@ Furthermore, agriculture is the largest water user in the state of Utah, using 6
 
 **Water Use**
 
-Obtained through the Utah Division of Water Rights [here](https://waterrights.utah.gov/asp_apps/generalWaterUse/WaterUseList.asp), this dataset includes all water rights holders in Utah dating back to 1959. Utah has surprisingly extensive water use data that is publicly available. It has records on total monthly water usage in gallons for each water user, and breaks down this usage by type of use (e.g. agricultural, commercial, water supplier), as well as several other variables of interest. We are looking at data on water usage for users whose coordinates lie within the GSL Basin. We will mainly focus on Agricultural water uses in the GSL Basin. 
+Obtained through the Utah Division of Water Rights [here](https://waterrights.utah.gov/asp_apps/generalWaterUse/WaterUseList.asp), this dataset includes all water rights holders in Utah dating back to 1959. Utah has surprisingly extensive water use data that is publicly available. It has records on total monthly water usage in gallons for each water user, and breaks down this usage by type of use (e.g. agricultural, commercial, water supplier), as well as several other variables of interest. We are looking at data for users whose coordinates lie within the GSL Basin. We will mainly focus on Agricultural water users. 
 
 **Great Salt Lake Elevation Levels**
 
@@ -53,7 +53,7 @@ Obtained through NOAA [here](https://www.ncei.noaa.gov/access/monitoring/climate
 
 **Utah Counties Shapefile**
 
-Obtained through the State of Utah Open Data Catalog [here](https://opendata.utah.gov/dataset/Utah-Counties-Shape-File/33u8-rt9k), this dataset contains a shapefile with geographic boundaries of all Utah counties. This is used as a backdrop for mapping the GSL Basin. 
+Obtained through the State of Utah Open Data Catalog [here](https://opendata.utah.gov/dataset/Utah-Counties-Shape-File/33u8-rt9k), this dataset contains a shapefile with geographic boundaries of all Utah counties. This is used as a backdrop for mapping the GSL Basin and for filtering to include only counties within the Basin.
 
 **Great Salt Lake Basin Shapefile** 
 
@@ -63,7 +63,7 @@ Obtained through HydroShare [here](https://www.hydroshare.org/resource/2796b46fa
 
 **Water Use**
 
-The water use .csv file includes two data tables containing different variables and information on entities with water user rights. One of the tables contains the monthly water usage data we are interested in, and the other table has county information which we merged with the first table after cleaning them both. This data required significant cleaning. After standard cleaning steps, like selecting and renaming relevant variables and dropping duplicates, we dedicated a lot of time to addressing NAs, 0 values, and outliers, as well as restricting the data to include the most complete reporting. We converted the dataset to long format by monthly water use after completing the majority of our cleaning; during the initial cleaning steps, it was easier to work with it in wide format.
+The water use .csv file from the Utah Division of Water Rights includes two data tables containing different variables and information on entities with water user rights. One of the tables contains the monthly water usage data we are interested in, and the other table has county information which we merged with the first table after cleaning them both. This data required significant cleaning. After standard cleaning steps, like selecting and renaming relevant variables and dropping duplicates, we dedicated a lot of time to addressing NAs, 0 values, and outliers, as well as restricting the data to include the most complete reporting. We converted the dataset to long format by monthly water use after completing the majority of our cleaning; during the initial cleaning steps, it was easier to work with it in wide format.
 
 Observations that were missing year, as well as those containing no water use values, were removed. We also removed observations with missing or invalid latitude and longitude coordinates since we used the Great Salt Lake Basin shapefile to filter out observations that did not overlap with its geometry. After filtering out these observations, the unique counties were extracted to determine the 12 counties that we needed population and precipitation data for.
 
@@ -79,7 +79,7 @@ For the GSL levels data, we first cleaned the North Arm and South Arm data sets 
 
 **Great Salt Lake Volume**
 
-The GSL volume data required minimal cleaning. Relevant variables were selected and renamed, and the date column was separated into year and month. Volume was later on converted from cubic meters to gallons to have consistent units with the water use data.
+The GSL volume data required minimal cleaning. Relevant variables were selected and renamed, and the date column was separated into year and month. Volume was later converted from cubic meters to gallons to have consistent units with the water use data.
 
 **County Resident Populations**
 
@@ -87,7 +87,7 @@ We obtained this data from FRED for our specific counties of interest, and it ca
 
 **Precipitation Data**
 
-The precipitation data was downloaded separately for each county, from which we then cleaned the date values and added a county variable for each county. That data was then appended into one dataset, and we did a few checks of the data before finalizing it. Overall, not much cleaning was needed here.
+The precipitation data was downloaded separately for each county, from which we then cleaned the date values and added a county variable. The separate county data was then appended into one dataset, and we did a few checks of the data before finalizing it. Overall, not much cleaning was needed here.
 
 **Utah Counties Shapefile**
 
@@ -99,7 +99,7 @@ After selecting and renaming relevant variables, we filtered out the Strawberry 
 
 **Master Dataset**
 
-Since we very thoroughly cleaned our individual datasets, merging was straightforward. We simply did a few many-to-one merges and our master dataset was ready. During our exploratory analysis, we created yearly aggregate datasets from the master dataset. This entailed taking either the sum of all months in each year (for water use) and the mean of all months in each year (for population, precipitation, and GSL levels and volume). We log transformed water use variables in a few instances during exploratory analysis due to positive skewness and outliers, as well as for our econometric analysis. We aggregated water use for each use type by year and month to run our regression at the monthly level.
+Since we very thoroughly cleaned our individual datasets, merging was straightforward. We simply did a few many-to-one merges and our master dataset was ready. During our exploratory analysis, we created yearly aggregated datasets from the master dataset. This entailed taking the sum of all months in each year for water use, and the mean of all months in each year for population, precipitation, and GSL levels and volume. We log transformed water use variables in a few instances during exploratory analysis due to positive skewness and outliers, as well as for our econometric analysis. We aggregated water use for each use type by year and month to run our regression at the monthly level.
 
 **Data Limitations**
 
@@ -111,15 +111,15 @@ Through our best efforts of cleaning and processing the data, we encountered a n
 
 **Great Salt Lake Volume Decreases with Greater Water Use**
 
-Great Salt Lake volume, measured in gallons, shows a consistent downward trend over time. The minimum volume needed for a healthy lake is calculated based on the repeatedly estimated minimum healthy lake level of 4,198 feet. This translates to 4.475 trillion gallons for the GSL. The GSL has been well below this volume since 2002, showing no signs of returning to a healthy level. Total water use in the Great Salt Lake Basin, apart from a spike in 2008, has been gradually increasing. Total water use has increased almost three fold since 1996, suggesting a negative correlation between water use and GSL volume. 
+Great Salt Lake volume, measured in gallons, shows a consistent downward trend over time. The minimum volume needed for a healthy lake is calculated based on the repeatedly estimated minimum healthy lake level of 4,198 feet. This translates to a minimum healthy lake volume of 4.475 trillion gallons. The GSL has been well below this volume since 2002, showing no signs of returning to a healthy level. Total water use in the Great Salt Lake Basin, apart from a spike in 2008, has been gradually increasing. Total water use has increased almost three fold since 1996, suggesting a negative correlation between water use and GSL volume. 
 
 ```{r GSL water level plot, echo=FALSE}
 include_graphics("~/560-Project/exploratory-analysis/output/water_use_gsl_plot.png")
 ```
 
-**Agricultural Water Use Increases at a Greater Rate Than Other Use Types**
+**Agricultural Water Use Increases at a Greater Rate than Other Use Types**
 
-The following figure describes water use trends in the Great Salt Lake Basin broken down by type of water use. Most uses show a steady but small increase over time, with agricultural uses increasing at a significantly faster rate than other uses. Water supplier, industrial, and mining water uses have remained high with little fluctuation across years. However, we find that agriculture recently surpassed mining in water use. If this upward trend continues, agriculture will become an even more significant water user in the Great Salt Lake Basin.
+The following figure describes water use trends in the Great Salt Lake Basin broken down by type of water use. Most uses show a steady but small increase over time, with agricultural uses increasing at a significantly faster rate than other uses in earlier years. Water supplier, industrial, and mining water uses have remained high with little fluctuation across years. However, we find that agriculture recently surpassed mining in water use. If this upward trend continues, agriculture will become an even more significant water user in the Great Salt Lake Basin.
 
 ```{r water use by type plot, echo=FALSE}
 include_graphics("~/560-Project/exploratory-analysis/output/wateruse_by_type_plot.png")
@@ -127,7 +127,7 @@ include_graphics("~/560-Project/exploratory-analysis/output/wateruse_by_type_plo
 
 **Agricultural Water Use is More Sensitive to Precipitation Than Other Water Uses**
 
-This figure illustrates how water use by sector changes as precipitation in the Great Salt Lake Basin counties increases. Most uses see either no change or a small decrease in use as precipitation increases, while agricultural uses decline more significantly. This aligns with what we would expect, since agricultural practices require high levels of water, and additional water may not be needed when precipitation is high. The figure shows a problematic trend when observed in a different way; in drier years, the agricultural sector increases its water usage at higher rate than other uses. This, in conjunction with the lack of precipitation in a drought stricken region, could exacerbate declining lake levels.
+This figure illustrates how water use by sector changes as precipitation in the Great Salt Lake Basin counties increases. Most uses see either no change or a small decrease in use as precipitation increases, while agricultural uses decline more significantly. This aligns with what we would expect, since agricultural practices require high levels of water for irrigation, and additional water may not be needed when precipitation is high. The figure shows a problematic trend when observed in a different way; in drier years, the agricultural sector increases its water usage at higher rate than other uses. This, in conjunction with the lack of precipitation in a drought stricken region, could exacerbate declining lake levels.
 
 ```{r water use and precipitation plot, echo=FALSE}
 include_graphics("~/560-Project/exploratory-analysis/output/wateruse_precip_plot.png")
@@ -135,7 +135,7 @@ include_graphics("~/560-Project/exploratory-analysis/output/wateruse_precip_plot
 
 **Bigger Picture**
 
-Overall, the data show that the Great Salt Lake is showing a continued downward trajectory, and water users in the Great Salt Lake Basin do not seem to be curbing their usage. The health, economic, environmental, and ecological impacts of a shrinking Great Salt Lake have already been felt and seen. Without significant behavioral and policy changes in this region, the GSL could reach irreversibly low water levels in the not-so-distant future. Our next step is to measure how water use by sector in the Great Salt Lake Basin are associated with GSL volume. We will control for precipitation and population to better isolate the relationship between water use and GSL volume.
+Overall, the data show that the Great Salt Lake is showing a continued downward trajectory, and water users in the Great Salt Lake Basin do not seem to be curbing their usage. The health, economic, environmental, and ecological impacts of a shrinking Great Salt Lake have already been felt and seen. Without significant behavioral and policy changes in this region, the GSL could reach irreversibly low water levels in the not-so-distant future. Our next step is to measure how water use by sector in the Great Salt Lake Basin is associated with GSL volume. We will control for precipitation and population to better isolate the relationship between water use and GSL volume.
 
 
 # Econometric Analysis
@@ -146,38 +146,38 @@ We use an OLS linear regression model to attempt to measure the relationships be
 
 ### Methods
 
-To try to estimate the effect of water use in the GSL Basin on the difference in GSL volume between time *t* and time *t-1*, we define two sets of models. The lagged time period is observed in the same month as the current time period; this is to control for seasonal fluctuations in lake volume. In the first set of models, we estimate each sector's water use on GSL volume changes. In the second set of models, we estimate total water use on GSL volume changes. Each model is estimated on two sets of data: the first dataset includes data from 1996 to 2014, while the second dataset includes data from 1996 to 2022. The purpose of testing our models on the larger set of data is to see how impactful the 2015 law was on reporting; if we see a drastic change in the effect of water use on GSL volume using the second dataset, we can confidently assume that there is a large difference in trends after 2015. All variables measure the difference in value (e.g. water use or lake volume) between *t* and *t-1*.
+To try to estimate the effect of water use in the GSL Basin on the change in GSL volume between times *t* and *t-1*, we define two sets of models. The lagged time period is observed in the same month (but previous year) as the current time period; this is to control for seasonal fluctuations in lake volume. In the first set of models, we regress yearly changes in GSL volume on each sector's lagged water use. In the second set of models, we regress changes in GSL volume on lagged total water use. Each model is estimated on two sets of data: the first dataset includes data from 1996 to 2014, while the second dataset includes data from 1996 to 2022. The purpose of testing our models on the expanded set of data is to see how impactful the 2015 law was on reporting; if we see a drastic change in the effect of water use on GSL volume differences using the second dataset, we can confidently assume that there is a large difference in trends after 2015. All variables measure the difference in value (e.g. water use or lake volume) between *t* and *t-1*.
 
-We chose these models to conduct a descriptive regression analysis as a first step toward causal inference. Measuring the relationship between water use and Great Salt Lake volume inherently implies some level of causality, and our data limitations and lack of more detailed model primarily stop us short of a causal estimate. In order to reach causal inference, we would ideally have near perfect water use data consisting of all water users in the Great Salt Lake Basin reporting their true water usage over a long time period. We would also be able to control for more confounding factors, such as evaporation, temperature, and streamflows entering the GSL. Though some of these data exist, a more thorough model capturing the relationships and interactions between these variables, water use, and GSL volume would be needed for causality. Our data limitations as well as lack of more controls may bias our estimate to prevent a causal interpretation. For example, inconsistent data reporting may bias the estimates of specific use types that report more or less completely during the study frame. Omitted variables such as evaporation and temperature may cause upward bias in our estimate. Overall, our model serves as a solid first step toward finding causal explanations of the effect of water use on the Great Salt Lake.
+We chose these models to conduct a descriptive regression analysis as a first step toward causal inference. Measuring the relationship between water use and Great Salt Lake volume inherently implies some level of causality, but our data limitations and lack of a more robust model stop us short of a causal estimate. In order to reach causal inference, we would ideally have near perfect water use data consisting of all water users in the Great Salt Lake Basin reporting their true water usage over a sufficiently long time period. We would also be able to control for more confounding factors, such as evaporation, temperature, and streamflows entering the GSL. Though some of these data exist, a more thorough model capturing the relationships and interactions between these variables, water use, and GSL volume would be needed for causality. Our data limitations as well as lack of more controls may bias our estimate to prevent a causal interpretation. For example, inconsistent data reporting may bias the estimates of specific use types that report more or less completely during the study frame. Omitted variables such as evaporation and temperature may cause upward bias in our estimate. Overall, our model serves as a solid first step toward finding causal explanations of the effect of water use on the Great Salt Lake.
 
-In the first set of models, we look at the association between water use by each sector and GSL volume changes, while controlling for precipitation and population. Each water use by sector is log transformed since they are right-skewed (shown in Appendix Figure 3) and contain outliers. We lag all independent variables by one year, since we expect a delayed effect of water use, precipitation, and population on lake volume. Further, we run the model using monthly water use and precipitation, and we impute values for monthly population by assuming that yearly population changes happen linearly from month to month. The results for the first set of models are shown below:
+In the first set of models, we look at the association between water use by each sector and year-to-year GSL volume changes, while controlling for precipitation and population. Each water use by sector is log transformed since they are strongly right-skewed (see Appendix Figure 3) and contain outliers. We lag all independent variables by one year, since we expect a delayed effect of water use, precipitation, and population on lake volume. Further, we run the model using monthly water use and precipitation, and we impute values for monthly population by assuming that yearly population changes happen linearly from month to month. The results for the first set of models are shown below:
 
 In the first model, we look at how water use by each sector effects GSL volume, while controlling for precipitation and population. Each water use by sector is log transformed since they are right-skewed (shown in Appendix Figure 3). We lag all independent variables by one year, since we expect a delayed effect of water use, precipitation, and population on lake levels. Further, we run the model using monthly water use and precipitation, and we impute values for monthly population by assuming that yearly population changes happen linearly from month to month. The estimating model is as follows:
 
 $$gslvolume_t = \beta_0 + \beta_1 agricultural_{t-1} + \beta_2 commercial_{t-1} + \beta_3 domestic_{t-1}+ \beta_4 industrial_{t-1} + \beta_5 irrigation_{t-1} +$$
 $$\beta_6 power_{t-1} + \beta_7 watersupply_{t-1} + \beta_8 population_{t-1} + \beta_9 precipitation_{t-1} + u_t$$
 
-The results for Model 1 are shown below:
+The results for Model 1 are shown below.
 
 ```{r table 1, echo=FALSE, out.width="400px", out.height="640px"}
 include_graphics("~/560-Project/econometric-analysis/output/table 1.png")
 ```
 
-In the second set of models, we look at how total water use, regardless of use type, is related to GSL volume. In this model, we again control for precipitation and population. Total water use is aggregated from monthly log water use, and we run the model using total water use, precipitation, and population. Further, we lag total water use, precipitation, and population by one year, as in the first models. The estimating model is as follows:
+In the second set of models, we look at how total water use, regardless of use type, is related to changes in GSL volume. In this model, we again control for precipitation and population. Total water use is aggregated from monthly log water use, and we run the model using total water use, precipitation, and population. Further, we lag total water use, precipitation, and population by one year, as in the first models. The estimating model is as follows:
 
 $$gslvolume_t = \beta_0 + \beta_1 wateruse_{t-1} + \beta_2 population_{t-1} + \beta_3 precipitation_{t-1} + u_t$$
 
-The results for the second set of models are shown below:
+The results for the second set of models are shown below.
 
 ```{r table 2, echo=FALSE, out.width="400px", out.height="360px"}
 include_graphics("~/560-Project/econometric-analysis/output/table 2.png")
 ```
 
-GSL volume is measured in billions of gallons in the models above. Further, in Table 1, water use variables in each sector are log transformed. Thus, the coefficient estimates on *Agricultural*, *Commercial*, etc. measure the estimated change in GSL volume from time *t-1* to time *t* from a one percent increase in water use by each respective sector in time *t-1*. For example, for Agricultural water use in Table 1, Model 1, a one percent increase in water use by the agricultural sector in time *t-1* is associated with a 86.595 billion gallon decrease in lake volume from time *t-1* to time *t*. In Table 2, water use is interpreted in the same way, but for total water use instead of by sector. The interpretations of the estimated coefficients on precipitation and population are similar to water use; however, these coefficients indicate the estimated change in GSL volume from a one-inch increase in precipitation and a one-person increase in population in time *t-1*. 
+GSL volume is measured in billions of gallons in the models above. Further, in Table 1, water use variables in each sector are log transformed. Thus, the coefficient estimates on *Agricultural*, *Commercial*, etc. measure the estimated rate of change in GSL volume from time *t-1* to time *t* from a one percent increase in water use by each respective sector in time *t-1*. For example, for Agricultural water use in Table 1, Model 1, a one percent increase in water use by the agricultural sector in time *t-1* is associated with a 86.595 billion gallon decrease in lake volume from times *t-1* to *t*. In Table 2, water use is interpreted in the same way, but for total water use instead of by sector. The interpretations of the estimated coefficients on precipitation and population are similar to water use; however, these coefficients indicate the estimated change in GSL volume from a one-inch increase in precipitation and a one-person increase in population in time *t-1*, respectively. 
 
 ### Results
 
-In Model 1 from Table 1, we find that the effect of agricultural water use in time *t-1* on GSL volume in time *t* is significant at the 1% level. Further, as described above, a one-percent change in agricultural water use is associated with a large negative decrease on GSL volume. We find almost no effect of population in time *t-1* on GSL volume in time *t*. Precipitation in time *t-1* has a positive effect on GSL volume; a one-inch increase in precipitation in time *t-1* is associated with an increase in GSL volume by 165 billion gallons. The coefficients on population and precipitation are both significant at the 1% level. All other water uses have coefficient estimates that are negative, with varying significance, apart from irrigation. The coefficient on irrigation implies that a one-percent change in irrigation water use in time *t-1* is associated with an increase in GSL volume of 175.149 billion gallons. This is significant at the 1% level, and this coefficient estimate may imply that the irrigation sector is using their water inefficiently, and the water is flowing back into the Great Salt Lake Basin. 
+In Model 1 from Table 1, we find that the effect of agricultural water use in time *t-1* on GSL volume changes is significant at the 1% level. Further, as described above, a one-percent change in agricultural water use is associated with a large negative decrease on GSL volume. We find almost no effect of population in time *t-1* on GSL volume in time *t*. Precipitation in time *t-1* has a positive effect on GSL volume; a one-inch increase in precipitation in time *t-1* is associated with an increase in GSL volume change by 165 billion gallons. The coefficients on population and precipitation are both significant at the 1% level. All other water uses have coefficient estimates that are negative, with varying significance, apart from irrigation. The coefficient on irrigation implies that a one-percent change in irrigation water use in time *t-1* is associated with an increase in GSL volume of 175.149 billion gallons. This is significant at the 1% level, and this coefficient estimate may imply that the irrigation sector is using their water inefficiently, and the water is flowing back into the Great Salt Lake Basin. 
 
 In Model 1 from Table 2, we find an insignificant relationship between monthly total water use in time *t-1* on GSL volume in time *t*. This result contradicts our hypothesis. As in Table 1, we find no effect of population in time *t-1* on GSL volume in time *t*. Further, we find that a one-inch increase in precipitation in time *t-1* is associated with a 73.407 billion gallon increase in GSL volume in time *t*. The coefficients on population and precipitation are significant at the 5% level and the 1% level, respectively. It is interesting that monthly total water use does not have a significant result. This could be due to data limitations or the type of model we used, as we expect water use to have a significant negative impact on GSL volume.
 
@@ -186,7 +186,7 @@ In both Table 1 and Table 2, Model 2 exhibits quite different results than Model
 
 ### AI Disclosure 
 
-Throughout the project, we utilized ChatGPT to help us troubleshoot code and enhance our figures. We used ChatGPT during the cleaning process to ensure that our cleaning steps were doing exactly what we were trying to achieve, such as properly tidying our data into long format and troubleshooting errors. Further, we frequently used ChatGPT for assistance with formatting plots and to make sure we were correctly and accurately plotting our data. This included removing gridlines, adding and removing legends, adding a horizontal line in the "Total Water Use and GSL Volume" graph, and plotting two lines on one graph. We did find that we are better data scientists than ChatGPT.
+Throughout the project, we utilized ChatGPT to help us troubleshoot code and enhance our figures. We used ChatGPT during the cleaning process to ensure that our cleaning steps were doing exactly what we intended, such as properly tidying our data into long format. Further, we frequently used ChatGPT for assistance with formatting plots and to make sure we were correctly and accurately plotting our data. This included removing gridlines, adding and removing legends, adding a horizontal line in the "Total Water Use and GSL Volume" graph, and plotting two lines on one graph with the same scale. We did find that we are better data scientists than ChatGPT.
 
 
 ### Appendix 
